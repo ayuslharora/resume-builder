@@ -30,7 +30,7 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
 
   return (
     <div
-      className="group relative flex flex-col cursor-pointer overflow-hidden rounded-xl transition-all duration-200"
+      className="group relative flex min-h-[22rem] flex-col cursor-pointer overflow-hidden rounded-xl transition-all duration-200"
       style={{
         background: "rgba(25,31,49,0.5)",
         backdropFilter: "blur(16px)",
@@ -50,7 +50,7 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
     >
       {/* Preview area */}
       <div
-        className="h-44 relative flex justify-center items-center overflow-hidden transition-colors"
+        className="h-48 relative flex justify-center items-center overflow-hidden transition-colors"
         style={{ background: "rgba(7,13,31,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         onClick={() => navigate(`/builder/${resume.id}`)}
       >
@@ -125,14 +125,14 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
       </div>
 
       {/* Card body */}
-      <div className="p-4" onClick={() => navigate(`/builder/${resume.id}`)}>
-        <h3 className="font-semibold text-sm text-on-surface truncate" title={resume.title}>{resume.title}</h3>
-        <p className="text-xs text-on-surface-variant mt-1.5 truncate">
+      <div className="px-5 py-4.5" onClick={() => navigate(`/builder/${resume.id}`)}>
+        <h3 className="font-semibold text-[15px] text-on-surface truncate leading-snug" title={resume.title}>{resume.title}</h3>
+        <p className="text-sm text-on-surface-variant mt-2 truncate">
           {resume.targetRole || "No role specified"}
         </p>
 
-        <div className="flex justify-between items-center mt-4">
-          <span className="text-[10px] text-on-surface-variant font-medium">Edited {dateStr}</span>
+        <div className="flex justify-between items-center mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <span className="text-[11px] text-on-surface-variant font-medium">Edited {dateStr}</span>
           <span className="text-primary text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
             Edit &rarr;
           </span>

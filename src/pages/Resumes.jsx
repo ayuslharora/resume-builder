@@ -71,10 +71,13 @@ export default function Resumes() {
     <div className="w-full max-w-7xl relative fade-in">
       {/* Header */}
       <div className="page-header">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="page-title">My Resumes</h1>
-            <p className="page-subtitle flex items-center gap-2">
+            <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-primary/80 mb-3">
+              Resume Library
+            </div>
+            <h1 className="page-title mb-2">My Resumes</h1>
+            <p className="page-subtitle flex flex-wrap items-center gap-x-2 gap-y-1 max-w-2xl">
               <span className="w-2 h-2 rounded-full bg-primary shadow-ambient inline-block"></span>
               {resumes.length} resume{resumes.length !== 1 ? "s" : ""} found
               {fromCache && (
@@ -84,7 +87,7 @@ export default function Resumes() {
               )}
             </p>
           </div>
-          <button onClick={() => navigate("/builder/new")} className="btn-primary">
+          <button onClick={() => navigate("/builder/new")} className="btn-primary self-start md:self-auto">
             <FilePlus size={16} />
             New Resume
           </button>
@@ -92,7 +95,7 @@ export default function Resumes() {
       </div>
 
       {resumes.length === 0 ? (
-        <div className="flex justify-center items-center h-64 rounded-xl"
+        <div className="flex min-h-[25rem] justify-center items-center rounded-xl px-6 py-10"
           style={{
             background: "rgba(25,31,49,0.3)",
             backdropFilter: "blur(12px)",
@@ -114,7 +117,7 @@ export default function Resumes() {
           </div>
         </div>
       ) : (
-        <div className="resume-grid">
+        <div className="resume-grid pt-1">
           {resumes.map(resume => (
             <ResumeCard
               key={resume.id}

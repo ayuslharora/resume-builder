@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../../services/firebase";
+import { getCachedResumeList, setCachedResumeList } from "../../services/resumeCache";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -11,9 +12,24 @@ export default function Sidebar() {
   const { currentUser, userDoc, logout } = useAuth();
   const [resumes, setResumes] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const usesSharedResumeList =
+    location.pathname.startsWith("/resumes") || location.pathname.startsWith("/dashboard");
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setResumes([]);
+      return;
+    }
+
+    const cached = getCachedResumeList(currentUser.uid);
+    if (cached.length > 0) {
+      setResumes(cached);
+    }
+
+    if (usesSharedResumeList) {
+      return;
+    }
+
     const q = query(
       collection(db, "resumes"),
       where("userId", "==", currentUser.uid),
@@ -22,9 +38,10 @@ export default function Sidebar() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setResumes(data);
+      setCachedResumeList(currentUser.uid, data);
     });
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [currentUser, usesSharedResumeList]);
 
   useEffect(() => {
     setMobileOpen(false);

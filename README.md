@@ -1,71 +1,96 @@
 # ResumeForge
 
-ResumeForge is an AI-powered resume builder designed to help students and professionals create tailored, ATS-friendly resumes quickly. Built with React, Vite, and Firebase, the application uses **Groq (Llama-3.1-8B)** to digest a user's "brag sheet" and intelligently generate precise resume content based on their target roles.
+ResumeForge is an AI-assisted resume builder and resume grader for students, freshers, and early-career professionals. It combines a guided resume builder, Groq-powered content generation, and a role-aware grading workflow that helps users compare resumes against target jobs, identify ATS risks, rewrite weak bullets, and open an improved draft directly in the builder.
 
-## 🚀 Features
+## Features
 
-- **Brainstorming to Resume:** Upload a raw "brag sheet" or provide interview-style answers, and let the AI generate polished, action-oriented resume bullets.
-- **Multiple Visual Templates:** Choose from Minimal, Modern, Professional, and Creative layouts that best fit the industry you are applying to.
-- **Fast and Responsive:** Built with Vite and TailwindCSS for a seamless, highly-responsive user experience right on your browser.
-- **Cloud Storage & Caching:** All resumes are saved securely in Firestore. Combined with LocalStorage dual-caching, your dashboard loads instantly without any latency.
-- **Export to PDF / DOCX:** Export your completed resumes in universally accepted formats for job applications.
-- **Midnight Luminary aesthetic:** Enjoy a sleek, premium dark-mode interface with micro-smooth animations built using pure CSS and Tailwind.
+- AI resume builder: Upload a brag sheet, notes, resume, or LinkedIn-style export and generate a structured resume draft tailored to a target role.
+- Guided builder flow: Collects target-role context, interview-style inputs, template selection, AI generation, and final editing in one workflow.
+- Resume grader: Scores uploaded resumes against a target job with recruiter-style feedback, ATS breakdowns, section scores, keyword gaps, and prioritized fixes.
+- OCR-backed PDF parsing: Handles text PDFs and falls back to OCR for scanned/image-based PDFs that would otherwise fail parsing.
+- Role comparison: Compare the same resume against multiple target roles from the grader.
+- Recruiter tone modes: Review a resume through different lenses such as ATS strict, HR recruiter, hiring manager, or campus placement.
+- Weak bullet rewriting: Surface weak bullets, generate stronger rewrites, and apply selected rewrites into the improved-draft flow.
+- One-click improvement pass: Turn grader feedback into an improved resume draft and open it in the builder for further editing.
+- Export and persistence: Save resumes in Firestore with local caching and export final versions to PDF or DOCX.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend Framework:** React 19 + Vite
-- **Styling:** Tailwind CSS + PostCSS + raw CSS variables
-- **Authentication & Database:** Firebase Auth, Firestore, and Firebase Storage
-- **AI Processing:** Groq Language Model API (Llama-3.1-8B-instant)
-- **Document Rendering:** `jspdf`, `html2canvas`, and `docx`
+- Frontend: React 19, Vite
+- Styling: Tailwind CSS, PostCSS, custom CSS variables
+- Auth and data: Firebase Auth, Firestore
+- AI services: Groq API using `llama-3.1-8b-instant`
+- Document parsing and export: `pdfjs-dist`, `mammoth`, `tesseract.js`, `jspdf`, `html2canvas`, `docx`
 
----
+## Main Flows
 
-## 💻 Running the App Locally
+### Builder
 
-Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
+1. Choose a target role and role context.
+2. Upload a brag sheet or supporting resume material.
+3. Pick a resume template.
+4. Generate a resume draft with Groq.
+5. Edit the final resume and export it.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/ayuslharora/resume-builder.git
-   cd resume-builder
-   ```
+### Grader
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+1. Enter the target job and optional job description.
+2. Upload a resume in `pdf`, `docx`, or `txt`.
+3. Parse the resume text, including OCR fallback for scanned PDFs.
+4. Grade the resume for ATS fit, keyword alignment, impact, clarity, and recruiter fit.
+5. Review weak bullets, rewrite suggestions, ATS risks, and job-match gaps.
+6. Open an improved draft in the builder if needed.
 
-3. **Environment Setup:**
-   Create a `.env` file in the root directory and add your own Firebase and Groq configuration limits:
-   ```env
-   VITE_FIREBASE_API_KEY="your_firebase_api_key"
-   VITE_FIREBASE_AUTH_DOMAIN="your_firebase_auth_domain"
-   VITE_FIREBASE_PROJECT_ID="your_firebase_project_id"
-   VITE_FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket"
-   VITE_FIREBASE_MESSAGING_SENDER_ID="your_firebase_messaging_sender_id"
-   VITE_FIREBASE_APP_ID="your_firebase_app_id"
-   
-   VITE_GROQ_API_KEY="your_groq_api_key_here"
-   ```
+## Local Development
 
-4. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+Make sure you have a recent version of Node.js installed.
 
-5. Visit `http://localhost:5173` in your browser.
+1. Clone the repository:
+```bash
+git clone https://github.com/ayuslharora/resume-builder.git
+cd resume-builder
+```
 
----
+2. Install dependencies:
+```bash
+npm install
+```
 
-## 🌍 Deployment (Vercel)
+3. Create a `.env` file in the project root:
+```env
+VITE_FIREBASE_API_KEY="your_firebase_api_key"
+VITE_FIREBASE_AUTH_DOMAIN="your_firebase_auth_domain"
+VITE_FIREBASE_PROJECT_ID="your_firebase_project_id"
+VITE_FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket"
+VITE_FIREBASE_MESSAGING_SENDER_ID="your_firebase_messaging_sender_id"
+VITE_FIREBASE_APP_ID="your_firebase_app_id"
 
-If you are deploying this application to Vercel, there is a crucial extra step beyond simply linking your GitHub repository:
+VITE_GROQ_API_KEY="your_groq_api_key_here"
+```
 
-1. **Import the repository into Vercel.**
-2. Go to your Vercel Project **Settings** → **Environment Variables**.
-3. **Add all of the variables** from your `.env` file (e.g., `VITE_FIREBASE_API_KEY`, `VITE_GROQ_API_KEY`). **If you don't do this, you will receive an `auth/invalid-api-key` error from Firebase.**
-4. Once variables are added, go to **Deployments** and click **Redeploy**.
+4. Start the dev server:
+```bash
+npm run dev
+```
 
-## 📄 License
+5. Open `http://localhost:5173`.
+
+## Deployment Notes
+
+For Vercel deployments:
+
+1. Import the repository into Vercel.
+2. Add every Firebase and Groq environment variable from your local `.env` file in the Vercel project settings.
+3. Redeploy after adding or changing environment variables.
+
+If the Firebase keys are missing or invalid, authentication and Firestore-backed flows will fail.
+
+## Current Architecture Notes
+
+- The Groq service layer now lives in `src/services/groq.js`.
+- The grader stores a small local score history in browser storage for quick report recall.
+- The builder and dashboard use local cache plus Firestore sync so the app remains responsive even during slower network conditions.
+
+## License
+
 This project is open-source and free to use.

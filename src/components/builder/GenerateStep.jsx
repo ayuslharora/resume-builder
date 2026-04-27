@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useResume } from "../../context/ResumeContext";
-import { generateResume } from "../../services/gemini";
+import { generateResume } from "../../services/groq";
 import { AlertCircle } from "lucide-react";
 
 export default function GenerateStep() {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/ResumeContext";
 import ResumePreview from "../resume/ResumePreview";
-import { regenerateSection } from "../../services/gemini";
+import { regenerateSection } from "../../services/groq";
 import { Wand2, Download, Save, Loader2, FileText } from "lucide-react";
 
 export default function EditStep() {
