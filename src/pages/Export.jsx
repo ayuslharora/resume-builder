@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { exportPDF, exportDOCX } from "../services/export";
 import { Download, FileText, ArrowLeft } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 
@@ -101,6 +100,7 @@ export default function Export() {
   const handleDownloadPDF = async () => {
     try {
       setExportingType('pdf');
+      const { exportPDF } = await import("../services/export");
       await exportPDF(resumeRef.current, `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`);
     } catch (e) {
       alert("Failed to export PDF: " + e.message);
@@ -112,6 +112,7 @@ export default function Export() {
   const handleDownloadDOCX = async () => {
     try {
       setExportingType('docx');
+      const { exportDOCX } = await import("../services/export");
       await exportDOCX(resumeData, `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`);
     } catch (e) {
       alert("Failed to export DOCX: " + e.message);

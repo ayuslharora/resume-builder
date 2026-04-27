@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useResume } from "../../context/ResumeContext";
-import { generateResume } from "../../services/groq";
 import { AlertCircle } from "lucide-react";
 
 export default function GenerateStep() {
@@ -26,6 +25,7 @@ export default function GenerateStep() {
     let isMounted = true;
     async function doGeneration() {
       try {
+        const { generateResume } = await import("../../services/groq");
         const resumeData = await generateResume(builderData.bragSheetText, builderData.interviewAnswers);
         if (isMounted) { setResumeData(resumeData); nextStep(); }
       } catch (err) {

@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/ResumeContext";
 import ResumePreview from "../resume/ResumePreview";
-import { regenerateSection } from "../../services/groq";
-import { Wand2, Download, Save, Loader2, FileText } from "lucide-react";
+import { Wand2, Save, Loader2, FileText } from "lucide-react";
 
 export default function EditStep() {
   const { builderData, updateSection, saveNow, activeResumeId } = useResume();
@@ -44,6 +43,7 @@ export default function EditStep() {
   const handleRegenerate = async () => {
     setIsRegenerating(true);
     try {
+      const { regenerateSection } = await import("../../services/groq");
       const newData = await regenerateSection(activeSection, currentSectionData, interviewAnswers);
       updateSection(activeSection, newData);
     } catch (err) {

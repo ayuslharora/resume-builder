@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { parseDocument } from "../services/parser";
-import { gradeResume, improveResume, rewriteResumeBullet } from "../services/groq";
 import { addGraderHistoryEntry, getGraderHistory } from "../services/graderHistory";
 import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "../context/AuthContext";
@@ -31,6 +29,14 @@ const breakdownLabels = [
   ["impact", "Impact"],
   ["clarity", "Clarity"],
 ];
+
+async function loadParser() {
+  return import("../services/parser");
+}
+
+async function loadGroq() {
+  return import("../services/groq");
+}
 
 export default function Grader() {
   const [loading, setLoading] = useState(false);
@@ -71,6 +77,7 @@ export default function Grader() {
     setAppliedRewrites({});
 
     try {
+      const [{ parseDocument }, { gradeResume }] = await Promise.all([loadParser(), loadGroq()]);
       const { text, metadata, fileName } = await parseDocument(file);
       if (!text.trim()) throw new Error("Document is empty.");
 
@@ -149,6 +156,7 @@ export default function Grader() {
     setBulletRewrites([]);
 
     try {
+      const { rewriteResumeBullet } = await loadGroq();
       const rewriteResult = await rewriteResumeBullet(bullet, {
         targetRole: result.targetRole,
         jobDescription: result.jobDescription,
@@ -170,6 +178,7 @@ export default function Grader() {
     setError(null);
 
     try {
+      const { improveResume } = await loadGroq();
       const improvedResumeData = await improveResume(result.resumeText, {
         targetRole: result.targetRole,
         jobDescription: result.jobDescription,

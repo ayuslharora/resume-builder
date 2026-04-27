@@ -1,5 +1,3 @@
-import * as mammoth from "mammoth";
-
 export async function parseDocument(file) {
   const extension = file.name.split('.').pop().toLowerCase();
   
@@ -29,6 +27,7 @@ function parseTxt(file) {
 }
 
 async function parseDocx(file) {
+  const mammoth = await loadMammoth();
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
   return { text: result.value, fileName: file.name };
@@ -165,6 +164,10 @@ async function extractPdfTextWithOcr(pdf) {
   }
 
   return fullText;
+}
+
+async function loadMammoth() {
+  return import("mammoth");
 }
 
 function buildExtractionConfidence({ extractionMethod, text }) {
