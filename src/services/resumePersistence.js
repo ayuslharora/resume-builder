@@ -40,6 +40,10 @@ export function buildResumeWriteData(existingResume, data) {
   };
 }
 
+export function getUserResumeQueryConstraints(whereFn, userId) {
+  return [whereFn("userId", "==", userId)];
+}
+
 function hasText(value) {
   return typeof value === "string" && value.trim().length > 0;
 }

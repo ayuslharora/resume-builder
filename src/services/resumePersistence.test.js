@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   buildResumeWriteData,
   getResumeBuilderStep,
+  getUserResumeQueryConstraints,
   mergeCachedAndServerResume,
   mergeCachedAndServerResumes,
 } from "./resumePersistence.js";
@@ -62,4 +63,15 @@ test("buildResumeWriteData preserves userId from cached resume for cloud upserts
     ),
     { userId: "user-1", title: "New" }
   );
+});
+
+test("getUserResumeQueryConstraints avoids Firestore composite index requirements", () => {
+  const constraints = getUserResumeQueryConstraints(
+    (...args) => ({ type: "where", args }),
+    "user-1"
+  );
+
+  assert.deepEqual(constraints, [
+    { type: "where", args: ["userId", "==", "user-1"] },
+  ]);
 });

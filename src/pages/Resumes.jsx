@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFirestore } from "../hooks/useFirestore";
-import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "../services/firebase";
 import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";
 import { FilePlus } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { getCachedResumeList, setCachedResumeList } from "../services/resumeCache";
-import { mergeCachedAndServerResumes } from "../services/resumePersistence";
 
 export default function Resumes() {
   const { currentUser } = useAuth();
-  const { deleteResume, duplicateResume } = useFirestore();
+  const { deleteResume, duplicateResume, getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fromCache, setFromCache] = useState(false);
@@ -21,51 +18,36 @@ export default function Resumes() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // ── 1. Instant render from localStorage ─────────────────────────────────
-    const cached = getCachedResumeList(currentUser.uid);
-    if (cached.length > 0) {
-      setResumes(cached);
-      setLoading(false);
-      setFromCache(true);
+    let cancelled = false;
+
+    async function loadResumes() {
+      const cached = getCachedResumeList(currentUser.uid);
+      if (cached.length > 0) {
+        setResumes(cached);
+        setFromCache(true);
+      }
+
+      try {
+        const data = await getUserResumes(currentUser.uid);
+        if (cancelled) return;
+        setResumes(data);
+        setFromCache(false);
+        setCachedResumeList(currentUser.uid, data);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Error fetching resumes:", error);
+          setFromCache(false);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
-    // ── 2. Fallback: stop spinner if Firebase hangs ──────────────────────────
-    const hangTimeout = setTimeout(() => {
-      setLoading(false);
-      setFromCache(false);
-    }, 5000);
-
-    // ── 3. Live Firebase subscription ────────────────────────────────────────
-    const q = query(
-      collection(db, "resumes"),
-      where("userId", "==", currentUser.uid),
-      orderBy("updatedAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        clearTimeout(hangTimeout);
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const merged = mergeCachedAndServerResumes(data, getCachedResumeList(currentUser.uid));
-        setResumes(merged);
-        setLoading(false);
-        setFromCache(merged.length > data.length);
-        setCachedResumeList(currentUser.uid, merged);
-      },
-      (error) => {
-        clearTimeout(hangTimeout);
-        console.error("Error fetching resumes:", error);
-        setLoading(false);
-        setFromCache(false);
-      }
-    );
-
+    loadResumes();
     return () => {
-      clearTimeout(hangTimeout);
-      unsubscribe();
+      cancelled = true;
     };
-  }, [currentUser]);
+  }, [currentUser, getUserResumes]);
 
   if (loading) return <Spinner />;
 

@@ -1,6 +1,7 @@
+import { useCallback } from "react";
 import {
   collection, doc, setDoc, deleteDoc,
-  getDoc, getDocs, query, where, orderBy, serverTimestamp
+  getDoc, getDocs, query, where, serverTimestamp
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
@@ -13,13 +14,15 @@ import {
 } from "../services/resumeCache";
 import {
   buildResumeWriteData,
+  getUserResumeQueryConstraints,
   mergeCachedAndServerResume,
+  mergeCachedAndServerResumes,
 } from "../services/resumePersistence";
 
 export function useFirestore() {
 
   // ─── Create ────────────────────────────────────────────────────────────────
-  async function createResume(userId, data) {
+  const createResume = useCallback(async (userId, data) => {
     const docRef = doc(collection(db, "resumes"));
     const serverTime = serverTimestamp();
     const docData = {
@@ -32,9 +35,6 @@ export function useFirestore() {
     };
 
     // Fire and forget so we get the ID INSTANTLY and avoid 4s timeout race
-    setDoc(docRef, docData).catch(err => console.warn("Failed to sync resume creation:", err));
-
-    // Mirror to localStorage immediately
     const localCopy = {
       id: docRef.id,
       ...docData, // includes userId, status, title from above, plus any data overwrites
@@ -46,15 +46,21 @@ export function useFirestore() {
     delete localCopy.updatedAt;
     localCopy.createdAt = Date.now();
     localCopy.updatedAt = Date.now();
-    
+
     setCachedResume(docRef.id, localCopy);
     upsertCachedResumeInList(userId, localCopy);
 
+    try {
+      await setDoc(docRef, docData);
+    } catch (err) {
+      console.warn("Failed to sync resume creation:", err);
+    }
+
     return docRef.id;
-  }
+  }, []);
 
   // ─── Read single ───────────────────────────────────────────────────────────
-  async function getResume(resumeId) {
+  const getResume = useCallback(async (resumeId) => {
     // 1. Return from localStorage instantly while waiting for Firebase
     const cached = getCachedResume(resumeId);
 
@@ -73,28 +79,27 @@ export function useFirestore() {
     }
 
     return cached ?? null;
-  }
+  }, []);
 
   // ─── Read list ─────────────────────────────────────────────────────────────
-  async function getUserResumes(userId) {
+  const getUserResumes = useCallback(async (userId) => {
     // Try Firebase first; fall back to localStorage
     try {
       const q = query(
         collection(db, "resumes"),
-        where("userId", "==", userId),
-        orderBy("updatedAt", "desc")
+        ...getUserResumeQueryConstraints(where, userId)
       );
       const snap = await getDocs(q);
       const resumes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      return resumes;
+      return mergeCachedAndServerResumes(resumes, getCachedResumeList(userId));
     } catch (err) {
       console.warn("getUserResumes: Firebase unavailable, using cache", err.message);
       return getCachedResumeList(userId);
     }
-  }
+  }, []);
 
   // ─── Update ────────────────────────────────────────────────────────────────
-  async function updateResume(resumeId, data) {
+  const updateResume = useCallback(async (resumeId, data) => {
     const docRef = doc(db, "resumes", resumeId);
     const existing = getCachedResume(resumeId) ?? {};
     const writeData = buildResumeWriteData(existing, data);
@@ -106,10 +111,10 @@ export function useFirestore() {
     if (merged.userId) {
       upsertCachedResumeInList(merged.userId, merged);
     }
-  }
+  }, []);
 
   // ─── Delete ────────────────────────────────────────────────────────────────
-  async function deleteResume(resumeId) {
+  const deleteResume = useCallback(async (resumeId) => {
     // Grab userId from cache before we wipe it
     const cached = getCachedResume(resumeId);
     await deleteDoc(doc(db, "resumes", resumeId));
@@ -117,10 +122,10 @@ export function useFirestore() {
     if (cached?.userId) {
       removeCachedResumeFromList(cached.userId, resumeId);
     }
-  }
+  }, []);
 
   // ─── Duplicate ─────────────────────────────────────────────────────────────
-  async function duplicateResume(resumeId) {
+  const duplicateResume = useCallback(async (resumeId) => {
     const data = await getResume(resumeId);
     if (!data) throw new Error("Resume not found");
     const rest = { ...data };
@@ -129,7 +134,7 @@ export function useFirestore() {
     delete rest.updatedAt;
     rest.title = `${rest.title} (Copy)`;
     return await createResume(data.userId, rest);
-  }
+  }, [getResume, createResume]);
 
   return {
     createResume,

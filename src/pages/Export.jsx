@@ -21,12 +21,6 @@ export default function Export() {
     // Helper: apply state from navigation (passed by EditStep)
     const stateBuilderData = location.state?.builderData;
 
-    // Simulate "Saving to Firebase" when finishing the builder flow
-    if (stateBuilderData) {
-      setSavingFinal(true);
-      setTimeout(() => setSavingFinal(false), 2000);
-    }
-
     // Case 1: brand-new resume that was never saved (id="new")
     if (resumeId === "new" && stateBuilderData) {
       setResumeData(stateBuilderData.resumeData);
@@ -129,12 +123,6 @@ export default function Export() {
           <ArrowLeft size={18} /> Back to Editor
         </button>
         <div className="flex gap-4 min-h-[40px] items-center">
-          {savingFinal ? (
-            <div className="flex items-center gap-3 text-primary font-mono text-sm px-4 fade-in">
-               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
-               Saving to Firebase...
-            </div>
-          ) : (
             <>
               <button 
                  onClick={handleDownloadDOCX} 
@@ -151,7 +139,6 @@ export default function Export() {
                 <Download size={18} /> {exportingType === 'pdf' ? 'Exporting...' : 'PDF'}
               </button>
             </>
-          )}
         </div>
       </header>
 

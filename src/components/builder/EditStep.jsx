@@ -5,7 +5,7 @@ import ResumePreview from "../resume/ResumePreview";
 import { Wand2, Save, Loader2, FileText } from "lucide-react";
 
 export default function EditStep() {
-  const { builderData, updateSection, saveNow, activeResumeId } = useResume();
+  const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore } = useResume();
   const [activeSection, setActiveSection] = useState("personalInfo");
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [localData, setLocalData] = useState(null);
@@ -46,6 +46,12 @@ export default function EditStep() {
       const { regenerateSection } = await import("../../services/groq");
       const newData = await regenerateSection(activeSection, currentSectionData, interviewAnswers);
       updateSection(activeSection, newData);
+      saveToFirestore({
+        resumeData: {
+          ...resumeData,
+          [activeSection]: newData
+        }
+      });
     } catch (err) {
       alert("Failed to regenerate: " + err.message);
     } finally {
@@ -62,6 +68,12 @@ export default function EditStep() {
     if (window.editTimeout) clearTimeout(window.editTimeout);
     window.editTimeout = setTimeout(() => {
       updateSection(activeSection, newData);
+      saveToFirestore({
+        resumeData: {
+          ...resumeData,
+          [activeSection]: newData
+        }
+      });
     }, 400);
   };
 

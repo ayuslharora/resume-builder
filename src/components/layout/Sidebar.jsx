@@ -2,18 +2,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Menu, X, Plus } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
-import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "../../services/firebase";
-import { getCachedResumeList, setCachedResumeList } from "../../services/resumeCache";
+import { getCachedResumeList } from "../../services/resumeCache";
+import { useFirestore } from "../../hooks/useFirestore";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, userDoc, logout } = useAuth();
+  const { getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const usesSharedResumeList =
-    location.pathname.startsWith("/resumes") || location.pathname.startsWith("/dashboard");
 
   useEffect(() => {
     if (!currentUser) {
@@ -21,27 +19,23 @@ export default function Sidebar() {
       return;
     }
 
-    const cached = getCachedResumeList(currentUser.uid);
-    if (cached.length > 0) {
-      setResumes(cached);
+    let cancelled = false;
+
+    async function loadResumes() {
+      const cached = getCachedResumeList(currentUser.uid);
+      if (cached.length > 0) {
+        setResumes(cached);
+      }
+
+      const data = await getUserResumes(currentUser.uid);
+      if (!cancelled) setResumes(data);
     }
 
-    if (usesSharedResumeList) {
-      return;
-    }
-
-    const q = query(
-      collection(db, "resumes"),
-      where("userId", "==", currentUser.uid),
-      orderBy("updatedAt", "desc")
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setResumes(data);
-      setCachedResumeList(currentUser.uid, data);
-    });
-    return () => unsubscribe();
-  }, [currentUser, usesSharedResumeList]);
+    loadResumes().catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, getUserResumes]);
 
   useEffect(() => {
     setMobileOpen(false);
