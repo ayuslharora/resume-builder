@@ -8,6 +8,7 @@ import ResumeCard from "../components/dashboard/ResumeCard";
 import { FilePlus } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { getCachedResumeList, setCachedResumeList } from "../services/resumeCache";
+import { mergeCachedAndServerResumes } from "../services/resumePersistence";
 
 export default function Resumes() {
   const { currentUser } = useAuth();
@@ -46,10 +47,11 @@ export default function Resumes() {
       (snapshot) => {
         clearTimeout(hangTimeout);
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setResumes(data);
+        const merged = mergeCachedAndServerResumes(data, getCachedResumeList(currentUser.uid));
+        setResumes(merged);
         setLoading(false);
-        setFromCache(false);
-        setCachedResumeList(currentUser.uid, data);
+        setFromCache(merged.length > data.length);
+        setCachedResumeList(currentUser.uid, merged);
       },
       (error) => {
         clearTimeout(hangTimeout);

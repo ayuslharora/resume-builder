@@ -1,5 +1,5 @@
 import {
-  collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
+  collection, doc, setDoc, deleteDoc,
   getDoc, getDocs, query, where, orderBy, serverTimestamp
 } from "firebase/firestore";
 import { db } from "../services/firebase";
@@ -11,6 +11,10 @@ import {
   removeCachedResumeFromList,
   getCachedResumeList,
 } from "../services/resumeCache";
+import {
+  buildResumeWriteData,
+  mergeCachedAndServerResume,
+} from "../services/resumePersistence";
 
 export function useFirestore() {
 
@@ -59,8 +63,9 @@ export function useFirestore() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const fresh = { id: docSnap.id, ...docSnap.data() };
-        setCachedResume(resumeId, fresh);   // keep cache fresh
-        return fresh;
+        const merged = mergeCachedAndServerResume(fresh, cached);
+        setCachedResume(resumeId, merged);   // keep cache fresh without dropping newer local progress
+        return merged;
       }
     } catch (err) {
       console.warn("getResume: Firebase unavailable, using cache", err.message);
@@ -91,11 +96,12 @@ export function useFirestore() {
   // ─── Update ────────────────────────────────────────────────────────────────
   async function updateResume(resumeId, data) {
     const docRef = doc(db, "resumes", resumeId);
-    await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
+    const existing = getCachedResume(resumeId) ?? {};
+    const writeData = buildResumeWriteData(existing, data);
+    await setDoc(docRef, { ...writeData, updatedAt: serverTimestamp() }, { merge: true });
 
     // Merge into localStorage so a reload shows the latest data
-    const existing = getCachedResume(resumeId) ?? {};
-    const merged = { ...existing, ...data, id: resumeId, updatedAt: Date.now() };
+    const merged = { ...existing, ...writeData, id: resumeId, updatedAt: Date.now() };
     setCachedResume(resumeId, merged);
     if (merged.userId) {
       upsertCachedResumeInList(merged.userId, merged);
@@ -117,7 +123,10 @@ export function useFirestore() {
   async function duplicateResume(resumeId) {
     const data = await getResume(resumeId);
     if (!data) throw new Error("Resume not found");
-    const { id, createdAt, updatedAt, ...rest } = data;
+    const rest = { ...data };
+    delete rest.id;
+    delete rest.createdAt;
+    delete rest.updatedAt;
     rest.title = `${rest.title} (Copy)`;
     return await createResume(data.userId, rest);
   }

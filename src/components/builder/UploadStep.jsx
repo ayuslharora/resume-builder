@@ -4,7 +4,7 @@ import { parseDocument } from "../../services/parser";
 import { UploadCloud, File, AlertCircle, X, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function UploadStep() {
-  const { nextStep, prevStep, setBragSheet, builderData } = useResume();
+  const { nextStep, prevStep, setBragSheet, builderData, saveNow } = useResume();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
@@ -34,6 +34,15 @@ export default function UploadStep() {
   };
 
   const hasContent = builderData.bragSheetText && builderData.bragSheetText.length > 0;
+
+  const handleNext = async () => {
+    await saveNow({
+      bragSheetText: builderData.bragSheetText,
+      bragSheetFileName: builderData.bragSheetFileName,
+      status: "draft",
+    });
+    nextStep();
+  };
 
   return (
     <div className="step-card fade-in">
@@ -115,7 +124,7 @@ export default function UploadStep() {
           <ChevronLeft size={16} /> Back
         </button>
         <button
-          onClick={nextStep}
+          onClick={handleNext}
           disabled={loading || !hasContent}
           className="btn-primary"
         >

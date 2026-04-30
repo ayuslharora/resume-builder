@@ -6,6 +6,7 @@ import {
   setCachedResume,
   upsertCachedResumeInList,
 } from "../services/resumeCache";
+import { getResumeBuilderStep } from "../services/resumePersistence";
 
 const ResumeContext = createContext();
 
@@ -99,10 +100,7 @@ export function ResumeProvider({ children }) {
           resumeData:       cached.resumeData       ?? null,
         }
       });
-      // Restore step from cached status
-      if (cached.status === "complete") setCurrentStep(5);
-      else if (cached.templateId)       setCurrentStep(4);
-      else                              setCurrentStep(1);
+      setCurrentStep(getResumeBuilderStep(cached));
     }
 
     // ── 2. Fetch fresh data from Firebase and update if different ────────────
@@ -119,9 +117,7 @@ export function ResumeProvider({ children }) {
             resumeData:       data.resumeData       ?? null,
           }
         });
-        if (data.status === "complete") setCurrentStep(5);
-        else if (data.templateId)       setCurrentStep(4);
-        else                            setCurrentStep(1);
+        setCurrentStep(getResumeBuilderStep(data));
       }
     } catch (err) {
       console.warn("loadResumeData: Firebase unavailable, using cache →", err.message);
@@ -156,7 +152,7 @@ export function ResumeProvider({ children }) {
     }
 
     let id = activeResumeIdRef.current;
-    if (!id || id === "creating" || !currentUser) return;
+    if (!id || id === "creating" || !currentUser) return null;
 
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("saveNow timed out")), 4000)
@@ -180,16 +176,19 @@ export function ResumeProvider({ children }) {
         activeResumeIdRef.current = newId;
         window.history.replaceState(null, "", `/builder/${newId}`);
         // createResume already wrote to localStorage via useFirestore
+        return newId;
       } else {
         // Write to localStorage first (instant), then Firestore
         persistLocally(id, { ...dataToMerge, userId: currentUser.uid });
-        await Promise.race([updateResume(id, dataToMerge), timeout]);
+        await Promise.race([updateResume(id, { ...dataToMerge, userId: currentUser.uid }), timeout]);
+        return id;
       }
     } catch (err) {
       if (activeResumeIdRef.current === "creating") {
         activeResumeIdRef.current = "new";
       }
       console.warn("Save skipped (Firestore offline or timeout):", err.message);
+      return null;
     } finally {
       dispatch({ type: "SET_SAVING", payload: false });
     }
@@ -208,7 +207,7 @@ export function ResumeProvider({ children }) {
       const latestId = activeResumeIdRef.current;
       if (!latestId || latestId === "creating" || latestId === "new") return;
       try {
-        await updateResume(latestId, dataToMerge);
+        await updateResume(latestId, { ...dataToMerge, userId: currentUser.uid });
       } catch (err) {
         console.warn("Live save failed:", err.message);
       }

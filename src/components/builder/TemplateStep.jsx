@@ -3,8 +3,16 @@ import { templateList } from "../templates";
 import { ChevronRight, ChevronLeft, LayoutTemplate } from "lucide-react";
 
 export default function TemplateStep() {
-  const { nextStep, prevStep, builderData, setTemplateId } = useResume();
+  const { nextStep, prevStep, builderData, setTemplateId, saveNow } = useResume();
   const selectedTemplate = builderData.templateId;
+
+  const handleNext = async () => {
+    await saveNow({
+      templateId: selectedTemplate,
+      status: "draft",
+    });
+    nextStep();
+  };
 
   return (
     <div className="step-card fade-in">
@@ -48,7 +56,7 @@ export default function TemplateStep() {
           <ChevronLeft size={16} /> Back
         </button>
         <button 
-          onClick={nextStep} 
+          onClick={handleNext} 
           disabled={!selectedTemplate}
           className="btn-primary"
         >

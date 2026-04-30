@@ -8,12 +8,12 @@ export default function InterviewStep() {
     setInterviewAnswers({ [field]: value });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!answers.targetRole) {
       alert("Target role is required.");
       return;
     }
-    saveNow({
+    await saveNow({
       interviewAnswers: answers,
       targetRole: answers.targetRole,
       title: answers.targetRole,

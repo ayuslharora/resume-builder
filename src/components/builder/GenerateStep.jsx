@@ -3,7 +3,7 @@ import { useResume } from "../../context/ResumeContext";
 import { AlertCircle } from "lucide-react";
 
 export default function GenerateStep() {
-  const { builderData, setResumeData, nextStep, prevStep } = useResume();
+  const { builderData, setResumeData, saveNow, nextStep, prevStep } = useResume();
   const [error, setError] = useState(null);
   const [msgIdx, setMsgIdx] = useState(0);
   const messages = [
@@ -27,7 +27,16 @@ export default function GenerateStep() {
       try {
         const { generateResume } = await import("../../services/groq");
         const resumeData = await generateResume(builderData.bragSheetText, builderData.interviewAnswers);
-        if (isMounted) { setResumeData(resumeData); nextStep(); }
+        if (isMounted) {
+          setResumeData(resumeData);
+          await saveNow({
+            resumeData,
+            templateId: builderData.templateId,
+            interviewAnswers: builderData.interviewAnswers,
+            status: "generated",
+          });
+          nextStep();
+        }
       } catch (err) {
         if (isMounted) setError(err.message);
       }

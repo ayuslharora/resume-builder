@@ -8,6 +8,7 @@ import ResumeCard from "../components/dashboard/ResumeCard";
 import EmptyState from "../components/dashboard/EmptyState";
 import Spinner from "../components/ui/Spinner";
 import { getCachedResumeList, setCachedResumeList } from "../services/resumeCache";
+import { mergeCachedAndServerResumes } from "../services/resumePersistence";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -43,10 +44,11 @@ export default function Dashboard() {
       (snapshot) => {
         clearTimeout(hangTimeout);
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setResumes(data);
+        const merged = mergeCachedAndServerResumes(data, getCachedResumeList(currentUser.uid));
+        setResumes(merged);
         setLoading(false);
-        setFromCache(false);
-        setCachedResumeList(currentUser.uid, data);
+        setFromCache(merged.length > data.length);
+        setCachedResumeList(currentUser.uid, merged);
       },
       (error) => {
         clearTimeout(hangTimeout);
