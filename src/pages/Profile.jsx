@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { User, Save, Camera, CheckCircle } from "lucide-react";
 
 export default function Profile() {

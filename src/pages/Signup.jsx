@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 

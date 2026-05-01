@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ResumeProvider, useResume } from "../context/ResumeContext";
+import { ResumeProvider } from "../context/ResumeContext";
+import { useResume } from "../context/useResume";
 import StepIndicator from "../components/builder/StepIndicator";
 import UploadStep from "../components/builder/UploadStep";
 import InterviewStep from "../components/builder/InterviewStep";

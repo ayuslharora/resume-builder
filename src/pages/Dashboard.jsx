@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useFirestore } from "../hooks/useFirestore";
 import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";

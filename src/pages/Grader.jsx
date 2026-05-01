@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addGraderHistoryEntry, getGraderHistory } from "../services/graderHistory";
 import { useFirestore } from "../hooks/useFirestore";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
   AlertCircle,
   Briefcase,

@@ -1,4 +1,4 @@
-import { useResume } from "../../context/ResumeContext";
+import { useResume } from "../../context/useResume";
 
 export default function InterviewStep() {
   const { nextStep, prevStep, builderData, setInterviewAnswers, saveNow } = useResume();

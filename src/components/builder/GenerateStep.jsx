@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
-import { useResume } from "../../context/ResumeContext";
+import { useResume } from "../../context/useResume";
 import { AlertCircle } from "lucide-react";
+
+const GENERATION_MESSAGES = [
+  "Reading your achievements...",
+  "Understanding your target role...",
+  "Crafting your professional summary...",
+  "Writing your experience bullets...",
+  "Finalizing your resume..."
+];
 
 export default function GenerateStep() {
   const { builderData, setResumeData, saveNow, nextStep, prevStep } = useResume();
   const [error, setError] = useState(null);
   const [msgIdx, setMsgIdx] = useState(0);
-  const messages = [
-    "Reading your achievements...",
-    "Understanding your target role...",
-    "Crafting your professional summary...",
-    "Writing your experience bullets...",
-    "Finalizing your resume..."
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setMsgIdx(prev => (prev < messages.length - 1 ? prev + 1 : prev));
+      setMsgIdx(prev => (prev < GENERATION_MESSAGES.length - 1 ? prev + 1 : prev));
     }, 2500);
     return () => clearInterval(interval);
   }, []);
@@ -41,9 +42,20 @@ export default function GenerateStep() {
         if (isMounted) setError(err.message);
       }
     }
-    if (!builderData.resumeData && !error) doGeneration();
+    if (!builderData.resumeData && !error) {
+      doGeneration();
+    }
     return () => { isMounted = false; };
-  }, []);
+  }, [
+    builderData.bragSheetText,
+    builderData.interviewAnswers,
+    builderData.resumeData,
+    builderData.templateId,
+    error,
+    nextStep,
+    saveNow,
+    setResumeData,
+  ]);
 
   return (
     <div className="max-w-lg mx-auto mt-10 text-center p-6 sm:p-12 rounded-2xl relative overflow-hidden fade-in"
@@ -83,7 +95,7 @@ export default function GenerateStep() {
               style={{ border: "4px solid transparent", borderTopColor: "#06b6d4", filter: "drop-shadow(0 0 6px rgba(6,182,212,0.5))" }} />
           </div>
           <p className="font-bold tracking-widest uppercase text-sm text-primary animate-pulse">
-            {messages[msgIdx]}
+            {GENERATION_MESSAGES[msgIdx]}
           </p>
         </div>
       )}

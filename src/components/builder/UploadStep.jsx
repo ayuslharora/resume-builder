@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useResume } from "../../context/ResumeContext";
+import { useResume } from "../../context/useResume";
 import { parseDocument } from "../../services/parser";
 import { UploadCloud, File, AlertCircle, X, ChevronRight, ChevronLeft, Type } from "lucide-react";
 

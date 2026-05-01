@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useResume } from "../../context/ResumeContext";
+import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
 import { Wand2, Save, Loader2, FileText } from "lucide-react";
 
@@ -15,8 +15,6 @@ export default function EditStep() {
   const navigate = useNavigate();
 
   const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
-
-  const currentSectionData = resumeData?.[activeSection];
 
   // Dynamic scaling for the preview container
   useEffect(() => {

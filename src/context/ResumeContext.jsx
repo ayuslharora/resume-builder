@@ -1,14 +1,13 @@
-import { createContext, useContext, useReducer, useCallback, useRef, useState } from "react";
+import { useReducer, useCallback, useRef, useState } from "react";
 import { useFirestore } from "../hooks/useFirestore";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 import {
   getCachedResume,
   setCachedResume,
   upsertCachedResumeInList,
 } from "../services/resumeCache";
 import { getResumeBuilderStep } from "../services/resumePersistence";
-
-const ResumeContext = createContext();
+import { ResumeContext } from "./resume-context";
 
 const initialBuilderState = {
   bragSheetText: "",
@@ -80,7 +79,7 @@ export function ResumeProvider({ children }) {
   const activeResumeIdRef = useRef(null); // Ref to always have latest ID in async callbacks
 
   // ─── LOAD / INIT ──────────────────────────────────────────────────────────
-  const loadResumeData = async (resumeId) => {
+  const loadResumeData = useCallback(async (resumeId) => {
     if (resumeId === "new") {
       dispatch({ type: "RESET" });
       setCurrentStep(1);
@@ -128,7 +127,7 @@ export function ResumeProvider({ children }) {
       console.warn("loadResumeData: Firebase unavailable, using cache →", err.message);
       // Already loaded from cache above — nothing more to do
     }
-  };
+  }, [getResume]);
 
   // ─── SAVE ──────────────────────────────────────────────────────────────────
   const debounceRef = useRef(null);
@@ -224,18 +223,43 @@ export function ResumeProvider({ children }) {
     setCurrentStep(prev => Math.min(prev + 1, 5));
   }, []);
 
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-  const goToStep = (step) => setCurrentStep(step);
+  const prevStep = useCallback(() => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  }, []);
+
+  const goToStep = useCallback((step) => {
+    setCurrentStep(step);
+  }, []);
 
   // ─── DISPATCH HELPERS ──────────────────────────────────────────────────────
-  const setBragSheet     = (text, fileName) => dispatch({ type: "SET_BRAG_SHEET",       payload: { text, fileName } });
-  const setPhoto         = (file, url)      => dispatch({ type: "SET_PHOTO",            payload: { file, url } });
-  const setInterviewAnswers = (answers)     => dispatch({ type: "SET_INTERVIEW_ANSWERS", payload: answers });
-  const setTemplateId    = (id)             => dispatch({ type: "SET_TEMPLATE_ID",       payload: id });
-  const setResumeData    = (data)           => dispatch({ type: "SET_RESUME_DATA",       payload: data });
-  const updateSection    = (sectionName, sectionData) =>
+  const setBragSheet = useCallback((text, fileName) => {
+    dispatch({ type: "SET_BRAG_SHEET", payload: { text, fileName } });
+  }, []);
+
+  const setPhoto = useCallback((file, url) => {
+    dispatch({ type: "SET_PHOTO", payload: { file, url } });
+  }, []);
+
+  const setInterviewAnswers = useCallback((answers) => {
+    dispatch({ type: "SET_INTERVIEW_ANSWERS", payload: answers });
+  }, []);
+
+  const setTemplateId = useCallback((id) => {
+    dispatch({ type: "SET_TEMPLATE_ID", payload: id });
+  }, []);
+
+  const setResumeData = useCallback((data) => {
+    dispatch({ type: "SET_RESUME_DATA", payload: data });
+  }, []);
+
+  const updateSection = useCallback((sectionName, sectionData) => {
     dispatch({ type: "UPDATE_SECTION", payload: { sectionName, sectionData } });
-  const resetBuilder = () => { dispatch({ type: "RESET" }); setCurrentStep(1); };
+  }, []);
+
+  const resetBuilder = useCallback(() => {
+    dispatch({ type: "RESET" });
+    setCurrentStep(1);
+  }, []);
 
   const value = {
     builderData, dispatch,
@@ -243,10 +267,5 @@ export function ResumeProvider({ children }) {
     currentStep, goToStep, nextStep, prevStep,
     activeResumeId, saveToFirestore, saveNow, loadResume: loadResumeData, resetBuilder,
   };
-
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
-}
-
-export function useResume() {
-  return useContext(ResumeContext);
 }

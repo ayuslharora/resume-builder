@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Plus, User } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useEffect, useState } from "react";
 import { getCachedResumeList } from "../../services/resumeCache";
 import { useFirestore } from "../../hooks/useFirestore";

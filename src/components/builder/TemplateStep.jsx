@@ -1,4 +1,4 @@
-import { useResume } from "../../context/ResumeContext";
+import { useResume } from "../../context/useResume";
 import { templateList } from "../templates";
 import { ChevronRight, ChevronLeft, LayoutTemplate } from "lucide-react";
 

@@ -66,12 +66,16 @@ export default function Landing() {
             { icon: Shield, label: "ATS Compliant" },
             { icon: Zap, label: "AI-Powered" },
             { icon: FileText, label: "Pro Templates" },
-          ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-              <Icon size={13} className="text-primary" />
-              <span>{label}</span>
-            </div>
-          ))}
+          ].map((item) => {
+            const IconComponent = item.icon;
+
+            return (
+              <div key={item.label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
+                <IconComponent size={13} className="text-primary" />
+                <span>{item.label}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

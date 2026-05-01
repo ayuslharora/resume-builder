@@ -7,25 +7,23 @@ import Spinner from "../components/ui/Spinner";
 
 export default function Export() {
   const { resumeId } = useParams();
-  const [resumeData, setResumeData] = useState(null);
-  const [templateId, setTemplateId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const stateBuilderData = location.state?.builderData;
+  const [resumeData, setResumeData] = useState(() => (
+    resumeId === "new" && stateBuilderData ? stateBuilderData.resumeData : null
+  ));
+  const [templateId, setTemplateId] = useState(() => (
+    resumeId === "new" && stateBuilderData ? stateBuilderData.templateId : null
+  ));
+  const [loading, setLoading] = useState(() => !(resumeId === "new" && stateBuilderData));
   const [exportingType, setExportingType] = useState(null);
-  const [savingFinal, setSavingFinal] = useState(false);
   const { getResume } = useFirestore();
   const resumeRef = useRef(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    // Helper: apply state from navigation (passed by EditStep)
-    const stateBuilderData = location.state?.builderData;
-
     // Case 1: brand-new resume that was never saved (id="new")
     if (resumeId === "new" && stateBuilderData) {
-      setResumeData(stateBuilderData.resumeData);
-      setTemplateId(stateBuilderData.templateId);
-      setLoading(false);
       return;
     }
 
@@ -39,28 +37,30 @@ export default function Export() {
       setLoading(false);
     }, 4000);
 
-    getResume(resumeId).then(data => {
-      clearTimeout(hangTimeout);
-      if (data && data.resumeData) {
-        setResumeData(data.resumeData);
-        setTemplateId(data.templateId);
-      } else if (stateBuilderData) {
-        // Firestore returned empty doc — use bundled state
-        setResumeData(stateBuilderData.resumeData);
-        setTemplateId(stateBuilderData.templateId);
-      }
-      setLoading(false);
-    }).catch((e) => {
-      clearTimeout(hangTimeout);
-      console.error("Firestore fetch failed, using local state:", e);
-      // Firestore offline — use bundled state from EditStep
-      if (stateBuilderData) {
-        setResumeData(stateBuilderData.resumeData);
-        setTemplateId(stateBuilderData.templateId);
-      }
-      setLoading(false);
-    });
-  }, [resumeId]);
+    getResume(resumeId)
+      .then((data) => {
+        clearTimeout(hangTimeout);
+        if (data && data.resumeData) {
+          setResumeData(data.resumeData);
+          setTemplateId(data.templateId);
+        } else if (stateBuilderData) {
+          setResumeData(stateBuilderData.resumeData);
+          setTemplateId(stateBuilderData.templateId);
+        }
+        setLoading(false);
+      })
+      .catch((e) => {
+        clearTimeout(hangTimeout);
+        console.error("Firestore fetch failed, using local state:", e);
+        if (stateBuilderData) {
+          setResumeData(stateBuilderData.resumeData);
+          setTemplateId(stateBuilderData.templateId);
+        }
+        setLoading(false);
+      });
+
+    return () => clearTimeout(hangTimeout);
+  }, [getResume, resumeId, stateBuilderData]);
 
   if (loading) return <Spinner />;
   if (!resumeData) return (
