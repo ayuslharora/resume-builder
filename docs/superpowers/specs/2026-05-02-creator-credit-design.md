@@ -6,7 +6,7 @@ The product does not currently credit its creator inside the app or on shared re
 
 **Goal**
 
-Add a subtle linked credit that reads `Created by Ayush` and points to `https://Ayuslh.in` in both the signed in app shell and the public shared resume page.
+Add a subtle linked credit that points to `https://Ayuslh.in` in both the signed in app and the public shared resume page.
 
 **Design**
 
@@ -19,12 +19,12 @@ Add a subtle linked credit that reads `Created by Ayush` and points to `https://
 - Open the portfolio in a new tab with safe external link attributes.
 - Preserve the current desktop and mobile structure, only adding a low emphasis inline text link that matches the existing color system.
 
-**Signed in app shell**
+**Signed in app profile section**
 
-- Add the same credit to the persistent app shell so attribution is visible while using the product.
-- On desktop, place the credit in the sidebar footer beneath the user account area.
-- On mobile, place a compact version in a low priority shell area that does not compete with the bottom navigation actions.
-- Use the same text and destination as the public page.
+- Add the credit inside the existing profile section so attribution feels integrated with the account area.
+- On desktop, place the credit beneath the user name area in the sidebar footer.
+- On mobile, place the same information in the profile screen or the existing profile section entry point rather than near the bottom navigation.
+- Show both the creator name and the portfolio link in this area.
 - Keep the styling understated and consistent with current typography and spacing.
 
 **Behavior**
@@ -36,11 +36,11 @@ Add a subtle linked credit that reads `Created by Ayush` and points to `https://
 **Implementation notes**
 
 - Update the public resume page component to render the new external credit link.
-- Update the shared app shell component set so the credit appears in both desktop and mobile layouts.
+- Update the profile related layout components so the credit appears inside the account area on desktop and mobile.
 - Reuse existing utility classes and visual tokens where possible instead of introducing a new branding pattern.
 
 **Testing**
 
 - Add focused checks that the public resume page includes `Created by Ayush` and links to `https://Ayuslh.in`.
-- Add focused checks that the signed in app shell renders the same credit in the intended layout components.
+- Add focused checks that the signed in app profile area renders the creator name and portfolio link in the intended layout components.
 - Keep tests narrow and structural rather than snapshot heavy.
