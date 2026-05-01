@@ -1,0 +1,27 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+test("Landing uses a desktop one-screen layout with marquee footer", async () => {
+  const source = await readFile(new URL("./Landing.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /Built and designed by Ayush/);
+  assert.match(source, /Ayuslh\.in/);
+  assert.match(source, /pb-24/);
+  assert.match(source, /landing-desktop-shell/);
+  assert.match(source, /landing-hero-grid/);
+  assert.match(source, /text-center/);
+  assert.match(source, /items-center/);
+  assert.match(source, /justify-center/);
+  assert.match(source, /landing-feature-panel/);
+  assert.match(source, /landing-feature-preview/);
+  assert.match(source, /Tailored rewrite suggestions/);
+  assert.match(source, /Keyword match signals/);
+  assert.match(source, /Layout and ATS checks/);
+  assert.match(source, /landing-credit-marquee/);
+  assert.match(source, /landing-credit-track/);
+  assert.match(source, /Start Building Free/);
+  assert.match(source, /Resume Grader/);
+  assert.match(source, /href="https:\/\/Ayuslh\.in"/);
+  assert.match(source, /target="_blank"/);
+});

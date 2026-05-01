@@ -182,6 +182,76 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  .landing-desktop-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .landing-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .landing-credit-marquee {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    overflow: hidden;
+    border-top: 1px solid rgba(6, 182, 212, 0.24);
+    background:
+      linear-gradient(180deg, rgba(12, 20, 40, 0.96) 0%, rgba(7, 13, 31, 0.94) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 -10px 30px rgba(2, 8, 23, 0.35),
+      0 0 0 1px rgba(255,255,255,0.02) inset,
+      0 -1px 0 rgba(6, 182, 212, 0.14) inset;
+  }
+
+  .landing-credit-track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    gap: 0;
+    padding: 0.95rem 0;
+    white-space: nowrap;
+    color: rgba(226, 232, 240, 0.82);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: landingCreditMarquee 20s linear infinite;
+    will-change: transform;
+  }
+
+  .landing-credit-item {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .landing-credit-separator {
+    margin: 0 1.4rem;
+    color: rgba(6, 182, 212, 0.65);
+  }
+
+  @keyframes landingCreditMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (min-width: 1024px) {
+    .landing-hero-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(22.5rem, 0.86fr);
+      gap: 1.9rem;
+      min-height: calc(100vh - 9rem);
+    }
+  }
+
   /* ── Dashboard grid ── */
   .resume-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 xl:gap-6 items-start;
