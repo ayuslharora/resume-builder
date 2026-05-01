@@ -13,5 +13,7 @@ test("EditStep uses a mobile overlay ATS panel and a scrollable preview rail", a
   assert.match(source, /fixed inset-x-3 top-\[5\.5rem\] bottom-\[calc\(7rem\+env\(safe-area-inset-bottom\)\)\] z-40 lg:static/);
   assert.match(source, /overflow-x-auto lg:overflow-x-hidden/);
   assert.match(source, /Math\.min\(0\.72, Math\.max\(0\.52, newScale\)\)/);
-  assert.match(source, /transformOrigin: isMobilePreview \? "top left" : "top center"/);
+  assert.match(source, /const scaledPreviewWidth = 794 \* previewScale/);
+  assert.match(source, /transform: isMobilePreview \? `scale\(\$\{previewScale\}\)` : undefined/);
+  assert.match(source, /width: isMobilePreview \? `\$\{scaledPreviewWidth\}px` : "794px"/);
 });

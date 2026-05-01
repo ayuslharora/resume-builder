@@ -33,6 +33,7 @@ export default function EditStep() {
   const navigate = useNavigate();
 
   const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
+  const scaledPreviewWidth = 794 * previewScale;
 
   // Dynamic scaling for the preview container
   useEffect(() => {
@@ -497,8 +498,10 @@ export default function EditStep() {
           <div 
             className="bg-white relative z-10 transition-transform duration-200" 
             style={{ 
-              width: "794px", 
-              zoom: previewScale, // Use zoom to accurately shrink the bounding box and prevent scrollbars
+              width: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
+              minWidth: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
+              transform: isMobilePreview ? `scale(${previewScale})` : undefined,
+              zoom: isMobilePreview ? undefined : previewScale,
               transformOrigin: isMobilePreview ? "top left" : "top center",
               boxShadow: "0 0 0 1px rgba(0,0,0,0.05), 0 30px 60px -15px rgba(0,0,0,0.6), 0 0 50px rgba(6, 182, 212, 0.15)",
               borderRadius: "4px"
