@@ -16,10 +16,10 @@ test("PublicResume uses the shared app brand icon instead of a letter badge", as
   assert.doesNotMatch(source, />\s*R\s*</);
 });
 
-test("PublicResume includes the creator credit link", async () => {
+test("PublicResume includes the compact shared credit", async () => {
   const source = await readFile(new URL("./PublicResume.jsx", import.meta.url), "utf8");
 
-  assert.match(source, /Created by Ayush/);
+  assert.match(source, /ResuMe by Ayush/);
   assert.match(source, /href="https:\/\/Ayuslh\.in"/);
   assert.match(source, /target="_blank"/);
   assert.match(source, /rel="noreferrer"/);

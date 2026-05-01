@@ -184,15 +184,24 @@ export default function Profile() {
             </div>
             <div>
               <p className="field-label">Creator</p>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm text-on-surface">Ayush</p>
+              <div
+                className="mt-2 rounded-xl p-4 space-y-2"
+                style={{
+                  background: "rgba(6,182,212,0.08)",
+                  border: "1px solid rgba(6,182,212,0.18)"
+                }}
+              >
+                <p className="text-sm font-medium text-on-surface">Built and designed by Ayush</p>
+                <p className="text-sm text-on-surface-variant">
+                  Visit portfolio: Ayuslh.in
+                </p>
                 <a
                   href="https://Ayuslh.in"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-primary transition-colors hover:text-cyan-300"
+                  className="inline-flex text-sm text-primary transition-colors hover:text-cyan-300"
                 >
-                  Ayuslh.in
+                  Open Ayuslh.in
                 </a>
               </div>
             </div>

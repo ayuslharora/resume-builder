@@ -71,7 +71,7 @@ export default function PublicResume() {
             rel="noreferrer"
             className="transition-colors hover:text-white"
           >
-            Created by Ayush
+            ResuMe by Ayush
           </a>
           <Link to="/" className="btn-primary py-1.5 px-4 text-xs">Build Yours</Link>
         </div>
