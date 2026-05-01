@@ -5,6 +5,19 @@ import { Wand2 } from "lucide-react";
 export default function Minimal({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
   if (!resumeData) return null;
 
+  const isExpNotEmpty = (exp) => exp.role?.trim() || exp.company?.trim() || exp.duration?.trim() || exp.location?.trim() || exp.bullets?.some(b => b?.trim());
+  const hasVisibleExperience = isEditing || resumeData.experience?.some(isExpNotEmpty);
+  
+  const isProjNotEmpty = (proj) => proj.name?.trim() || proj.link?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.trim());
+  const hasVisibleProjects = isEditing || resumeData.projects?.some(isProjNotEmpty);
+  
+  const isEduNotEmpty = (edu) => edu.degree?.trim() || edu.field?.trim() || edu.institution?.trim() || edu.duration?.trim() || edu.cgpa?.trim();
+  const hasVisibleEducation = isEditing || resumeData.education?.some(isEduNotEmpty);
+  
+  const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.trim()) || resumeData.skills?.soft?.some(s => s?.trim());
+  
+  const hasVisibleSummary = isEditing || resumeData.summary?.trim();
+
   return (
     <div className="bg-white p-8 md:p-12 max-w-[850px] min-h-[1100px] mx-auto text-gray-900 font-sans">
       <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
@@ -35,7 +48,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
         </div>
       </EditableSection>
 
-      {resumeData.summary && (
+      {hasVisibleSummary && (
         <EditableSection sectionName="summary" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "summary"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-6">
             <h2 className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 mb-3">
@@ -48,14 +61,14 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
         </EditableSection>
       )}
 
-      {resumeData.experience?.length > 0 && (
+      {hasVisibleExperience && (
         <EditableSection sectionName="experience" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "experience"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-6">
             <h2 className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 mb-3">
               <InlineEdit value={resumeData.labels?.experience ?? "Experience"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, experience: v })} />
             </h2>
             <div className="space-y-4">
-              {resumeData.experience.map((exp, i) => (
+              {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
                 <div key={exp.id || `exp-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
@@ -105,14 +118,14 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
         </EditableSection>
       )}
 
-      {resumeData.education?.length > 0 && (
+      {hasVisibleEducation && (
         <EditableSection sectionName="education" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "education"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-6">
             <h2 className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 mb-3">
               <InlineEdit value={resumeData.labels?.education ?? "Education"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, education: v })} />
             </h2>
             <div className="space-y-4">
-              {resumeData.education.map((edu, i) => (
+              {resumeData.education.map((edu, i) => (isEditing || isEduNotEmpty(edu)) && (
                 <div key={edu.id || `edu-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
@@ -140,7 +153,9 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                       <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, institution: v } : e))} />
                     </span>
                     <div className="text-sm">
-                      <InlineEdit value={resumeData.labels?.gpa ?? "GPA:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} />
+                      {(isEditing || edu.cgpa) && (
+                        <span><InlineEdit value={resumeData.labels?.gpa ?? "GPA:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} /></span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -150,7 +165,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
         </EditableSection>
       )}
 
-      {resumeData.skills && (resumeData.skills.technical?.length > 0 || resumeData.skills.soft?.length > 0) && (
+      {hasVisibleSkills && (
         <EditableSection sectionName="skills" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "skills"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-6">
             <h2 className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 mb-3">
@@ -192,14 +207,14 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
         </EditableSection>
       )}
 
-      {resumeData.projects?.length > 0 && (
+      {hasVisibleProjects && (
         <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-6">
             <h2 className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 mb-3">
               <InlineEdit value={resumeData.labels?.projects ?? "Projects"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, projects: v })} />
             </h2>
             <div className="space-y-4">
-              {resumeData.projects.map((proj, i) => (
+              {resumeData.projects.map((proj, i) => (isEditing || isProjNotEmpty(proj)) && (
                 <div key={proj.id || `proj-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
@@ -217,7 +232,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                           <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
                         </button>
                       )}
-                      {proj.link && (
+                      {(isEditing || proj.link) && (
                         <span className="text-blue-600 text-xs font-normal">
                           <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, link: v } : p))} />
                         </span>

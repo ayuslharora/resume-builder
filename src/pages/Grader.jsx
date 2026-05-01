@@ -184,6 +184,7 @@ export default function Grader() {
         jobDescription: result.jobDescription,
         reviewTone: result.reviewTone,
         rewrittenResumeText: applySelectedRewrites(result.resumeText, appliedRewrites),
+        sourceDocumentText: result.resumeText,
       });
 
       const resumeId = await createResume(currentUser.uid, {

@@ -504,7 +504,12 @@ export default function EditStep() {
           {rewriteBulletData && (
             <AiRewriteModal
               data={rewriteBulletData}
-              context={{ targetRole: interviewAnswers.targetRole, resumeText: bragSheetText }}
+              context={{
+                targetRole: interviewAnswers.targetRole,
+                jobDescription: interviewAnswers.additionalContext,
+                resumeText: buildResumeTextForAts(resumeData),
+                sourceDocumentText: bragSheetText,
+              }}
               onClose={() => setRewriteBulletData(null)}
               onSelect={handleApplyBulletRewrite}
             />

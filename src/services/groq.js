@@ -306,6 +306,7 @@ ${resumeText}`;
 export async function rewriteResumeBullet(originalBullet, targetContext = {}) {
   const systemPrompt = `You are an expert resume writer.
 Rewrite one resume bullet for stronger ATS match and recruiter impact.
+Use the source document as factual background when it is provided.
 Return ONLY valid JSON matching:
 {
   "rewrites": [
@@ -331,7 +332,8 @@ Original bullet:
 ${originalBullet}
 
 Relevant resume context:
-${targetContext.resumeText || "Not provided"}`;
+${targetContext.resumeText || "Not provided"}
+${targetContext.sourceDocumentText ? `\n\nRelevant source document context:\n${targetContext.sourceDocumentText}` : ""}`;
 
   const result = await callGemini(systemPrompt, userPrompt);
   return {
@@ -341,7 +343,7 @@ ${targetContext.resumeText || "Not provided"}`;
 
 export async function improveResume(resumeText, targetContext = {}) {
   const systemPrompt = `You are an expert resume writer improving an existing resume for a specific target role.
-You must keep the candidate truthful and only use evidence from the supplied resume text and job notes.
+You must keep the candidate truthful and only use evidence from the supplied resume text, source document, and job notes.
 Do not invent employers, degrees, projects, dates, or metrics.
 Return ONLY valid JSON matching this schema:
 {
@@ -369,7 +371,8 @@ Target job description or notes: ${targetContext.jobDescription || "Not provided
 Review tone: ${targetContext.reviewTone || "ATS strict"}
 
 Current resume text:
-${targetContext.rewrittenResumeText || resumeText}`;
+${targetContext.rewrittenResumeText || resumeText}
+${targetContext.sourceDocumentText ? `\n\nCandidate's raw background/source document (use this to recover concrete facts and stronger details, but do not invent anything beyond it):\n${targetContext.sourceDocumentText}` : ""}`;
 
   const result = await callGemini(systemPrompt, userPrompt);
 

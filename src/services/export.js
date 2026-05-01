@@ -3,6 +3,10 @@ import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel } from "docx";
 
 export async function exportPDF(resumeElement, fileName) {
+  // Temporarily remove shadow to prevent html2canvas from capturing extra padding
+  const originalBoxShadow = resumeElement.style.boxShadow;
+  resumeElement.style.boxShadow = 'none';
+
   const canvas = await html2canvas(resumeElement, {
     scale: 2,
     useCORS: true,
@@ -12,24 +16,24 @@ export async function exportPDF(resumeElement, fileName) {
     windowHeight: resumeElement.scrollHeight,
   });
   
-  const imgWidth = 210;
-  const pageHeight = 297;
+  // Restore original shadow
+  resumeElement.style.boxShadow = originalBoxShadow;
+  
+  const imgWidth = 210; // A4 width in mm
+  const minPageHeight = 297; // A4 height in mm
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   
-  const pdf = new jsPDF("p", "mm", "a4");
-  let heightLeft = imgHeight;
-  let position = 0;
+  // Set the PDF page height to match the resume's exact height (with a minimum of A4 height)
+  // This ensures the entire resume fits on a single continuous page without cutting content.
+  const finalHeight = Math.max(minPageHeight, imgHeight);
   
-  pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: [imgWidth, finalHeight]
+  });
   
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
-  
+  pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, 0, imgWidth, imgHeight);
   pdf.save(`${fileName}.pdf`);
 }
 

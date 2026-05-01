@@ -2,12 +2,29 @@ import React from "react";
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import { Wand2 } from "lucide-react";
+import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
 export default function Creative({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
   if (!resumeData) return null;
 
+  const isExpNotEmpty = (exp) => exp.role?.trim() || exp.company?.trim() || exp.duration?.trim() || exp.location?.trim() || exp.bullets?.some(b => b?.trim());
+  const hasVisibleExperience = isEditing || resumeData.experience?.some(isExpNotEmpty);
+  
+  const isProjNotEmpty = (proj) => proj.name?.trim() || proj.link?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.trim());
+  const hasVisibleProjects = isEditing || resumeData.projects?.some(isProjNotEmpty);
+  
+  const isEduNotEmpty = (edu) => edu.degree?.trim() || edu.field?.trim() || edu.institution?.trim() || edu.duration?.trim() || edu.cgpa?.trim();
+  const hasVisibleEducation = isEditing || resumeData.education?.some(isEduNotEmpty);
+  
+  const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.trim()) || resumeData.skills?.soft?.some(s => s?.trim());
+  
+  const hasVisibleSummary = isEditing || resumeData.summary?.trim();
+
   return (
-    <div className="bg-gray-50 flex max-w-[850px] min-h-[1100px] mx-auto text-gray-800 font-sans overflow-hidden shadow-2xl">
+    <div
+      className="bg-gray-50 flex max-w-[850px] mx-auto text-gray-800 font-sans overflow-hidden shadow-2xl"
+      style={RESUME_PAGE_MIN_HEIGHT_STYLE}
+    >
       {/* Left Sidebar - Dark with Neon Accents */}
       <div className="w-[35%] bg-gray-900 text-gray-100 p-8 flex flex-col gap-6 relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-purple-600"></div>
@@ -29,7 +46,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </div>
         </EditableSection>
 
-        {resumeData.summary && (
+        {hasVisibleSummary && (
           <EditableSection sectionName="summary" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "summary"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="bg-gray-800/50 p-5 rounded-xl border border-gray-700/50">
               <h2 className="text-xs font-bold text-pink-400 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -43,7 +60,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </EditableSection>
         )}
 
-        {resumeData.skills && (resumeData.skills.technical?.length > 0 || resumeData.skills.soft?.length > 0) && (
+        {hasVisibleSkills && (
           <EditableSection sectionName="skills" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "skills"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="bg-gray-800/50 p-5 rounded-xl border border-gray-700/50">
               <h2 className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -87,14 +104,14 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
 
       {/* Right Content Area - Light bg */}
       <div className="w-[65%] p-10 bg-white">
-        {resumeData.experience?.length > 0 && (
+        {hasVisibleExperience && (
           <EditableSection sectionName="experience" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "experience"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="mb-10">
               <div className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-6 shadow-sm shadow-pink-500/20">
                 <InlineEdit value={resumeData.labels?.experience ?? "Experience"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, experience: v })} />
               </div>
               <div className="space-y-8 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-pink-500 before:to-purple-600 before:opacity-20 pl-8">
-                {resumeData.experience.map((exp, i) => (
+                {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
                   <div key={exp.id || `exp-${i}`} className="relative">
                     <div className="absolute w-3 h-3 bg-pink-500 rounded-full -left-[37px] top-1.5 shadow-[0_0_10px_rgba(236,72,153,0.5)] border border-white"></div>
                     <div className="flex justify-between items-baseline mb-1">
@@ -140,14 +157,14 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </EditableSection>
         )}
 
-        {resumeData.projects?.length > 0 && (
+        {hasVisibleProjects && (
           <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="mb-10">
               <div className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-6 shadow-sm shadow-purple-500/20">
                 <InlineEdit value={resumeData.labels?.projects ?? "Projects"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, projects: v })} />
               </div>
               <div className="grid grid-cols-1 gap-6">
-                {resumeData.projects.map((proj, i) => (
+                {resumeData.projects.map((proj, i) => (isEditing || isProjNotEmpty(proj)) && (
                   <div key={proj.id || `proj-${i}`} className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-baseline mb-2">
                       <h3 className="font-bold text-gray-900 text-base flex items-center flex-wrap gap-2">
@@ -166,7 +183,9 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                           </button>
                         )}
                       </h3>
-                      <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium"><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, link: v } : p))} /></span>
+                      {(isEditing || proj.link) && (
+                        <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium"><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, link: v } : p))} /></span>
+                      )}
                     </div>
                     <div className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 mb-3 inline-block">
                       <InlineEdit value={proj.techStack?.join(" + ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, techStack: v.split(' + ') } : p))} />
@@ -190,7 +209,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </EditableSection>
         )}
 
-        {resumeData.education?.length > 0 && (
+        {hasVisibleEducation && (
           <EditableSection sectionName="education" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "education"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-6">
@@ -200,7 +219,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               </div>
               
               <div className="space-y-4">
-                {resumeData.education.map((edu, i) => (
+                {resumeData.education.map((edu, i) => (isEditing || isEduNotEmpty(edu)) && (
                   <div key={edu.id || `edu-${i}`} className="flex justify-between items-center group">
                     <div>
                       <h3 className="font-bold text-sm text-gray-900 group-hover:text-purple-600 transition-colors flex items-center flex-wrap gap-2">
@@ -227,7 +246,9 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                       <div className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
                         <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, duration: v } : e))} />
                       </div>
-                      <div className="text-xs font-bold text-pink-500 mt-1"><InlineEdit value={resumeData.labels?.gpa ?? "GPA"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} /></div>
+                      {(isEditing || edu.cgpa) && (
+                        <div className="text-xs font-bold text-pink-500 mt-1"><InlineEdit value={resumeData.labels?.gpa ?? "GPA"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} /></div>
+                      )}
                     </div>
                   </div>
                 ))}
