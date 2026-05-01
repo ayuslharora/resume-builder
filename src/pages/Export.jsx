@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { Download, FileText, ArrowLeft } from "lucide-react";
+import { Download, FileText, ArrowLeft, Home } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 
 export default function Export() {
@@ -119,9 +119,15 @@ export default function Export() {
     <div className="min-h-screen bg-surface/50 flex flex-col">
       {/* ── Sticky header bar ── */}
       <header className="glass-card shadow-sm border-b border-surface-container-high py-4 px-4 sm:px-6 sticky top-0 z-10 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition font-medium">
-          <ArrowLeft size={18} /> Back to Editor
-        </button>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition font-medium">
+            <Home size={18} /> Dashboard
+          </button>
+          <div className="w-px h-5 bg-white/10 hidden sm:block"></div>
+          <button onClick={() => navigate(`/builder/${resumeId}`)} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition font-medium">
+            <ArrowLeft size={18} /> Back to Editor
+          </button>
+        </div>
         <div className="flex gap-4 min-h-[40px] items-center">
             <>
               <button 

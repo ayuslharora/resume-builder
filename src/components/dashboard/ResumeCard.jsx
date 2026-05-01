@@ -7,6 +7,8 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef();
+  const previewContainerRef = useRef(null);
+  const [scale, setScale] = useState(0.38);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -16,6 +18,18 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!previewContainerRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const { width } = entry.contentRect;
+        setScale(width / 794);
+      }
+    });
+    observer.observe(previewContainerRef.current);
+    return () => observer.disconnect();
   }, []);
 
   const dateStr = resume.updatedAt?.seconds
@@ -50,15 +64,16 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
     >
       {/* Preview area */}
       <div
-        className="h-48 relative flex justify-center items-center overflow-hidden transition-colors"
-        style={{ background: "rgba(7,13,31,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        ref={previewContainerRef}
+        className="relative flex justify-center items-start overflow-hidden transition-colors w-full"
+        style={{ aspectRatio: "210/148", background: "rgba(7,13,31,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         onClick={() => navigate(`/builder/${resume.id}`)}
       >
         {resume.templateId && resume.resumeData ? (
-          <div className="absolute top-9 left-1/2 -translate-x-1/2 pointer-events-none transition-transform duration-300 group-hover:-translate-y-2 z-0">
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none transition-transform duration-300 group-hover:scale-105 z-0">
             <div 
-              style={{ width: "794px", transform: "scale(0.26)", transformOrigin: "top center" }}
-              className="bg-white overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.4)] border border-black/10"
+              style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
+              className="bg-white"
             >
               <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
             </div>
@@ -129,21 +144,21 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
       </div>
 
       {/* Card body */}
-      <div className="px-5 py-5 flex flex-col" onClick={() => navigate(`/builder/${resume.id}`)}>
-        <h3 className="font-bold text-lg text-on-surface line-clamp-1 group-hover:text-primary transition-colors" title={resume.title}>
+      <div className="px-4 py-4 flex flex-col" onClick={() => navigate(`/builder/${resume.id}`)}>
+        <h3 className="font-bold text-[15px] text-on-surface line-clamp-1 group-hover:text-primary transition-colors" title={resume.title}>
           {resume.title}
         </h3>
-        <p className="text-sm text-on-surface-variant mt-1 flex items-center gap-2 truncate">
+        <p className="text-[13px] text-on-surface-variant mt-1 flex items-center gap-1.5 truncate">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/50"></span>
           {resume.targetRole || "No role specified"}
         </p>
 
-        <div className="mt-5 pt-4 flex justify-between items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-[11px] text-on-surface-variant/70 font-semibold tracking-wider uppercase">
+        <div className="mt-4 pt-3 flex justify-between items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <span className="text-[10px] text-on-surface-variant/70 font-semibold tracking-wider uppercase">
             Edited {dateStr}
           </span>
-          <span className="text-primary text-xs font-bold tracking-wide flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0 -translate-x-2">
-            EDIT <span className="text-lg leading-none">&rarr;</span>
+          <span className="text-primary text-[11px] font-bold tracking-wide flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0 -translate-x-2">
+            EDIT <span className="text-[13px] leading-none">&rarr;</span>
           </span>
         </div>
       </div>

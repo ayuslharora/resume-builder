@@ -155,16 +155,36 @@ export default function EditStep() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            {isSaving ? (
-              <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
-                <Loader2 size={12} className="inline mr-1 animate-spin" />
-                SAVING
-              </span>
+            {pendingAIChange ? (
+              <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
+                <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5 mr-2">
+                  <Wand2 size={12}/> Review AI Change
+                </span>
+                <button 
+                  onClick={handleDiscardAIChange}
+                  className="px-3 py-1 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors"
+                >
+                  Discard
+                </button>
+                <button 
+                  onClick={handleAcceptAIChange}
+                  className="px-3 py-1 text-[11px] font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all"
+                >
+                  Keep
+                </button>
+              </div>
             ) : (
-              <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
-                <Save size={12} className="inline mr-1" />
-                AUTO-SAVED
-              </span>
+              isSaving ? (
+                <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                  <Loader2 size={12} className="inline mr-1 animate-spin" />
+                  SAVING
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                  <Save size={12} className="inline mr-1" />
+                  AUTO-SAVED
+                </span>
+              )
             )}
             <button 
               onClick={async () => {
@@ -216,34 +236,7 @@ export default function EditStep() {
             />
           </div>
           
-          {/* Floating Action Bar for AI Review */}
-          {pendingAIChange && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-[#0b1021] border border-blue-500/30 p-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.3)] z-50 flex items-center gap-6 animate-in slide-in-from-bottom-10 fade-in duration-300">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-500/20 p-2 rounded-lg">
-                  <Wand2 size={18} className="text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="text-white text-sm font-bold">Review AI Changes</h4>
-                  <p className="text-gray-400 text-xs">Do you want to keep this new text?</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={handleDiscardAIChange}
-                  className="px-4 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  Discard
-                </button>
-                <button 
-                  onClick={handleAcceptAIChange}
-                  className="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all"
-                >
-                  Keep Changes
-                </button>
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
     </div>

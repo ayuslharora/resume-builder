@@ -14,14 +14,14 @@ function BuilderContent() {
 
   useEffect(() => {
     loadResume(resumeId);
-  }, [resumeId]);
+  }, [loadResume, resumeId]);
 
   return (
     <div className="flex flex-col relative">
-      <div className="glass-card border-b ghost-border border-x-0 border-t-0 py-4 px-4 sm:py-5 sm:px-6 sticky top-16 lg:top-0 z-10">
+      <div className="glass-card border-b ghost-border border-x-0 border-t-0 py-4 px-4 sm:py-5 sm:px-6 sticky top-0 z-10">
          <StepIndicator currentStep={currentStep} />
       </div>
-      <main className="flex-1 w-full p-4 sm:p-6 pb-16 sm:pb-20 overflow-y-auto custom-scrollbar">
+      <main className="flex-1 w-full p-4 sm:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-20 overflow-y-auto custom-scrollbar">
         {currentStep === 1 && <InterviewStep />}
         {currentStep === 2 && <UploadStep />}
         {currentStep === 3 && <TemplateStep />}

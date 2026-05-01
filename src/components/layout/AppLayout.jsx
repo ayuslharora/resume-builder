@@ -12,7 +12,7 @@ export default function AppLayout() {
       <Sidebar />
 
       <div className="lg:ml-[260px] flex flex-col relative w-full lg:w-[calc(100%-260px)] min-h-screen" style={{ zIndex: 1 }}>
-        <main className="flex-1 pt-6 lg:pt-10 px-4 sm:px-6 lg:px-10 pb-12 w-full mt-16 lg:mt-0">
+        <main className="flex-1 pt-6 lg:pt-10 px-4 sm:px-6 lg:px-10 pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-12 w-full">
           <Outlet />
         </main>
       </div>

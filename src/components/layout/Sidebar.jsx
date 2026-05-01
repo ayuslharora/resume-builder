@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Menu, X, Plus } from "lucide-react";
+import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Plus, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { getCachedResumeList } from "../../services/resumeCache";
@@ -11,11 +11,9 @@ export default function Sidebar() {
   const { currentUser, userDoc, logout } = useAuth();
   const { getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
-      setResumes([]);
       return;
     }
 
@@ -25,6 +23,8 @@ export default function Sidebar() {
       const cached = getCachedResumeList(currentUser.uid);
       if (cached.length > 0) {
         setResumes(cached);
+      } else {
+        setResumes([]);
       }
 
       const data = await getUserResumes(currentUser.uid);
@@ -37,13 +37,18 @@ export default function Sidebar() {
     };
   }, [currentUser, getUserResumes]);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
-
   async function handleCreate() {
     if (!currentUser) return;
     navigate(`/builder/new`);
+  }
+
+  async function handleLogout() {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const links = [
@@ -53,14 +58,46 @@ export default function Sidebar() {
     { name: "Resources",     path: "/resources", icon: BookOpen },
   ];
 
+  const mobileLinks = [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Grader", path: "/grader", icon: CheckSquare },
+    { name: "New", path: "/builder/new", icon: Plus },
+    { name: "Resources", path: "/resources", icon: BookOpen },
+    { name: "Profile", path: "/profile", icon: User },
+  ];
+
   const initials = userDoc?.displayName
     ? userDoc.displayName.split(" ").map(n => n[0]).slice(0, 2).join("")
     : "U";
 
-  const SidebarContent = () => (
+  const isMobileLinkActive = (path) => (
+    path === "/builder/new"
+      ? location.pathname === path
+      : location.pathname.startsWith(path)
+  );
+
+  const MobileProfileAvatar = ({ active }) => (
+    <div
+      className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold transition-all ${
+        active ? "text-on-surface shadow-[0_0_14px_rgba(6,182,212,0.24)]" : "text-on-surface-variant"
+      }`}
+      style={{
+        background: active ? "linear-gradient(180deg, rgba(8,145,178,0.28) 0%, rgba(14,116,144,0.18) 100%)" : "rgba(35,41,60,0.9)",
+        border: active ? "1px solid rgba(6,182,212,0.38)" : "1px solid rgba(255,255,255,0.12)",
+      }}
+    >
+      {userDoc?.photoURL
+        ? <img src={userDoc.photoURL} alt="Profile" className="w-full h-full object-cover" />
+        : initials
+      }
+    </div>
+  );
+
+  function renderSidebarContent() {
+    return (
     <div className="flex flex-col h-full">
       {/* ── Brand ── */}
-      <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-5 pt-6 pb-5 flex items-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <Link to="/dashboard" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)", boxShadow: "0 0 12px rgba(6,182,212,0.4)" }}>
@@ -70,12 +107,6 @@ export default function Sidebar() {
             Resu<span className="text-primary">Me</span>
           </span>
         </Link>
-        <button
-          onClick={() => setMobileOpen(false)}
-          className="lg:hidden p-1 text-on-surface-variant hover:text-on-surface rounded transition"
-        >
-          <X size={18} />
-        </button>
       </div>
 
       {/* ── New Resume ── */}
@@ -97,6 +128,7 @@ export default function Sidebar() {
             <div key={link.name}>
               <Link
                 to={link.path}
+                aria-current={isActive ? "page" : undefined}
                 className={`nav-link ${isActive ? "active" : ""}`}
               >
                 {isActive && (
@@ -153,7 +185,7 @@ export default function Sidebar() {
             </div>
           </button>
           <button
-            onClick={() => { logout(); navigate("/"); }}
+            onClick={handleLogout}
             className="p-1.5 text-on-surface-variant hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors flex-shrink-0"
             title="Log Out"
           >
@@ -162,45 +194,14 @@ export default function Sidebar() {
         </div>
       </div>
     </div>
-  );
+    );
+  }
 
   return (
     <>
-      {/* Mobile topbar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 z-30 flex items-center justify-between px-4"
-        style={{
-          background: "rgba(7,13,31,0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)"
-        }}>
-        <span className="font-bold text-base text-on-surface">
-          Resu<span className="text-primary">Me</span>
-        </span>
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 text-on-surface-variant hover:text-on-surface rounded-md transition"
-        >
-          <Menu size={20} />
-        </button>
-      </div>
-
-      {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
+      {/* Desktop sidebar */}
       <aside
-        className={`
-          fixed top-0 left-0 h-screen z-50 flex flex-col transition-transform duration-250
-          w-[260px]
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 lg:z-20
-        `}
+        className="hidden lg:flex fixed top-0 left-0 h-screen z-20 flex-col w-[260px]"
         style={{
           background: "rgba(7,13,31,0.82)",
           backdropFilter: "blur(24px)",
@@ -208,8 +209,82 @@ export default function Sidebar() {
           borderRight: "1px solid rgba(255,255,255,0.06)"
         }}
       >
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
+
+      <nav
+        className="lg:hidden fixed inset-x-3 z-30 grid grid-cols-5 gap-1 rounded-[1.75rem] p-2"
+        style={{
+          bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
+          paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))",
+          background: "linear-gradient(180deg, rgba(10,18,38,0.92) 0%, rgba(7,13,31,0.96) 100%)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 18px 45px rgba(2,8,23,0.45), 0 0 0 1px rgba(6,182,212,0.05) inset"
+        }}
+      >
+        {mobileLinks.map((link) => {
+          const isActive = isMobileLinkActive(link.path);
+          const isCenterAction = link.name === "New";
+          return (
+            <Link
+              key={link.name}
+              to={link.path}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex flex-col items-center justify-center px-2 text-[11px] font-medium transition-all duration-200 ${
+                isCenterAction
+                  ? "-mt-3 gap-1.5"
+                  : "gap-1 rounded-2xl py-2.5"
+              } ${
+                isActive || isCenterAction
+                  ? "text-on-surface"
+                  : "text-on-surface-variant hover:text-on-surface"
+              }`}
+              style={{
+                background: isCenterAction
+                  ? "transparent"
+                  : isActive
+                    ? "linear-gradient(180deg, rgba(8,145,178,0.22) 0%, rgba(14,116,144,0.14) 100%)"
+                    : "transparent",
+                boxShadow: isCenterAction
+                  ? "none"
+                  : isActive
+                    ? "0 0 18px rgba(6,182,212,0.14)"
+                    : "none",
+              }}
+            >
+              {link.name === "Profile" ? (
+                <MobileProfileAvatar active={isActive} />
+              ) : isCenterAction ? (
+                <div
+                  className="w-12 h-12 rounded-[1rem] flex items-center justify-center transition-transform duration-200"
+                  style={{
+                    background: isActive
+                      ? "linear-gradient(180deg, rgba(14,165,233,0.38) 0%, rgba(8,145,178,0.24) 100%)"
+                      : "linear-gradient(180deg, rgba(14,165,233,0.28) 0%, rgba(8,145,178,0.18) 100%)",
+                    border: "1px solid rgba(103,232,249,0.28)",
+                    boxShadow: "0 8px 20px rgba(6,182,212,0.18), 0 0 0 1px rgba(255,255,255,0.05) inset",
+                  }}
+                >
+                  <link.icon
+                    size={20}
+                    strokeWidth={2.6}
+                    className="text-cyan-50"
+                  />
+                </div>
+              ) : (
+                <link.icon
+                  size={18}
+                  strokeWidth={isActive ? 2.4 : 2}
+                  className={isActive ? "text-primary" : ""}
+                />
+              )}
+              <span className={isCenterAction ? "font-semibold tracking-[0.01em]" : ""}>{link.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </>
   );
 }
