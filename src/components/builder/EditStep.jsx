@@ -21,6 +21,7 @@ export default function EditStep() {
   const [isRegeneratingItem, setIsRegeneratingItem] = useState(null);
   const [pendingAIChange, setPendingAIChange] = useState(null);
   const [previewScale, setPreviewScale] = useState(1);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [rewriteBulletData, setRewriteBulletData] = useState(null);
   const [isAtsPanelOpen, setIsAtsPanelOpen] = useState(false);
   const [isScanningAts, setIsScanningAts] = useState(false);
@@ -42,6 +43,7 @@ export default function EditStep() {
         const { width } = entry.contentRect;
         const targetWidth = 794;
         const isMobileViewport = width < 640;
+        setIsMobilePreview(isMobileViewport);
         const availableWidth = width - (isMobileViewport ? 12 : 64);
         
         if (availableWidth < targetWidth && availableWidth > 0) {
@@ -497,7 +499,7 @@ export default function EditStep() {
             style={{ 
               width: "794px", 
               zoom: previewScale, // Use zoom to accurately shrink the bounding box and prevent scrollbars
-              transformOrigin: "top center",
+              transformOrigin: isMobilePreview ? "top left" : "top center",
               boxShadow: "0 0 0 1px rgba(0,0,0,0.05), 0 30px 60px -15px rgba(0,0,0,0.6), 0 0 50px rgba(6, 182, 212, 0.15)",
               borderRadius: "4px"
             }}

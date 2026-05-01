@@ -20,32 +20,6 @@ async function parseLLMResponse(response, provider) {
 
 async function callGemini(systemPrompt, userPrompt, options = {}) {
   try {
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-        ...options,
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
-    }
-
-    return await parseLLMResponse(response, "Groq");
-  } catch (error) {
-    console.warn("Groq failed, falling back to NVIDIA:", error);
-    
-    // Fallback to NVIDIA API
     const response = await fetch(NVIDIA_API_URL, {
       method: "POST",
       headers: { 
@@ -68,6 +42,32 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
     }
 
     return await parseLLMResponse(response, "NVIDIA");
+  } catch (error) {
+    console.warn("NVIDIA failed, falling back to Groq:", error);
+    
+    // Fallback to Groq API
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        ...options,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return await parseLLMResponse(response, "Groq");
   }
 }
 
