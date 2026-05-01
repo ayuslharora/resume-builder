@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/ResumeContext";
 import ResumePreview from "../resume/ResumePreview";
@@ -8,17 +8,39 @@ export default function EditStep() {
   const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore } = useResume();
   const [activeSection, setActiveSection] = useState("personalInfo");
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [localData, setLocalData] = useState(null);
+  const [isRegeneratingItem, setIsRegeneratingItem] = useState(null);
+  const [pendingAIChange, setPendingAIChange] = useState(null);
+  const [previewScale, setPreviewScale] = useState(1);
+  const previewContainerRef = useRef(null);
   const navigate = useNavigate();
 
-  const { resumeData, templateId, interviewAnswers, isSaving } = builderData;
+  const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
 
   const currentSectionData = resumeData?.[activeSection];
 
-  // Sync local typing state to avoid blocking the UI thread on keystrokes
+  // Dynamic scaling for the preview container
   useEffect(() => {
-    setLocalData(currentSectionData);
-  }, [currentSectionData, activeSection]);
+    if (!previewContainerRef.current) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width } = entry.contentRect;
+        // The resume width is 794px. Add 64px padding (32px on each side).
+        const targetWidth = 794;
+        const availableWidth = width - 64;
+        
+        if (availableWidth < targetWidth && availableWidth > 0) {
+          const newScale = availableWidth / targetWidth;
+          setPreviewScale(Math.min(1, Math.max(0.3, newScale)));
+        } else {
+          setPreviewScale(1);
+        }
+      }
+    });
+    
+    observer.observe(previewContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Save immediately when entering EditStep — this is the critical save
   useEffect(() => {
@@ -40,17 +62,17 @@ export default function EditStep() {
 
   if (!resumeData) return <div className="p-8 text-center text-gray-500">No resume data found</div>;
 
-  const handleRegenerate = async () => {
+  const handleRegenerate = async (sectionToRegenerate) => {
     setIsRegenerating(true);
     try {
       const { regenerateSection } = await import("../../services/groq");
-      const newData = await regenerateSection(activeSection, currentSectionData, interviewAnswers);
-      updateSection(activeSection, newData);
-      saveToFirestore({
-        resumeData: {
-          ...resumeData,
-          [activeSection]: newData
-        }
+      const dataToRegenerate = resumeData?.[sectionToRegenerate];
+      const newData = await regenerateSection(sectionToRegenerate, dataToRegenerate, interviewAnswers, bragSheetText);
+      updateSection(sectionToRegenerate, newData);
+      setPendingAIChange({
+        sectionName: sectionToRegenerate,
+        originalData: dataToRegenerate,
+        newData
       });
     } catch (err) {
       alert("Failed to regenerate: " + err.message);
@@ -59,188 +81,169 @@ export default function EditStep() {
     }
   };
 
-  const handleChange = (field, value) => {
-    const newData =
-      typeof localData === "object" && localData !== null
-        ? { ...localData, [field]: value }
-        : value;
-    setLocalData(newData);
-    if (window.editTimeout) clearTimeout(window.editTimeout);
-    window.editTimeout = setTimeout(() => {
-      updateSection(activeSection, newData);
-      saveToFirestore({
-        resumeData: {
-          ...resumeData,
-          [activeSection]: newData
-        }
+  const handleRegenerateItem = async (sectionName, itemIndex) => {
+    setIsRegeneratingItem(`${sectionName}-${itemIndex}`);
+    try {
+      const { regenerateItem } = await import("../../services/groq");
+      const currentSectionArray = resumeData?.[sectionName] || [];
+      const itemToRegenerate = currentSectionArray[itemIndex];
+      
+      if (!itemToRegenerate) throw new Error("Item not found");
+
+      const newData = await regenerateItem(sectionName, itemToRegenerate, interviewAnswers, bragSheetText);
+      
+      const updatedSectionArray = [...currentSectionArray];
+      updatedSectionArray[itemIndex] = {
+        ...newData,
+        id: itemToRegenerate.id // preserve the original ID if it existed
+      };
+
+      updateSection(sectionName, updatedSectionArray);
+      setPendingAIChange({
+        sectionName,
+        originalData: currentSectionArray,
+        newData: updatedSectionArray
       });
-    }, 400);
+    } catch (err) {
+      alert("Failed to regenerate item: " + err.message);
+    } finally {
+      setIsRegeneratingItem(null);
+    }
   };
 
-
-
-  const renderEditor = () => {
-    if (activeSection === "summary") {
-      return (
-        <div className="fade-in space-y-4 pt-4">
-          <div>
-            <label className="label-md block pl-1 mb-2">Executive Summary</label>
-            <textarea
-              rows="6"
-              className="custom-scrollbar"
-              value={localData !== null ? localData : ""}
-              onChange={(e) => handleChange("summary", e.target.value)}
-            />
-          </div>
-        </div>
-      );
-    }
-
-    if (activeSection === "personalInfo") {
-      const safeData = currentSectionData || { fullName: "", email: "", phone: "", location: "" };
-      return (
-        <div className="fade-in grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-          {Object.keys(safeData).map((key) => (
-            <div key={key}>
-              <label className="label-md block pl-2 mb-2 capitalize">
-                {key.replace(/([A-Z])/g, " $1").trim()}
-              </label>
-              <input
-                type="text"
-                value={localData?.[key] || ""}
-                onChange={(e) => handleChange(key, e.target.value)}
-              />
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <div className="fade-in p-5 bg-primary/5 rounded-xl border border-primary/20 mt-4">
-        <p className="font-bold text-primary mb-2">AI Regeneration Available</p>
-        <p className="text-sm text-on-surface-variant leading-relaxed">
-          Manual editing of list-based sections isn't supported here. Use the{" "}
-          <strong>AI Regenerate</strong> button (✦) above to rewrite this section automatically.
-        </p>
-      </div>
-    );
+  const handleAcceptAIChange = () => {
+    if (!pendingAIChange) return;
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        [pendingAIChange.sectionName]: pendingAIChange.newData
+      }
+    });
+    setPendingAIChange(null);
   };
 
-  const SectionTabs = ["personalInfo", "summary", "experience", "education", "projects", "skills"];
+  const handleDiscardAIChange = () => {
+    if (!pendingAIChange) return;
+    updateSection(pendingAIChange.sectionName, pendingAIChange.originalData);
+    setPendingAIChange(null);
+  };
+
+  const handleSectionClick = (sectionName) => {
+    if (pendingAIChange) return; // Prevent switching sections while reviewing AI change
+    setActiveSection(sectionName);
+  };
+
+  const handleSectionUpdate = (section, newData) => {
+    updateSection(section, newData);
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        [section]: newData
+      }
+    });
+  };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full lg:h-[calc(100vh-140px)]">
-      {/* ── Left panel: section editors + download buttons ── */}
-      <div className="w-full lg:w-[450px] flex flex-col lg:h-full">
-        <div className="mb-5">
-          <h2 className="text-xs font-bold tracking-widest text-primary uppercase mb-1">
-            Project Workspace
-          </h2>
-          <h1 className="text-2xl font-bold text-on-surface">
-            Executive Portfolio / {new Date().getFullYear()}
-          </h1>
-        </div>
-
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-          {SectionTabs.map((section) => (
-            <div
-              key={section}
-              className={`glass-card ghost-border rounded-xl transition-all overflow-hidden border ${
-                activeSection === section
-                  ? "border-primary ring-1 ring-primary/50 shadow-ambient bg-surface-lowest"
-                  : "border-surface-container-high bg-surface-container/50 hover:border-primary/50"
-              }`}
-            >
-              <div
-                className="p-4 flex justify-between items-center cursor-pointer"
-                onClick={() => setActiveSection(section)}
-              >
-                <div>
-                  <h3
-                    className={`font-bold capitalize transition-colors ${
-                      activeSection === section ? "text-primary" : "text-on-surface"
-                    }`}
-                  >
-                    {section === "personalInfo"
-                      ? "Personal Info"
-                      : section === "experience"
-                      ? "Experience"
-                      : section === "skills"
-                      ? "Skills"
-                      : section.replace(/([A-Z])/g, " $1").trim()}
-                  </h3>
-                </div>
-                {activeSection === section && section !== "personalInfo" && (
-                  <button
-                    disabled={isRegenerating}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRegenerate();
-                    }}
-                    className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition disabled:opacity-50"
-                    title="AI Regenerate Section"
-                  >
-                    <Wand2 size={16} className={isRegenerating ? "animate-pulse" : ""} />
-                  </button>
-                )}
-              </div>
-              {activeSection === section && (
-                <div className="px-4 pb-5 border-t border-surface-container-high/50 bg-black/10">
-                  {renderEditor()}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* ── Export button ── */}
-        <div className="pt-6 mt-4">
-          {isSaving && (
-            <p className="text-xs text-primary/60 font-mono flex items-center gap-1.5 justify-center mb-3">
-              <Loader2 size={11} className="animate-spin" /> Saving to cloud...
-            </p>
-          )}
-          <button 
-            onClick={async () => {
-              // Explicitly push a final save to Firebase marking the resume as complete
-              await saveNow({ status: "complete" });
-              navigate(`/export/${activeResumeId}`, { state: { builderData } });
-            }}
-            className="w-full bg-primary text-surface rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-ambient relative group"
-          >
-            <div className="absolute inset-0 border border-primary border-dashed rounded-xl transform translate-x-1 translate-y-1 transition-transform group-hover:translate-x-1.5 group-hover:translate-y-1.5"></div>
-            <FileText size={18} className="relative" /> 
-            <span className="relative">Complete Rendering</span>
-          </button>
-        </div>
-      </div>
-
+    <div className="flex flex-col lg:flex-row gap-6 w-full lg:h-[calc(100vh-140px)] justify-center">
       {/* ── Right panel: live preview ref'd for PDF/html2canvas capture ── */}
-      <div className="flex-1 glass-card ghost-border rounded-2xl flex flex-col overflow-hidden relative min-h-[60vh] lg:min-h-0">
-        <div className="bg-surface-lowest border-b ghost-border border-x-0 border-t-0 p-3 px-5 flex justify-between items-center z-10">
+      <div className="flex-1 max-w-[1000px] glass-card ghost-border rounded-2xl flex flex-col overflow-hidden relative min-h-[60vh] lg:min-h-0 order-first lg:order-last">
+        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 px-5 flex justify-between items-center z-10">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
-            <span className="text-xs font-bold tracking-widest text-on-surface-variant uppercase">
-              Real-Time Render
+            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-cyan-400/80 uppercase">
+              Live Preview (Click text to edit)
             </span>
           </div>
-          <div className="text-[10px] font-mono text-primary/70">
-            <Save size={12} className="inline mr-1" />
-            SYNCED TO CLOUD
+          <div className="flex items-center gap-4">
+            {isSaving ? (
+              <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                <Loader2 size={12} className="inline mr-1 animate-spin" />
+                SAVING
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                <Save size={12} className="inline mr-1" />
+                AUTO-SAVED
+              </span>
+            )}
+            <button 
+              onClick={async () => {
+                await saveNow({ status: "complete" });
+                navigate(`/export/${activeResumeId}`, { state: { builderData } });
+              }}
+              className="bg-primary text-surface rounded-md px-4 py-1.5 text-xs font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-ambient"
+            >
+              <FileText size={14} /> 
+              Complete Rendering
+            </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto bg-[#1a1a24] p-4 lg:p-8 flex justify-center custom-scrollbar">
-          <div className="bg-white shadow-[0_0_30px_rgba(0,0,0,0.4)]" style={{ width: "794px" }}>
+        <div 
+          ref={previewContainerRef}
+          className="flex-1 overflow-auto p-4 lg:p-10 flex justify-center custom-scrollbar relative"
+          style={{
+            backgroundColor: "#0b1021",
+            backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
+            backgroundSize: "24px 24px"
+          }}
+        >
+          {/* Ambient Glow Behind Document */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+          <div 
+            className="bg-white relative z-10 transition-transform duration-200" 
+            style={{ 
+              width: "794px", 
+              zoom: previewScale, // Use zoom to accurately shrink the bounding box and prevent scrollbars
+              transformOrigin: "top center",
+              boxShadow: "0 0 0 1px rgba(0,0,0,0.05), 0 30px 60px -15px rgba(0,0,0,0.6), 0 0 50px rgba(6, 182, 212, 0.15)",
+              borderRadius: "4px"
+            }}
+          >
             <ResumePreview
               resumeData={resumeData}
               templateId={templateId}
               isEditing={true}
               activeSection={activeSection}
-              onSectionClick={setActiveSection}
+              onSectionClick={handleSectionClick}
+              onUpdateSection={handleSectionUpdate}
+              onRegenerate={!pendingAIChange ? handleRegenerate : null}
+              isRegenerating={isRegenerating}
+              onRegenerateItem={!pendingAIChange ? handleRegenerateItem : null}
+              isRegeneratingItem={isRegeneratingItem}
+              scale={1} // Override default scale, since we zoom the parent container
             />
           </div>
+          
+          {/* Floating Action Bar for AI Review */}
+          {pendingAIChange && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-[#0b1021] border border-blue-500/30 p-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.3)] z-50 flex items-center gap-6 animate-in slide-in-from-bottom-10 fade-in duration-300">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-500/20 p-2 rounded-lg">
+                  <Wand2 size={18} className="text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="text-white text-sm font-bold">Review AI Changes</h4>
+                  <p className="text-gray-400 text-xs">Do you want to keep this new text?</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={handleDiscardAIChange}
+                  className="px-4 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  Discard
+                </button>
+                <button 
+                  onClick={handleAcceptAIChange}
+                  className="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all"
+                >
+                  Keep Changes
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

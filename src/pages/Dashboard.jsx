@@ -21,8 +21,14 @@ export default function Dashboard() {
     let cancelled = false;
 
     async function loadResumes() {
-      const cached = getCachedResumeList(currentUser.uid);
+      let cached = getCachedResumeList(currentUser.uid);
       if (cached.length > 0) {
+        cached = cached.map(r => {
+          if (r.resumeData?.summary && typeof r.resumeData.summary === 'object') {
+            r.resumeData.summary = r.resumeData.summary.summary || "";
+          }
+          return r;
+        });
         setResumes(cached);
         setFromCache(true);
       }

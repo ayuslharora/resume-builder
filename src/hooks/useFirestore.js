@@ -19,6 +19,13 @@ import {
   mergeCachedAndServerResumes,
 } from "../services/resumePersistence";
 
+function sanitizeResume(resume) {
+  if (resume?.resumeData?.summary && typeof resume.resumeData.summary === 'object') {
+    resume.resumeData.summary = resume.resumeData.summary.summary || "";
+  }
+  return resume;
+}
+
 export function useFirestore() {
 
   // ─── Create ────────────────────────────────────────────────────────────────
@@ -62,13 +69,14 @@ export function useFirestore() {
   // ─── Read single ───────────────────────────────────────────────────────────
   const getResume = useCallback(async (resumeId) => {
     // 1. Return from localStorage instantly while waiting for Firebase
-    const cached = getCachedResume(resumeId);
+    let cached = getCachedResume(resumeId);
+    if (cached) cached = sanitizeResume(cached);
 
     try {
       const docRef = doc(db, "resumes", resumeId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const fresh = { id: docSnap.id, ...docSnap.data() };
+        const fresh = sanitizeResume({ id: docSnap.id, ...docSnap.data() });
         const merged = mergeCachedAndServerResume(fresh, cached);
         setCachedResume(resumeId, merged);   // keep cache fresh without dropping newer local progress
         return merged;
@@ -90,11 +98,11 @@ export function useFirestore() {
         ...getUserResumeQueryConstraints(where, userId)
       );
       const snap = await getDocs(q);
-      const resumes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      return mergeCachedAndServerResumes(resumes, getCachedResumeList(userId));
+      const resumes = snap.docs.map(d => sanitizeResume({ id: d.id, ...d.data() }));
+      return mergeCachedAndServerResumes(resumes, getCachedResumeList(userId).map(sanitizeResume));
     } catch (err) {
       console.warn("getUserResumes: Firebase unavailable, using cache", err.message);
-      return getCachedResumeList(userId);
+      return getCachedResumeList(userId).map(sanitizeResume);
     }
   }, []);
 

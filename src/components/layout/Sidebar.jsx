@@ -67,7 +67,7 @@ export default function Sidebar() {
             <FileText size={14} className="text-surface" />
           </div>
           <span className="font-bold text-base text-on-surface tracking-tight">
-            Resume<span className="text-primary">Forge</span>
+            Resu<span className="text-primary">Me</span>
           </span>
         </Link>
         <button
@@ -175,7 +175,7 @@ export default function Sidebar() {
           borderBottom: "1px solid rgba(255,255,255,0.06)"
         }}>
         <span className="font-bold text-base text-on-surface">
-          Resume<span className="text-primary">Forge</span>
+          Resu<span className="text-primary">Me</span>
         </span>
         <button
           onClick={() => setMobileOpen(true)}

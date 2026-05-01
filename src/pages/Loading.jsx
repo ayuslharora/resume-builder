@@ -6,7 +6,7 @@ export function LoaderOneDemo() {
 }
 
 /**
- * Loading — full-screen loading page with ResumeForge branding.
+ * Loading — full-screen loading page with ResuMe branding.
  * Used as the Suspense fallback and any page-level loading state.
  */
 export default function Loading() {
@@ -28,15 +28,15 @@ export default function Loading() {
             strokeLinejoin="round"
             className="text-surface"
           >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
           </svg>
         </div>
         <span className="font-bold text-lg text-on-surface tracking-tight">
-          Resume<span className="text-primary">Forge</span>
+          Resu<span className="text-primary">Me</span>
         </span>
       </div>
 

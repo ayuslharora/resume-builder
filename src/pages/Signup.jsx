@@ -70,7 +70,7 @@ export default function Signup() {
 
         <div className="text-center mb-8">
           <Link to="/" className="inline-block font-bold text-xl text-on-surface tracking-tight mb-6">
-            Resume<span className="text-primary">Forge</span>
+            Resu<span className="text-primary">Me</span>
           </Link>
           <h2 className="text-2xl font-bold text-on-surface mb-2">Create Account</h2>
           <p className="text-sm text-on-surface-variant">Start building better resumes today.</p>

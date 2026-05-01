@@ -56,8 +56,13 @@ function builderReducer(state, action) {
       };
     case "SET_SAVING":
       return { ...state, isSaving: action.payload };
-    case "LOAD_STATE":
-      return { ...initialBuilderState, ...action.payload };
+    case "LOAD_STATE": {
+      const payload = { ...action.payload };
+      if (payload.resumeData?.summary && typeof payload.resumeData.summary === 'object') {
+        payload.resumeData.summary = payload.resumeData.summary.summary || "";
+      }
+      return { ...initialBuilderState, ...payload };
+    }
     case "RESET":
       return initialBuilderState;
     default:

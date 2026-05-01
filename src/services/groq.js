@@ -43,6 +43,7 @@ CRITICAL RULES:
 4. Your output must be ONLY valid JSON matching the schema precisely. No markdown, no explanation.
 5. Write all experience bullets starting with strong action verbs (Led, Built, Developed, Designed, Implemented, Optimized, etc.).
 6. Keep bullets impact-driven and concise: under 20 words each.
+7. NEVER use em-dashes ("—"). If you must use a dash, use a regular hyphen ("-") or a colon instead.
 Tailor the tone and emphasis based on the target company type and role.`;
 
   const userPrompt = `Here is the candidate's raw achievements document (Brag Sheet):
@@ -90,14 +91,76 @@ Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
   return result;
 }
 
-export async function regenerateSection(sectionName, currentSectionData, context) {
+export async function regenerateSection(sectionName, currentSectionData, context, bragSheetText = "") {
   const systemPrompt = `You are an expert resume writer.
 Rewrite ONLY the "${sectionName}" section of this resume.
 Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
-Output ONLY the updated section as valid JSON. No explanation.`;
+${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}
+CRITICAL RULE: NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
+Output ONLY valid JSON in the exact following format:
+{
+  "${sectionName}": <updated data>
+}
+CRITICAL: The <updated data> MUST strictly match the data type and exact schema/structure of the original data. For example, if the original data is an array of objects, output an array of objects. If it's an object with "technical" and "soft" arrays, output exactly that structure.
+No explanation.`;
 
   const userPrompt = `Current section data: ${JSON.stringify(currentSectionData)}`;
-  return await callGemini(systemPrompt, userPrompt);
+  let result = await callGemini(systemPrompt, userPrompt);
+  
+  if (result && result[sectionName] !== undefined) {
+    result = result[sectionName];
+  } else if (result && typeof result === 'object' && !Array.isArray(result)) {
+    const keys = Object.keys(result);
+    if (keys.length === 1) {
+      result = result[keys[0]];
+    }
+  }
+
+  // Safety fallback for skills section schema corruption
+  if (sectionName === "skills") {
+    // Unwrap nested 'skills' object if AI double-wrapped it
+    if (result.skills && !result.technical && !result.soft) {
+      result = result.skills;
+    }
+    
+    // If AI returned a flat array instead of categorized object
+    if (Array.isArray(result)) {
+      result = { technical: result, soft: currentSectionData?.soft || [] };
+    }
+
+    // Normalize strings to arrays if AI returned comma-separated strings
+    if (typeof result.technical === 'string') result.technical = result.technical.split(',').map(s => s.trim());
+    if (typeof result.soft === 'string') result.soft = result.soft.split(',').map(s => s.trim());
+    
+    // Ensure final output has arrays; if not, fallback to original data to prevent deletion
+    result = {
+      technical: Array.isArray(result.technical) && result.technical.length > 0 ? result.technical : currentSectionData?.technical || [],
+      soft: Array.isArray(result.soft) && result.soft.length > 0 ? result.soft : currentSectionData?.soft || []
+    };
+  }
+  
+  return result;
+}
+
+export async function regenerateItem(sectionName, currentItemData, context, bragSheetText = "") {
+  const systemPrompt = `You are an expert resume writer.
+Rewrite ONLY this single item from the "${sectionName}" section of the candidate's resume.
+Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
+${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}
+CRITICAL RULE: NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
+Do NOT invent new experiences, but improve the wording, impact, and formatting of the existing details. Keep bullets concise and start with strong action verbs.
+Output ONLY valid JSON representing the updated item. Maintain the same schema as the input object, specifically keeping the "id" unchanged.
+No explanation.`;
+
+  const userPrompt = `Current item data: ${JSON.stringify(currentItemData)}`;
+  const result = await callGemini(systemPrompt, userPrompt);
+  
+  // Ensure the id remains unchanged to prevent React key issues
+  if (result && typeof result === 'object' && currentItemData.id) {
+    result.id = currentItemData.id;
+  }
+  
+  return result;
 }
 
 export async function extractBasicInfo(bragSheetText) {

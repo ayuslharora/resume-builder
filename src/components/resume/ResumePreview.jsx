@@ -1,7 +1,19 @@
 import { Suspense } from "react";
 import { templates } from "../templates";
 
-export default function ResumePreview({ resumeData, templateId, isEditing, onSectionClick, activeSection, scale = 0.85 }) {
+export default function ResumePreview({ 
+  resumeData, 
+  templateId, 
+  isEditing, 
+  onSectionClick, 
+  activeSection, 
+  onUpdateSection, 
+  onRegenerate, 
+  isRegenerating, 
+  onRegenerateItem,
+  isRegeneratingItem,
+  scale = 0.85 
+}) {
   if (!templateId || !templates[templateId]) return <div className="p-10 text-center text-gray-500">No template selected</div>;
 
   const { component: TemplateComponent } = templates[templateId];
@@ -14,6 +26,11 @@ export default function ResumePreview({ resumeData, templateId, isEditing, onSec
           isEditing={isEditing}
           onSectionClick={onSectionClick}
           activeSection={activeSection}
+          onUpdateSection={onUpdateSection}
+          onRegenerate={onRegenerate}
+          isRegenerating={isRegenerating}
+          onRegenerateItem={onRegenerateItem}
+          isRegeneratingItem={isRegeneratingItem}
         />
       </div>
     </Suspense>
