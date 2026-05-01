@@ -12,7 +12,7 @@ export default function RichTextToolbar() {
   };
 
   return (
-    <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md border border-white/10 p-1.5 rounded-lg shadow-sm">
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 bg-white/10 backdrop-blur-md border border-white/10 p-1.5 rounded-lg shadow-sm">
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'bold')}

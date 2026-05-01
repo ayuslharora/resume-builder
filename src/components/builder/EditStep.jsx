@@ -40,13 +40,17 @@ export default function EditStep() {
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { width } = entry.contentRect;
-        // The resume width is 794px. Add 64px padding (32px on each side).
         const targetWidth = 794;
-        const availableWidth = width - 64;
+        const isMobileViewport = width < 640;
+        const availableWidth = width - (isMobileViewport ? 12 : 64);
         
         if (availableWidth < targetWidth && availableWidth > 0) {
           const newScale = availableWidth / targetWidth;
-          setPreviewScale(Math.min(1, Math.max(0.3, newScale)));
+          setPreviewScale(
+            isMobileViewport
+              ? Math.min(0.72, Math.max(0.52, newScale))
+              : Math.min(1, Math.max(0.3, newScale))
+          );
         } else {
           setPreviewScale(1);
         }
@@ -265,9 +269,22 @@ export default function EditStep() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full h-[calc(100dvh-220px)] lg:h-[calc(100dvh-190px)] min-h-0 justify-center">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full min-h-0 lg:h-[calc(100dvh-190px)] justify-center">
+      {isAtsPanelOpen && (
+        <button
+          type="button"
+          aria-label="Close ATS feedback"
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-[2px] lg:hidden"
+          onClick={() => setIsAtsPanelOpen(false)}
+        />
+      )}
+
       <aside
-        className={`glass-card ghost-border rounded-2xl overflow-hidden shrink-0 order-last lg:order-first transition-all duration-300 ease-in-out ${isAtsPanelOpen ? 'w-full lg:w-[360px] opacity-100' : 'w-0 opacity-0 border-none'} min-h-0 lg:h-full`}
+        className={`glass-card ghost-border rounded-2xl overflow-hidden shrink-0 order-last transition-all duration-300 ease-in-out fixed inset-x-3 top-[5.5rem] bottom-[calc(7rem+env(safe-area-inset-bottom))] z-40 lg:static lg:order-first ${
+          isAtsPanelOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto lg:w-[360px]"
+            : "translate-y-6 opacity-0 pointer-events-none lg:w-0 lg:border-none"
+        } min-h-0 lg:h-full`}
         style={{ background: "rgba(12,18,36,0.82)" }}
       >
         <div className="w-full lg:w-[360px] lg:min-w-[360px] min-h-0 h-full flex flex-col">
@@ -391,8 +408,8 @@ export default function EditStep() {
 
       {/* ── Right panel: live preview ref'd for PDF/html2canvas capture ── */}
       <div className="flex-1 max-w-[1000px] glass-card ghost-border rounded-2xl flex flex-col relative min-h-[60vh] lg:min-h-0 order-first lg:order-last transition-all duration-300">
-        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 px-5 flex justify-between items-center z-50 sticky top-[72px] sm:top-[85px] rounded-t-2xl flex-wrap gap-3">
-          <div className="flex items-center gap-3">
+        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 sm:px-5 sm:py-3 flex flex-wrap gap-3 justify-between items-center z-50 sticky top-0 lg:top-[85px] rounded-t-2xl">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={() => setIsAtsPanelOpen(!isAtsPanelOpen)}
               className="p-1.5 text-on-surface hover:bg-white/10 rounded transition-colors bg-white/5 mr-2"
@@ -406,11 +423,13 @@ export default function EditStep() {
             </span>
           </div>
           
-          <RichTextToolbar />
+          <div className="order-last w-full sm:order-none sm:w-auto">
+            <RichTextToolbar />
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex w-full sm:w-auto flex-wrap gap-3 sm:items-center sm:justify-end">
             {pendingAIChange ? (
-              <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
+              <div className="flex w-full sm:w-auto flex-wrap items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
                 <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5 mr-2">
                   <Wand2 size={12}/> Review AI Change
                 </span>
@@ -443,7 +462,7 @@ export default function EditStep() {
             <button
               onClick={handleAtsRescan}
               disabled={isScanningAts}
-              className="btn-ghost"
+              className="btn-ghost w-full sm:w-auto"
             >
               {isScanningAts ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
               Re-scan
@@ -453,7 +472,7 @@ export default function EditStep() {
                 await saveNow({ status: "complete" });
                 navigate(`/export/${activeResumeId}`, { state: { builderData } });
               }}
-              className="bg-primary text-surface rounded-md px-4 py-1.5 text-xs font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-ambient"
+              className="bg-primary text-surface rounded-md px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-ambient w-full sm:w-auto"
             >
               <FileText size={14} /> 
               Complete Rendering
@@ -463,7 +482,7 @@ export default function EditStep() {
 
         <div 
           ref={previewContainerRef}
-          className="w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar p-4 lg:p-10 flex justify-center relative"
+          className="w-full flex-1 min-h-0 overflow-y-auto overflow-x-auto lg:overflow-x-hidden custom-scrollbar p-2 sm:p-4 lg:p-10 flex justify-start sm:justify-center relative"
           style={{
             backgroundColor: "#0b1021",
             backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",

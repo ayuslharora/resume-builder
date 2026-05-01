@@ -7,6 +7,6 @@ test("GenerateStep includes a persistent back button footer", async () => {
 
   assert.match(
     source,
-    /<div className="mt-8 pt-5 flex justify-between items-center"[\s\S]*?<button onClick=\{prevStep\} className="btn-ghost"/
+    /<div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center"[\s\S]*?<button onClick=\{prevStep\} className="btn-ghost w-full sm:w-auto"/
   );
 });

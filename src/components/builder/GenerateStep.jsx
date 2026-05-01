@@ -58,9 +58,9 @@ export default function GenerateStep() {
   ]);
 
   return (
-    <div className="h-[calc(100dvh-220px)] lg:h-[calc(100dvh-190px)] min-h-0 overflow-hidden flex items-center justify-center">
+    <div className="h-[calc(100dvh-250px)] lg:h-[calc(100dvh-190px)] min-h-0 overflow-hidden flex items-center justify-center">
       <div
-        className="w-full max-w-lg mx-auto text-center p-6 sm:p-12 rounded-2xl relative overflow-y-auto custom-scrollbar fade-in"
+        className="w-full max-w-lg mx-auto text-center p-5 sm:p-12 rounded-2xl relative overflow-y-auto custom-scrollbar fade-in"
         style={{
           maxHeight: "100%",
           background: "rgba(25,31,49,0.55)",
@@ -100,13 +100,13 @@ export default function GenerateStep() {
           </div>
         )}
 
-        <div className="mt-8 pt-5 flex justify-between items-center"
+        <div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center"
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <button onClick={prevStep} className="btn-ghost">
+          <button onClick={prevStep} className="btn-ghost w-full sm:w-auto">
             <ChevronLeft size={16} /> Back
           </button>
           {error && (
-            <button onClick={() => { setError(null); setMsgIdx(0); }} className="btn-primary py-3">
+            <button onClick={() => { setError(null); setMsgIdx(0); }} className="btn-primary py-3 w-full sm:w-auto">
               Retry
             </button>
           )}

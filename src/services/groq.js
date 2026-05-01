@@ -1,29 +1,11 @@
-const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const API_URL = `https://api.groq.com/openai/v1/chat/completions`;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_URL = `https://api.groq.com/openai/v1/chat/completions`;
+const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY;
+const NVIDIA_API_URL = `https://integrate.api.nvidia.com/v1/chat/completions`;
+
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
 
-async function callGemini(systemPrompt, userPrompt, options = {}) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "llama-3.1-8b-instant",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" },
-      ...options,
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
-  }
-
+async function parseLLMResponse(response, provider) {
   const data = await response.json();
   const textContent = data.choices[0].message.content;
   const cleanedText = textContent.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -31,8 +13,61 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
   try {
     return JSON.parse(cleanedText);
   } catch {
-    console.error("Raw response:", textContent);
-    throw new Error("Failed to parse Groq JSON output.");
+    console.error(`Raw ${provider} response:`, textContent);
+    throw new Error(`Failed to parse ${provider} JSON output.`);
+  }
+}
+
+async function callGemini(systemPrompt, userPrompt, options = {}) {
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        ...options,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return await parseLLMResponse(response, "Groq");
+  } catch (error) {
+    console.warn("Groq failed, falling back to NVIDIA:", error);
+    
+    // Fallback to NVIDIA API
+    const response = await fetch(NVIDIA_API_URL, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${NVIDIA_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "meta/llama-3.1-70b-instruct",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        ...options,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`NVIDIA API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return await parseLLMResponse(response, "NVIDIA");
   }
 }
 

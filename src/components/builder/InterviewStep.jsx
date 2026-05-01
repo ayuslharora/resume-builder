@@ -99,7 +99,7 @@ export default function InterviewStep() {
           </div>
           <div>
             <label className="field-label">Resume Length</label>
-            <div className="flex gap-4 mt-2">
+            <div className="flex flex-wrap gap-4 mt-2">
               <label className="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer hover:text-on-surface">
                 <input type="radio" name="length" value="1-page" className="accent-primary" checked={answers.preferredLength === "1-page"} onChange={e => handleChange('preferredLength', e.target.value)} /> 
                 1 Page
@@ -113,11 +113,11 @@ export default function InterviewStep() {
         </div>
       </div>
 
-      <div className="mt-8 pt-5 border-t border-surface-container-high flex justify-between items-center">
-        <button onClick={prevStep} className="btn-ghost" disabled>
+      <div className="mt-8 pt-5 border-t border-surface-container-high flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+        <button onClick={prevStep} className="btn-ghost w-full sm:w-auto" disabled>
           Cancel
         </button>
-        <button onClick={handleNext} className="btn-primary">
+        <button onClick={handleNext} className="btn-primary w-full sm:w-auto">
           Save & Next
         </button>
       </div>

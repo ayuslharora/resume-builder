@@ -72,15 +72,15 @@ export default function UploadStep() {
 
       {!hasContent ? (
         <div className="flex flex-col gap-6">
-          <div className="flex p-1 rounded-lg mx-auto w-fit" style={{ background: "rgba(25,31,49,0.4)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex flex-wrap p-1 rounded-lg mx-auto w-full sm:w-fit" style={{ background: "rgba(25,31,49,0.4)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <button
-              className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === "upload" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
+              className={`flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "upload" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
               onClick={() => { setActiveTab("upload"); setError(null); }}
             >
               <UploadCloud size={16} /> Upload File
             </button>
             <button
-              className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === "text" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
+              className={`flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "text" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
               onClick={() => { setActiveTab("text"); setError(null); }}
             >
               <Type size={16} /> Paste Text
@@ -90,7 +90,7 @@ export default function UploadStep() {
           {activeTab === "upload" ? (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="h-56 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 group"
+              className="h-48 sm:h-56 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 group"
               style={{
                 background: "rgba(25,31,49,0.4)",
                 backdropFilter: "blur(12px)",
@@ -150,7 +150,7 @@ export default function UploadStep() {
               </div>
               <button
                 onClick={handlePasteSubmit}
-                className="btn-primary self-end"
+                className="btn-primary w-full sm:w-auto self-stretch sm:self-end"
                 disabled={!pastedText.trim()}
               >
                 Extract Info
@@ -186,14 +186,14 @@ export default function UploadStep() {
         </div>
       )}
 
-      <div className="mt-8 pt-5 flex justify-between items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <button onClick={prevStep} className="btn-ghost" disabled={loading}>
+      <div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <button onClick={prevStep} className="btn-ghost w-full sm:w-auto" disabled={loading}>
           <ChevronLeft size={16} /> Back
         </button>
         <button
           onClick={handleNext}
           disabled={loading || !hasContent}
-          className="btn-primary"
+          className="btn-primary w-full sm:w-auto"
         >
           Next Step <ChevronRight size={16} />
         </button>

@@ -51,14 +51,14 @@ export default function TemplateStep() {
         ))}
       </div>
 
-      <div className="mt-8 flex justify-between items-center pt-5 border-t border-surface-container-high">
-        <button onClick={prevStep} className="btn-ghost">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center pt-5 border-t border-surface-container-high">
+        <button onClick={prevStep} className="btn-ghost w-full sm:w-auto">
           <ChevronLeft size={16} /> Back
         </button>
         <button 
           onClick={handleNext} 
           disabled={!selectedTemplate}
-          className="btn-primary"
+          className="btn-primary w-full sm:w-auto"
         >
           Next Step <ChevronRight size={16} />
         </button>
