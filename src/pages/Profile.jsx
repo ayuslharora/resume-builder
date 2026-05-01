@@ -182,6 +182,20 @@ export default function Profile() {
                 ).join(", ")}
               </p>
             </div>
+            <div>
+              <p className="field-label">Creator</p>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm text-on-surface">Ayush</p>
+                <a
+                  href="https://Ayuslh.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary transition-colors hover:text-cyan-300"
+                >
+                  Ayuslh.in
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

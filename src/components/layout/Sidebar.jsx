@@ -176,6 +176,18 @@ export default function Sidebar() {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-on-surface truncate">{userDoc?.displayName || "User"}</p>
               <p className="text-[10px] text-on-surface-variant truncate">Edit profile</p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]">
+                <span className="text-on-surface-variant">Created by Ayush</span>
+                <a
+                  href="https://Ayuslh.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary/80 transition-colors hover:text-primary"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  Ayuslh.in
+                </a>
+              </div>
             </div>
           </button>
           <button

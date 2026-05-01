@@ -65,7 +65,14 @@ export default function PublicResume() {
           <span className="font-bold tracking-tight text-white hidden sm:block">ResuMe</span>
         </div>
         <div className="text-sm font-medium text-on-surface-variant flex items-center gap-4">
-          <span className="hidden sm:inline">Created with ResuMe</span>
+          <a
+            href="https://Ayuslh.in"
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-white"
+          >
+            Created by Ayush
+          </a>
           <Link to="/" className="btn-primary py-1.5 px-4 text-xs">Build Yours</Link>
         </div>
       </header>
