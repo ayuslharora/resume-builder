@@ -19,56 +19,28 @@ async function parseLLMResponse(response, provider) {
 }
 
 async function callGemini(systemPrompt, userPrompt, options = {}) {
-  try {
-    const response = await fetch(NVIDIA_API_URL, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${NVIDIA_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "meta/llama-3.1-70b-instruct",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-        ...options,
-      })
-    });
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      response_format: { type: "json_object" },
+      ...options,
+    })
+  });
 
-    if (!response.ok) {
-      throw new Error(`NVIDIA API Error: ${response.status} ${response.statusText}`);
-    }
-
-    return await parseLLMResponse(response, "NVIDIA");
-  } catch (error) {
-    console.warn("NVIDIA failed, falling back to Groq:", error);
-    
-    // Fallback to Groq API
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-        ...options,
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
-    }
-
-    return await parseLLMResponse(response, "Groq");
+  if (!response.ok) {
+    throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
   }
+
+  return await parseLLMResponse(response, "Groq");
 }
 
 export async function generateResume(bragSheetText, interviewAnswers) {
