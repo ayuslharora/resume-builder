@@ -35,7 +35,7 @@ async function loadParser() {
 }
 
 async function loadGroq() {
-  return import("../services/groq");
+  return import("../services/llm");
 }
 
 export default function Grader() {

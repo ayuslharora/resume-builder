@@ -98,7 +98,7 @@ export default function EditStep() {
   const handleRegenerate = async (sectionToRegenerate) => {
     setIsRegenerating(true);
     try {
-      const { regenerateSection } = await import("../../services/groq");
+      const { regenerateSection } = await import("../../services/llm");
       const dataToRegenerate = resumeData?.[sectionToRegenerate];
       const newData = await regenerateSection(sectionToRegenerate, dataToRegenerate, interviewAnswers, bragSheetText);
       updateSection(sectionToRegenerate, newData);
@@ -117,7 +117,7 @@ export default function EditStep() {
   const handleRegenerateItem = async (sectionName, itemIndex) => {
     setIsRegeneratingItem(`${sectionName}-${itemIndex}`);
     try {
-      const { regenerateItem } = await import("../../services/groq");
+      const { regenerateItem } = await import("../../services/llm");
       const currentSectionArray = resumeData?.[sectionName] || [];
       const itemToRegenerate = currentSectionArray[itemIndex];
       
@@ -255,7 +255,7 @@ export default function EditStep() {
 
       setIsScanningAts(true);
       const requestId = ++atsScanRequestIdRef.current;
-      const { gradeResume } = await import("../../services/groq");
+      const { gradeResume } = await import("../../services/llm");
       const result = await gradeResume(resumeText, scanContext);
       if (requestId !== atsScanRequestIdRef.current) return;
       atsScanCacheRef.current.set(scanKey, result);

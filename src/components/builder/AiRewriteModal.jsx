@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Wand2, Check, X, RefreshCw, AlertCircle } from "lucide-react";
-import { rewriteResumeBullet } from "../../services/groq";
+import { rewriteResumeBullet } from "../../services/llm";
 
 export default function AiRewriteModal({ data, context, onClose, onSelect }) {
   const [loading, setLoading] = useState(true);

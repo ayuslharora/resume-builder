@@ -26,7 +26,7 @@ export default function GenerateStep() {
     let isMounted = true;
     async function doGeneration() {
       try {
-        const { generateResume } = await import("../../services/groq");
+        const { generateResume } = await import("../../services/llm");
         const resumeData = await generateResume(builderData.bragSheetText, builderData.interviewAnswers);
         if (isMounted) {
           setResumeData(resumeData);
