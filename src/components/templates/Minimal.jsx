@@ -72,7 +72,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                 <div key={exp.id || `exp-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
-                      <span><InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, role: v } : e))} /></span>
+                      <span><InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, role: v } : e))} /></span>
                       {isEditing && activeSection === "experience" && onRegenerateItem && (
                         <button
                           disabled={isRegeneratingItem === `experience-${i}`}
@@ -88,21 +88,21 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                       )}
                     </h3>
                     <span className="text-sm text-gray-600">
-                      <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, duration: v } : e))} />
+                      <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline mb-2 text-sm text-gray-800">
                     <span className="font-medium italic">
-                      <InlineEdit value={exp.company} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, company: v } : e))} />
+                      <InlineEdit value={exp.company} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, company: v } : e))} />
                     </span>
                     <span>
-                      <InlineEdit value={exp.location} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, location: v } : e))} />
+                      <InlineEdit value={exp.location} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, location: v } : e))} />
                     </span>
                   </div>
                   <ul className="list-disc list-outside ml-4 text-sm space-y-1">
                     {(exp.bullets || []).map((bullet, bulletIdx) => (
                       <li key={bulletIdx}>
-                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
+                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
                       </li>
                     ))}
                   </ul>
@@ -129,7 +129,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                 <div key={edu.id || `edu-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
-                      <span><InlineEdit value={edu.degree} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, degree: v } : e))} /> <InlineEdit value={resumeData.labels?.in ?? "in"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, in: v })} /> <InlineEdit value={edu.field} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, field: v } : e))} /></span>
+                      <span><InlineEdit value={edu.degree} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, degree: v } : e))} /> <InlineEdit value={resumeData.labels?.in ?? "in"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, in: v })} /> <InlineEdit value={edu.field} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, field: v } : e))} /></span>
                       {isEditing && activeSection === "education" && onRegenerateItem && (
                         <button
                           disabled={isRegeneratingItem === `education-${i}`}
@@ -145,16 +145,16 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                       )}
                     </h3>
                     <span className="text-sm text-gray-600">
-                      <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, duration: v } : e))} />
+                      <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline text-sm text-gray-800">
                     <span className="font-medium italic">
-                      <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, institution: v } : e))} />
+                      <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, institution: v } : e))} />
                     </span>
                     <div className="text-sm">
                       {(isEditing || edu.cgpa) && (
-                        <span><InlineEdit value={resumeData.labels?.gpa ?? "GPA:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} /></span>
+                        <span><InlineEdit value={resumeData.labels?.gpa ?? "GPA:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, cgpa: v } : e))} /></span>
                       )}
                     </div>
                   </div>
@@ -218,7 +218,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                 <div key={proj.id || `proj-${i}`}>
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className="font-bold text-base flex items-center flex-wrap gap-2">
-                      <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, name: v } : p))} /></span>
+                      <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
                       {isEditing && activeSection === "projects" && onRegenerateItem && (
                         <button
                           disabled={isRegeneratingItem === `projects-${i}`}
@@ -234,18 +234,18 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                       )}
                       {(isEditing || proj.link) && (
                         <span className="text-blue-600 text-xs font-normal">
-                          <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, link: v } : p))} />
+                          <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} />
                         </span>
                       )}
                     </h3>
                   </div>
                   <div className="text-xs text-gray-500 mb-2">
-                    <InlineEdit value={proj.techStack?.join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, techStack: v.split(' • ') } : p))} />
+                    <InlineEdit value={proj.techStack?.join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' • ') } : p))} />
                   </div>
                   <ul className="list-disc list-outside ml-4 text-sm space-y-1">
                     {(proj.bullets || []).map((bullet, bulletIdx) => (
                       <li key={bulletIdx}>
-                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
+                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
                       </li>
                     ))}
                   </ul>

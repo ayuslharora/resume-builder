@@ -116,7 +116,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                     <div className="absolute w-3 h-3 bg-pink-500 rounded-full -left-[37px] top-1.5 shadow-[0_0_10px_rgba(236,72,153,0.5)] border border-white"></div>
                     <div className="flex justify-between items-baseline mb-1">
                       <h3 className="font-bold text-gray-900 text-base flex items-center flex-wrap gap-2">
-                        <span><InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, role: v } : e))} /></span>
+                        <span><InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, role: v } : e))} /></span>
                         {isEditing && activeSection === "experience" && onRegenerateItem && (
                           <button
                             disabled={isRegeneratingItem === `experience-${i}`}
@@ -132,16 +132,16 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         )}
                       </h3>
                       <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
-                        <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, duration: v } : e))} />
+                        <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
                       </span>
                     </div>
                     <div className="text-sm font-semibold text-gray-500 mb-3">
-                      <InlineEdit value={exp.company} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, company: v } : e))} /> <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span> <InlineEdit value={exp.location} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, location: v } : e))} />
+                      <InlineEdit value={exp.company} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, company: v } : e))} /> <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span> <InlineEdit value={exp.location} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, location: v } : e))} />
                     </div>
                     <ul className="list-none text-sm space-y-2 text-gray-600">
                       {(exp.bullets || []).map((bullet, bulletIdx) => (
                         <li key={bulletIdx} className="relative pl-4 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-purple-300 before:rounded-sm">
-                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
+                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
                         </li>
                       ))}
                     </ul>
@@ -168,7 +168,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                   <div key={proj.id || `proj-${i}`} className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-baseline mb-2">
                       <h3 className="font-bold text-gray-900 text-base flex items-center flex-wrap gap-2">
-                        <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, name: v } : p))} /></span>
+                        <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
                         {isEditing && activeSection === "projects" && onRegenerateItem && (
                           <button
                             disabled={isRegeneratingItem === `projects-${i}`}
@@ -184,16 +184,16 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         )}
                       </h3>
                       {(isEditing || proj.link) && (
-                        <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium"><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, link: v } : p))} /></span>
+                        <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium"><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} /></span>
                       )}
                     </div>
                     <div className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 mb-3 inline-block">
-                      <InlineEdit value={proj.techStack?.join(" + ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, techStack: v.split(' + ') } : p))} />
+                      <InlineEdit value={proj.techStack?.join(" + ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' + ') } : p))} />
                     </div>
                     <ul className="list-disc list-outside ml-4 text-sm space-y-1.5 text-gray-600">
                       {(proj.bullets || []).map((bullet, bulletIdx) => (
                         <li key={bulletIdx}>
-                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
+                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
                         </li>
                       ))}
                     </ul>
@@ -223,7 +223,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                   <div key={edu.id || `edu-${i}`} className="flex justify-between items-center group">
                     <div>
                       <h3 className="font-bold text-sm text-gray-900 group-hover:text-purple-600 transition-colors flex items-center flex-wrap gap-2">
-                        <span><InlineEdit value={edu.degree} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, degree: v } : e))} /> <InlineEdit value={resumeData.labels?.in ?? "in"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, in: v })} /> <InlineEdit value={edu.field} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, field: v } : e))} /></span>
+                        <span><InlineEdit value={edu.degree} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, degree: v } : e))} /> <InlineEdit value={resumeData.labels?.in ?? "in"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, in: v })} /> <InlineEdit value={edu.field} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, field: v } : e))} /></span>
                         {isEditing && activeSection === "education" && onRegenerateItem && (
                           <button
                             disabled={isRegeneratingItem === `education-${i}`}
@@ -239,15 +239,15 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         )}
                       </h3>
                       <div className="text-sm font-medium text-gray-500 mt-0.5">
-                        <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, institution: v } : e))} />
+                        <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, institution: v } : e))} />
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-                        <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, duration: v } : e))} />
+                        <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
                       </div>
                       {(isEditing || edu.cgpa) && (
-                        <div className="text-xs font-bold text-pink-500 mt-1"><InlineEdit value={resumeData.labels?.gpa ?? "GPA"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map(e => e.id === edu.id ? { ...e, cgpa: v } : e))} /></div>
+                        <div className="text-xs font-bold text-pink-500 mt-1"><InlineEdit value={resumeData.labels?.gpa ?? "GPA"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, gpa: v })} /> <InlineEdit value={edu.cgpa} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, cgpa: v } : e))} /></div>
                       )}
                     </div>
                   </div>
