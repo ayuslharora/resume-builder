@@ -1,7 +1,8 @@
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const API_URL = `https://api.groq.com/openai/v1/chat/completions`;
+import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
 
-async function callGemini(systemPrompt, userPrompt) {
+async function callGemini(systemPrompt, userPrompt, options = {}) {
   const response = await fetch(API_URL, {
     method: "POST",
     headers: { 
@@ -14,7 +15,8 @@ async function callGemini(systemPrompt, userPrompt) {
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      ...options,
     })
   });
 
@@ -77,7 +79,12 @@ Generate a complete resume as JSON following this exact schema:
 
 Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
 
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callGemini(systemPrompt, userPrompt, {
+    // Keep ATS rescans stable so repeated scans on unchanged content
+    // produce near-identical scoring and recommendations.
+    temperature: 0,
+    top_p: 1,
+  });
   
   if (!result.personalInfo) result.personalInfo = { fullName: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "" };
   if (!result.summary) result.summary = "";
@@ -328,7 +335,7 @@ ${targetContext.resumeText || "Not provided"}`;
 
   const result = await callGemini(systemPrompt, userPrompt);
   return {
-    rewrites: Array.isArray(result.rewrites) ? result.rewrites : [],
+    rewrites: Array.isArray(result.rewrites) ? result.rewrites.map(sanitizeRewriteOption) : [],
   };
 }
 

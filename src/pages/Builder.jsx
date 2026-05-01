@@ -8,21 +8,43 @@ import InterviewStep from "../components/builder/InterviewStep";
 import TemplateStep from "../components/builder/TemplateStep";
 import GenerateStep from "../components/builder/GenerateStep";
 import EditStep from "../components/builder/EditStep";
+import { ChevronLeft } from "lucide-react";
 
 function BuilderContent() {
   const { resumeId } = useParams();
-  const { loadResume, currentStep } = useResume();
+  const { loadResume, currentStep, prevStep } = useResume();
 
   useEffect(() => {
     loadResume(resumeId);
   }, [loadResume, resumeId]);
 
+  useEffect(() => {
+    if (currentStep === 4) {
+      document.body.classList.add("builder-step-4-lock-scroll");
+    } else {
+      document.body.classList.remove("builder-step-4-lock-scroll");
+    }
+
+    return () => {
+      document.body.classList.remove("builder-step-4-lock-scroll");
+    };
+  }, [currentStep]);
+
   return (
     <div className="flex flex-col relative">
       <div className="glass-card border-b ghost-border border-x-0 border-t-0 py-4 px-4 sm:py-5 sm:px-6 sticky top-0 z-10">
-         <StepIndicator currentStep={currentStep} />
+        <div className="w-full max-w-5xl mx-auto flex items-center gap-4">
+          {currentStep >= 4 && (
+            <button onClick={prevStep} className="btn-ghost shrink-0">
+              <ChevronLeft size={16} /> Back
+            </button>
+          )}
+          <div className="flex-1 min-w-0">
+            <StepIndicator currentStep={currentStep} />
+          </div>
+        </div>
       </div>
-      <main className="flex-1 w-full p-4 sm:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-20 overflow-y-auto custom-scrollbar">
+      <main className={`flex-1 w-full p-4 sm:p-6 ${currentStep === 4 ? "pb-4 overflow-hidden" : "pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-20"}`}>
         {currentStep === 1 && <InterviewStep />}
         {currentStep === 2 && <UploadStep />}
         {currentStep === 3 && <TemplateStep />}

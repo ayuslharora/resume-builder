@@ -5,18 +5,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
-  setCachedResume,
-  getCachedResume,
-  removeCachedResume,
-  upsertCachedResumeInList,
-  removeCachedResumeFromList,
-  getCachedResumeList,
-} from "../services/resumeCache";
-import {
   buildResumeWriteData,
   getUserResumeQueryConstraints,
-  mergeCachedAndServerResume,
-  mergeCachedAndServerResumes,
 } from "../services/resumePersistence";
 
 function sanitizeResume(resume) {
@@ -40,96 +30,51 @@ export function useFirestore() {
       status: "draft",
       ...data,
     };
-
-    // Fire and forget so we get the ID INSTANTLY and avoid 4s timeout race
-    const localCopy = {
-      id: docRef.id,
-      ...docData, // includes userId, status, title from above, plus any data overwrites
-      updatedAt: Date.now(),
-      createdAt: Date.now(),
-      // Remove the FieldValue sentinel so localStorage gets real values if needed
-    };
-    delete localCopy.createdAt;
-    delete localCopy.updatedAt;
-    localCopy.createdAt = Date.now();
-    localCopy.updatedAt = Date.now();
-
-    setCachedResume(docRef.id, localCopy);
-    upsertCachedResumeInList(userId, localCopy);
-
-    try {
-      await setDoc(docRef, docData);
-    } catch (err) {
-      console.warn("Failed to sync resume creation:", err);
-    }
+    await setDoc(docRef, docData);
 
     return docRef.id;
   }, []);
 
   // ─── Read single ───────────────────────────────────────────────────────────
   const getResume = useCallback(async (resumeId) => {
-    // 1. Return from localStorage instantly while waiting for Firebase
-    let cached = getCachedResume(resumeId);
-    if (cached) cached = sanitizeResume(cached);
-
-    try {
-      const docRef = doc(db, "resumes", resumeId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const fresh = sanitizeResume({ id: docSnap.id, ...docSnap.data() });
-        const merged = mergeCachedAndServerResume(fresh, cached);
-        setCachedResume(resumeId, merged);   // keep cache fresh without dropping newer local progress
-        return merged;
-      }
-    } catch (err) {
-      console.warn("getResume: Firebase unavailable, using cache", err.message);
-      if (cached) return cached;
-    }
-
-    return cached ?? null;
+    const docRef = doc(db, "resumes", resumeId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return null;
+    return sanitizeResume({ id: docSnap.id, ...docSnap.data() });
   }, []);
 
   // ─── Read list ─────────────────────────────────────────────────────────────
   const getUserResumes = useCallback(async (userId) => {
-    // Try Firebase first; fall back to localStorage
-    try {
-      const q = query(
-        collection(db, "resumes"),
-        ...getUserResumeQueryConstraints(where, userId)
-      );
-      const snap = await getDocs(q);
-      const resumes = snap.docs.map(d => sanitizeResume({ id: d.id, ...d.data() }));
-      return mergeCachedAndServerResumes(resumes, getCachedResumeList(userId).map(sanitizeResume));
-    } catch (err) {
-      console.warn("getUserResumes: Firebase unavailable, using cache", err.message);
-      return getCachedResumeList(userId).map(sanitizeResume);
-    }
+    const q = query(
+      collection(db, "resumes"),
+      ...getUserResumeQueryConstraints(where, userId)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => sanitizeResume({ id: d.id, ...d.data() }));
+  }, []);
+
+  const getResumeByShareToken = useCallback(async (shareToken) => {
+    const q = query(
+      collection(db, "resumes"),
+      where("shareToken", "==", shareToken)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const first = snap.docs[0];
+    return sanitizeResume({ id: first.id, ...first.data() });
   }, []);
 
   // ─── Update ────────────────────────────────────────────────────────────────
   const updateResume = useCallback(async (resumeId, data) => {
     const docRef = doc(db, "resumes", resumeId);
-    const existing = getCachedResume(resumeId) ?? {};
+    const existing = await getResume(resumeId);
     const writeData = buildResumeWriteData(existing, data);
     await setDoc(docRef, { ...writeData, updatedAt: serverTimestamp() }, { merge: true });
-
-    // Merge into localStorage so a reload shows the latest data
-    const merged = { ...existing, ...writeData, id: resumeId, updatedAt: Date.now() };
-    setCachedResume(resumeId, merged);
-    if (merged.userId) {
-      upsertCachedResumeInList(merged.userId, merged);
-    }
-  }, []);
+  }, [getResume]);
 
   // ─── Delete ────────────────────────────────────────────────────────────────
   const deleteResume = useCallback(async (resumeId) => {
-    // Grab userId from cache before we wipe it
-    const cached = getCachedResume(resumeId);
     await deleteDoc(doc(db, "resumes", resumeId));
-    removeCachedResume(resumeId);
-    if (cached?.userId) {
-      removeCachedResumeFromList(cached.userId, resumeId);
-    }
   }, []);
 
   // ─── Duplicate ─────────────────────────────────────────────────────────────
@@ -147,6 +92,7 @@ export function useFirestore() {
   return {
     createResume,
     getResume,
+    getResumeByShareToken,
     getUserResumes,
     updateResume,
     deleteResume,

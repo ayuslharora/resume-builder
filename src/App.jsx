@@ -17,6 +17,7 @@ const Builder  = lazy(() => import("./pages/Builder"));
 const Export   = lazy(() => import("./pages/Export"));
 const Grader   = lazy(() => import("./pages/Grader"));
 const Profile  = lazy(() => import("./pages/Profile"));
+const PublicResume = lazy(() => import("./pages/PublicResume"));
 
 const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
         element: <FullscreenProtectedRoute />,
         children: [
           { path: "/export/:resumeId", element: <Export /> },
+          { path: "/shared/:token", element: <PublicResume /> },
         ]
       },
       { path: "*", element: <NotFound /> }

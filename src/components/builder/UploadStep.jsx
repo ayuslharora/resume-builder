@@ -122,26 +122,32 @@ export default function UploadStep() {
             </div>
           ) : (
             <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <textarea
-                value={pastedText}
-                onChange={(e) => setPastedText(e.target.value)}
-                placeholder="Paste your resume, notes, or achievements here..."
-                className="w-full h-56 p-4 rounded-xl resize-none outline-none custom-scrollbar transition-all duration-200"
-                style={{
-                  background: "rgba(25,31,49,0.4)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "var(--on-surface)",
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = "rgba(6,182,212,0.35)";
-                  e.currentTarget.style.boxShadow = "0 0 12px rgba(6,182,212,0.1)";
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              />
+              <div className="relative">
+                <textarea
+                  value={pastedText}
+                  onChange={(e) => setPastedText(e.target.value)}
+                  maxLength={5000}
+                  placeholder="Paste your resume, notes, or achievements here..."
+                  className="w-full h-56 p-4 rounded-xl resize-none outline-none custom-scrollbar transition-all duration-200"
+                  style={{
+                    background: "rgba(25,31,49,0.4)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "var(--on-surface)",
+                  }}
+                  onFocus={e => {
+                    e.currentTarget.style.borderColor = "rgba(6,182,212,0.35)";
+                    e.currentTarget.style.boxShadow = "0 0 12px rgba(6,182,212,0.1)";
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                />
+                <div className="absolute bottom-3 right-4 text-xs text-on-surface-variant font-mono">
+                  {pastedText.length} / 5,000
+                </div>
+              </div>
               <button
                 onClick={handlePasteSubmit}
                 className="btn-primary self-end"

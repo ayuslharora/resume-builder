@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Plus, User } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useEffect, useState } from "react";
-import { getCachedResumeList } from "../../services/resumeCache";
 import { useFirestore } from "../../hooks/useFirestore";
 
 export default function Sidebar() {
@@ -20,15 +19,10 @@ export default function Sidebar() {
     let cancelled = false;
 
     async function loadResumes() {
-      const cached = getCachedResumeList(currentUser.uid);
-      if (cached.length > 0) {
-        setResumes(cached);
-      } else {
-        setResumes([]);
-      }
-
       const data = await getUserResumes(currentUser.uid);
-      if (!cancelled) setResumes(data);
+      if (!cancelled) {
+        setResumes(data);
+      }
     }
 
     loadResumes().catch(console.error);
@@ -201,7 +195,7 @@ export default function Sidebar() {
     <>
       {/* Desktop sidebar */}
       <aside
-        className="hidden lg:flex fixed top-0 left-0 h-screen z-20 flex-col w-[260px]"
+        className="app-sidebar-desktop hidden lg:flex fixed top-0 left-0 h-screen z-20 flex-col w-[260px]"
         style={{
           background: "rgba(7,13,31,0.82)",
           backdropFilter: "blur(24px)",
@@ -213,7 +207,7 @@ export default function Sidebar() {
       </aside>
 
       <nav
-        className="lg:hidden fixed inset-x-3 z-30 grid grid-cols-5 gap-1 rounded-[1.75rem] p-2"
+        className="app-sidebar-mobile lg:hidden fixed inset-x-3 z-30 grid grid-cols-5 gap-1 rounded-[1.75rem] p-2"
         style={{
           bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
           paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))",

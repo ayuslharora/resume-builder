@@ -247,3 +247,38 @@
   .body-lg { @apply text-sm leading-relaxed text-on-surface-variant; }
   .label-md { @apply text-xs font-semibold text-on-surface-variant uppercase tracking-wide; }
 }
+
+@media (min-width: 1024px) {
+  body .app-sidebar-desktop {
+    transition: transform 220ms ease, opacity 220ms ease;
+  }
+
+  body .app-shell-main {
+    transition: margin-left 220ms ease, width 220ms ease;
+  }
+
+  body.ats-panel-open .app-sidebar-desktop {
+    transform: translateX(-105%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.ats-panel-open .app-shell-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+body .app-sidebar-mobile {
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+body.ats-panel-open .app-sidebar-mobile {
+  transform: translateY(130%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.builder-step-4-lock-scroll {
+  overflow: hidden;
+}

@@ -5,14 +5,12 @@ import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";
 import { FilePlus } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
-import { getCachedResumeList, setCachedResumeList } from "../services/resumeCache";
 
 export default function Resumes() {
   const { currentUser } = useAuth();
   const { deleteResume, duplicateResume, getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fromCache, setFromCache] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,22 +19,13 @@ export default function Resumes() {
     let cancelled = false;
 
     async function loadResumes() {
-      const cached = getCachedResumeList(currentUser.uid);
-      if (cached.length > 0) {
-        setResumes(cached);
-        setFromCache(true);
-      }
-
       try {
         const data = await getUserResumes(currentUser.uid);
         if (cancelled) return;
         setResumes(data);
-        setFromCache(false);
-        setCachedResumeList(currentUser.uid, data);
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching resumes:", error);
-          setFromCache(false);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -64,11 +53,6 @@ export default function Resumes() {
             <p className="page-subtitle flex flex-wrap items-center gap-x-2 gap-y-1 max-w-2xl">
               <span className="w-2 h-2 rounded-full bg-primary shadow-ambient inline-block"></span>
               {resumes.length} resume{resumes.length !== 1 ? "s" : ""} found
-              {fromCache && (
-                <span className="ml-1 text-[10px] font-bold text-primary/70 animate-pulse uppercase tracking-wider">
-                  · syncing
-                </span>
-              )}
             </p>
           </div>
           <button onClick={() => navigate("/builder/new")} className="btn-primary self-start md:self-auto">
@@ -106,9 +90,13 @@ export default function Resumes() {
             <ResumeCard
               key={resume.id}
               resume={resume}
-              onDelete={() => {
-                setResumes(prev => prev.filter(r => r.id !== resume.id));
-                deleteResume(resume.id).catch(console.error);
+              onDelete={async () => {
+                try {
+                  await deleteResume(resume.id);
+                  setResumes(prev => prev.filter(r => r.id !== resume.id));
+                } catch (error) {
+                  console.error(error);
+                }
               }}
               onDuplicate={async () => {
                 try {

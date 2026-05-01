@@ -2,7 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
-import { Wand2, Save, Loader2, FileText } from "lucide-react";
+import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import AiRewriteModal from "./AiRewriteModal";
+import RichTextToolbar from "./RichTextToolbar";
+import { buildResumeTextForAts } from "../../services/resumeTextForAts";
+
+const atsBreakdownLabels = [
+  ["formatting", "Formatting"],
+  ["keywords", "Keywords"],
+  ["impact", "Impact"],
+  ["clarity", "Clarity"],
+];
 
 export default function EditStep() {
   const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore } = useResume();
@@ -11,6 +21,13 @@ export default function EditStep() {
   const [isRegeneratingItem, setIsRegeneratingItem] = useState(null);
   const [pendingAIChange, setPendingAIChange] = useState(null);
   const [previewScale, setPreviewScale] = useState(1);
+  const [rewriteBulletData, setRewriteBulletData] = useState(null);
+  const [isAtsPanelOpen, setIsAtsPanelOpen] = useState(false);
+  const [isScanningAts, setIsScanningAts] = useState(false);
+  const [atsResult, setAtsResult] = useState(null);
+  const [atsError, setAtsError] = useState(null);
+  const atsScanCacheRef = useRef(new Map());
+  const atsScanRequestIdRef = useRef(0);
   const previewContainerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -39,6 +56,18 @@ export default function EditStep() {
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (isAtsPanelOpen) {
+      document.body.classList.add("ats-panel-open");
+    } else {
+      document.body.classList.remove("ats-panel-open");
+    }
+
+    return () => {
+      document.body.classList.remove("ats-panel-open");
+    };
+  }, [isAtsPanelOpen]);
 
   // Save immediately when entering EditStep — this is the critical save
   useEffect(() => {
@@ -109,6 +138,59 @@ export default function EditStep() {
     }
   };
 
+  const handleRewriteBulletRequest = (sectionName, itemId, bulletIdx, currentText) => {
+    setRewriteBulletData({ sectionName, itemId, bulletIdx, currentText });
+  };
+
+  const handleApplyBulletRewrite = (newBulletText) => {
+    if (!rewriteBulletData) return;
+    const { sectionName, itemId, bulletIdx } = rewriteBulletData;
+    
+    const currentSection = resumeData[sectionName] || [];
+    const updatedSection = currentSection.map(item => {
+      if (item.id === itemId) {
+        const newBullets = [...(item.bullets || [])];
+        newBullets[bulletIdx] = newBulletText;
+        return { ...item, bullets: newBullets };
+      }
+      return item;
+    });
+    
+    updateSection(sectionName, updatedSection);
+    setRewriteBulletData(null);
+  };
+
+  const handleUpdateBullet = (sectionName, itemId, bulletIdx, newValue) => {
+    const currentSection = resumeData[sectionName] || [];
+    const updatedSection = currentSection.map(item => {
+      if (item.id === itemId) {
+        let newBullets = [...(item.bullets || [])];
+        newBullets[bulletIdx] = newValue;
+        // Auto-remove empty bullets (strip HTML tags first to handle <b></b> or <br>)
+        newBullets = newBullets.filter(b => {
+          if (!b) return false;
+          const textContent = b.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
+          return textContent !== "";
+        });
+        return { ...item, bullets: newBullets };
+      }
+      return item;
+    });
+    updateSection(sectionName, updatedSection);
+  };
+
+  const handleAddBullet = (sectionName, itemId) => {
+    const currentSection = resumeData[sectionName] || [];
+    const updatedSection = currentSection.map(item => {
+      if (item.id === itemId) {
+        const newBullets = [...(item.bullets || []), "New Bullet"];
+        return { ...item, bullets: newBullets };
+      }
+      return item;
+    });
+    updateSection(sectionName, updatedSection);
+  };
+
   const handleAcceptAIChange = () => {
     if (!pendingAIChange) return;
     saveToFirestore({
@@ -141,17 +223,191 @@ export default function EditStep() {
     });
   };
 
+  const handleAtsRescan = async () => {
+    setIsAtsPanelOpen(true);
+    setAtsError(null);
+
+    if (!interviewAnswers.targetRole?.trim()) {
+      setAtsResult(null);
+      setAtsError("Add a target role before running an ATS rescan.");
+      return;
+    }
+
+    try {
+      const resumeText = buildResumeTextForAts(resumeData);
+      const scanContext = {
+        targetRole: interviewAnswers.targetRole,
+        jobDescription: interviewAnswers.additionalContext || "",
+        reviewTone: "ATS strict",
+      };
+      const scanKey = JSON.stringify({ resumeText, ...scanContext });
+
+      if (atsScanCacheRef.current.has(scanKey)) {
+        setAtsResult(atsScanCacheRef.current.get(scanKey));
+        return;
+      }
+
+      setIsScanningAts(true);
+      const requestId = ++atsScanRequestIdRef.current;
+      const { gradeResume } = await import("../../services/groq");
+      const result = await gradeResume(resumeText, scanContext);
+      if (requestId !== atsScanRequestIdRef.current) return;
+      atsScanCacheRef.current.set(scanKey, result);
+      setAtsResult(result);
+    } catch (err) {
+      if (atsScanRequestIdRef.current > 0) {
+        // Keep latest request winner semantics if multiple scans are triggered quickly.
+      }
+      setAtsError(err.message);
+    } finally {
+      setIsScanningAts(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full lg:h-[calc(100vh-140px)] justify-center">
+    <div className="flex flex-col lg:flex-row gap-6 w-full h-[calc(100dvh-220px)] lg:h-[calc(100dvh-190px)] min-h-0 justify-center">
+      <aside
+        className={`glass-card ghost-border rounded-2xl overflow-hidden shrink-0 order-last lg:order-first transition-all duration-300 ease-in-out ${isAtsPanelOpen ? 'w-full lg:w-[360px] opacity-100' : 'w-0 opacity-0 border-none'} min-h-0 lg:h-full`}
+        style={{ background: "rgba(12,18,36,0.82)" }}
+      >
+        <div className="w-full lg:w-[360px] lg:min-w-[360px] min-h-0 h-full flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-white/5">
+            <div>
+              <div className="text-[10px] font-bold tracking-[0.2em] text-primary/80 uppercase mb-1">
+                ATS Feedback
+              </div>
+              <h3 className="text-sm font-bold text-on-surface">Current Draft Scan</h3>
+            </div>
+            <button
+              onClick={() => setIsAtsPanelOpen(false)}
+              className="p-2 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors"
+              aria-label="Close ATS panel"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="p-4 space-y-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            <button
+              onClick={handleAtsRescan}
+              disabled={isScanningAts}
+              className="btn-primary w-full"
+            >
+              {isScanningAts ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+              Re-scan
+            </button>
+
+            {!atsResult && !atsError && (
+              <div className="rounded-xl p-4 text-sm text-on-surface-variant leading-relaxed"
+                style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                Review the current version of your resume against the target role. Rescans only run when you click the button.
+              </div>
+            )}
+
+            {atsError && (
+              <div className="rounded-xl p-4"
+                style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300 leading-relaxed">{atsError}</p>
+                </div>
+              </div>
+            )}
+
+            {atsResult && (
+              <>
+                <div className="rounded-xl p-4"
+                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-on-surface-variant mb-2">
+                        ATS Score
+                      </div>
+                      <div className="text-sm text-on-surface">{interviewAnswers.targetRole}</div>
+                    </div>
+                    <div className="text-3xl font-black text-primary">{atsResult.score}/100</div>
+                  </div>
+                  <p className="text-sm text-on-surface mb-2">{atsResult.summary}</p>
+                  <p className="text-sm text-on-surface-variant leading-relaxed">{atsResult.fitAssessment}</p>
+                </div>
+
+                <div className="rounded-xl p-4 space-y-3"
+                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+                    <Sparkles size={16} className="text-primary" />
+                    ATS Breakdown
+                  </div>
+                  {atsBreakdownLabels.map(([key, label]) => (
+                    <div key={key}>
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-on-surface">{label}</span>
+                        <span className="text-on-surface-variant">{atsResult.atsBreakdown?.[key] ?? 0}/100</span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${atsResult.atsBreakdown?.[key] ?? 0}%`,
+                            background: "linear-gradient(90deg, #06b6d4 0%, #67e8f9 100%)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-xl p-4"
+                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="text-sm font-semibold text-on-surface mb-3">Missing Keywords</div>
+                  <div className="space-y-2">
+                    {(atsResult.keywordGaps?.length ? atsResult.keywordGaps : ["No major keyword gaps identified."]).map((item, index) => (
+                      <div key={`${item}-${index}`} className="text-sm text-on-surface-variant leading-relaxed">
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl p-4"
+                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="text-sm font-semibold text-on-surface mb-3">Top Priority Fixes</div>
+                  <div className="space-y-3">
+                    {(atsResult.priorityFixes || []).slice(0, 3).map((fix, index) => (
+                      <div key={`${fix.issue}-${index}`}>
+                        <div className="text-sm font-medium text-on-surface mb-1">{fix.issue}</div>
+                        <div className="text-sm text-on-surface-variant leading-relaxed">{fix.howToFix}</div>
+                      </div>
+                    ))}
+                    {(!atsResult.priorityFixes || atsResult.priorityFixes.length === 0) && (
+                      <div className="text-sm text-on-surface-variant">No major fixes surfaced in this scan.</div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </aside>
+
       {/* ── Right panel: live preview ref'd for PDF/html2canvas capture ── */}
-      <div className="flex-1 max-w-[1000px] glass-card ghost-border rounded-2xl flex flex-col overflow-hidden relative min-h-[60vh] lg:min-h-0 order-first lg:order-last">
-        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 px-5 flex justify-between items-center z-10">
+      <div className="flex-1 max-w-[1000px] glass-card ghost-border rounded-2xl flex flex-col relative min-h-[60vh] lg:min-h-0 order-first lg:order-last transition-all duration-300">
+        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 px-5 flex justify-between items-center z-50 sticky top-[72px] sm:top-[85px] rounded-t-2xl flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />
-            <span className="text-[11px] font-bold tracking-[0.2em] text-cyan-400/80 uppercase">
-              Live Preview (Click text to edit)
+            <button 
+              onClick={() => setIsAtsPanelOpen(!isAtsPanelOpen)}
+              className="p-1.5 text-on-surface hover:bg-white/10 rounded transition-colors bg-white/5 mr-2"
+              title="Toggle ATS Feedback Panel"
+            >
+              {isAtsPanelOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+            </button>
+            <div className="hidden sm:flex w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />
+            <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] text-cyan-400/80 uppercase">
+              Live Preview
             </span>
           </div>
+          
+          <RichTextToolbar />
+
           <div className="flex items-center gap-4">
             {pendingAIChange ? (
               <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
@@ -166,7 +422,7 @@ export default function EditStep() {
                 </button>
                 <button 
                   onClick={handleAcceptAIChange}
-                  className="px-3 py-1 text-[11px] font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all"
+                  className="px-3 py-1 font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all"
                 >
                   Keep
                 </button>
@@ -184,6 +440,14 @@ export default function EditStep() {
                 </span>
               )
             )}
+            <button
+              onClick={handleAtsRescan}
+              disabled={isScanningAts}
+              className="btn-ghost"
+            >
+              {isScanningAts ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+              Re-scan
+            </button>
             <button 
               onClick={async () => {
                 await saveNow({ status: "complete" });
@@ -199,7 +463,7 @@ export default function EditStep() {
 
         <div 
           ref={previewContainerRef}
-          className="flex-1 overflow-auto p-4 lg:p-10 flex justify-center custom-scrollbar relative"
+          className="w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar p-4 lg:p-10 flex justify-center relative"
           style={{
             backgroundColor: "#0b1021",
             backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
@@ -230,10 +494,21 @@ export default function EditStep() {
               isRegenerating={isRegenerating}
               onRegenerateItem={!pendingAIChange ? handleRegenerateItem : null}
               isRegeneratingItem={isRegeneratingItem}
+              onRewriteBulletRequest={handleRewriteBulletRequest}
+              onUpdateBullet={handleUpdateBullet}
+              onAddBullet={handleAddBullet}
               scale={1} // Override default scale, since we zoom the parent container
             />
           </div>
           
+          {rewriteBulletData && (
+            <AiRewriteModal
+              data={rewriteBulletData}
+              context={{ targetRole: interviewAnswers.targetRole, resumeText: bragSheetText }}
+              onClose={() => setRewriteBulletData(null)}
+              onSelect={handleApplyBulletRewrite}
+            />
+          )}
 
         </div>
       </div>

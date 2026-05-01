@@ -1,11 +1,6 @@
 import { useReducer, useCallback, useRef, useState } from "react";
 import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "./useAuth";
-import {
-  getCachedResume,
-  setCachedResume,
-  upsertCachedResumeInList,
-} from "../services/resumeCache";
 import { getResumeBuilderStep } from "../services/resumePersistence";
 import { ResumeContext } from "./resume-context";
 
@@ -90,66 +85,31 @@ export function ResumeProvider({ children }) {
 
     setActiveResumeId(resumeId);
     activeResumeIdRef.current = resumeId;
+    try {
+      const data = await getResume(resumeId);
+      if (!data) return;
 
-    // ── 1. Instant load from localStorage so the builder doesn't blank ──────
-    const cached = getCachedResume(resumeId);
-    if (cached) {
       dispatch({
         type: "LOAD_STATE",
         payload: {
-          bragSheetText:    cached.bragSheetText    ?? "",
-          photoURL:         cached.photoURL         ?? null,
-          interviewAnswers: cached.interviewAnswers ?? initialBuilderState.interviewAnswers,
-          templateId:       cached.templateId       ?? null,
-          resumeData:       cached.resumeData       ?? null,
+          bragSheetText: data.bragSheetText ?? "",
+          photoURL: data.photoURL ?? null,
+          interviewAnswers: data.interviewAnswers ?? initialBuilderState.interviewAnswers,
+          templateId: data.templateId ?? null,
+          resumeData: data.resumeData ?? null,
         }
       });
-      setCurrentStep(getResumeBuilderStep(cached));
-    }
-
-    // ── 2. Fetch fresh data from Firebase and update if different ────────────
-    try {
-      const data = await getResume(resumeId);   // getResume already updates cache
-      if (data) {
-        dispatch({
-          type: "LOAD_STATE",
-          payload: {
-            bragSheetText:    data.bragSheetText    ?? "",
-            photoURL:         data.photoURL         ?? null,
-            interviewAnswers: data.interviewAnswers ?? initialBuilderState.interviewAnswers,
-            templateId:       data.templateId       ?? null,
-            resumeData:       data.resumeData       ?? null,
-          }
-        });
-        setCurrentStep(getResumeBuilderStep(data));
-      }
+      setCurrentStep(getResumeBuilderStep(data));
     } catch (err) {
-      console.warn("loadResumeData: Firebase unavailable, using cache →", err.message);
-      // Already loaded from cache above — nothing more to do
+      console.warn("loadResumeData failed:", err.message);
     }
   }, [getResume]);
 
   // ─── SAVE ──────────────────────────────────────────────────────────────────
   const debounceRef = useRef(null);
 
-  /**
-   * Write data to localStorage immediately (synchronous), then persist to
-   * Firestore. This ensures a page reload always shows the latest state.
-   */
-  const persistLocally = useCallback((resumeId, dataToMerge) => {
-    if (!resumeId || resumeId === "new" || resumeId === "creating") return;
-    const existing = getCachedResume(resumeId) ?? {};
-    const merged = { ...existing, ...dataToMerge, id: resumeId, updatedAt: Date.now() };
-    setCachedResume(resumeId, merged);
-    if (currentUser && merged.userId) {
-      upsertCachedResumeInList(merged.userId, merged);
-    }
-  }, [currentUser]);
-
   // Direct (non-debounced) save — used for critical saves at step transitions.
-  // Races against a 4s timeout so Firestore offline can't block navigation.
   const saveNow = useCallback(async (dataToMerge) => {
-    // Cancel any pending debounced save to avoid a race
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
       debounceRef.current = null;
@@ -179,11 +139,8 @@ export function ResumeProvider({ children }) {
         setActiveResumeId(newId);
         activeResumeIdRef.current = newId;
         window.history.replaceState(null, "", `/builder/${newId}`);
-        // createResume already wrote to localStorage via useFirestore
         return newId;
       } else {
-        // Write to localStorage first (instant), then Firestore
-        persistLocally(id, { ...dataToMerge, userId: currentUser.uid });
         await Promise.race([updateResume(id, { ...dataToMerge, userId: currentUser.uid }), timeout]);
         return id;
       }
@@ -196,15 +153,11 @@ export function ResumeProvider({ children }) {
     } finally {
       dispatch({ type: "SET_SAVING", payload: false });
     }
-  }, [currentUser, updateResume, createResume, persistLocally]);
+  }, [currentUser, updateResume, createResume]);
 
   // Debounced save — used for live typing in EditStep
   const saveToFirestore = useCallback((dataToMerge) => {
     if (!currentUser) return;
-
-    // Write to localStorage immediately so a reload shows the latest text
-    const id = activeResumeIdRef.current;
-    persistLocally(id, { ...dataToMerge, userId: currentUser.uid });
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -216,7 +169,7 @@ export function ResumeProvider({ children }) {
         console.warn("Live save failed:", err.message);
       }
     }, 1000);
-  }, [currentUser, updateResume, persistLocally]);
+  }, [currentUser, updateResume]);
 
   // ─── STEP NAVIGATION ───────────────────────────────────────────────────────
   const nextStep = useCallback(() => {

@@ -2,7 +2,7 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import { Wand2 } from "lucide-react";
 
-export default function Professional({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem }) {
+export default function Professional({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
   if (!resumeData) return null;
 
   return (
@@ -109,12 +109,17 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                       <span className="not-italic"><InlineEdit value={exp.location} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, location: v } : e))} /></span>
                     </div>
                     <ul className="list-disc list-outside ml-4 text-xs space-y-1.5 text-gray-700">
-                      {(exp.bullets || []).map((bullet, i) => (
-                        <li key={i}>
-                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[i]: v}) } : e))} />
+                      {(exp.bullets || []).map((bullet, bulletIdx) => (
+                        <li key={bulletIdx}>
+                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map(e => e.id === exp.id ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
                         </li>
                       ))}
                     </ul>
+                    {isEditing && onAddBullet && (
+                      <button onClick={(e) => { e.stopPropagation(); onAddBullet('experience', exp.id); }} className="text-[10px] text-blue-500 hover:text-blue-600 mt-1 flex items-center gap-1 opacity-50 hover:opacity-100 transition-opacity uppercase font-bold tracking-wider ml-4">
+                        + Add Bullet
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -199,12 +204,17 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                       <InlineEdit value={proj.techStack?.join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, techStack: v.split(' • ') } : p))} />
                     </div>
                     <ul className="list-disc list-outside ml-4 text-xs space-y-1.5 text-gray-700">
-                      {(proj.bullets || []).map((bullet, i) => (
-                        <li key={i}>
-                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[i]: v}) } : p))} />
+                      {(proj.bullets || []).map((bullet, bulletIdx) => (
+                        <li key={bulletIdx}>
+                          <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map(p => p.id === proj.id ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
                         </li>
                       ))}
                     </ul>
+                    {isEditing && onAddBullet && (
+                      <button onClick={(e) => { e.stopPropagation(); onAddBullet('projects', proj.id); }} className="text-[10px] text-blue-500 hover:text-blue-600 mt-1 flex items-center gap-1 opacity-50 hover:opacity-100 transition-opacity uppercase font-bold tracking-wider ml-4">
+                        + Add Bullet
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

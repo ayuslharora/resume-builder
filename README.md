@@ -1,18 +1,19 @@
-# ResumeForge
+# ResuMe
 
-ResumeForge is an AI-assisted resume builder and resume grader for students, freshers, and early-career professionals. It combines a guided resume builder, Groq-powered content generation, and a role-aware grading workflow that helps users compare resumes against target jobs, identify ATS risks, rewrite weak bullets, and open an improved draft directly in the builder.
+ResuMe is an AI-assisted resume builder and resume grader for students, freshers, and early-career professionals. It combines a guided resume builder with a modern WYSIWYG editor, Groq-powered content generation, and a role-aware grading workflow that helps users compare resumes against target jobs, identify ATS risks, rewrite weak bullets, and open an improved draft directly in the builder.
 
 ## Features
 
-- AI resume builder: Upload a brag sheet, notes, resume, or LinkedIn-style export and generate a structured resume draft tailored to a target role.
-- Guided builder flow: Collects target-role context, interview-style inputs, template selection, AI generation, and final editing in one workflow.
-- Resume grader: Scores uploaded resumes against a target job with recruiter-style feedback, ATS breakdowns, section scores, keyword gaps, and prioritized fixes.
-- OCR-backed PDF parsing: Handles text PDFs and falls back to OCR for scanned/image-based PDFs that would otherwise fail parsing.
-- Role comparison: Compare the same resume against multiple target roles from the grader.
-- Recruiter tone modes: Review a resume through different lenses such as ATS strict, HR recruiter, hiring manager, or campus placement.
-- Weak bullet rewriting: Surface weak bullets, generate stronger rewrites, and apply selected rewrites into the improved-draft flow.
-- One-click improvement pass: Turn grader feedback into an improved resume draft and open it in the builder for further editing.
-- Export and persistence: Save resumes in Firestore with local caching and export final versions to PDF or DOCX.
+- **WYSIWYG Resume Editor:** Edit your resume directly on the document preview with inline text editing and real-time updates.
+- **AI Resume Builder:** Upload a brag sheet, notes, resume, or LinkedIn-style export and generate a structured resume draft tailored to a target role.
+- **Guided Builder Flow:** Collects target-role context, bragsheet inputs, template selection, AI generation, and final inline-editing in one seamless workflow.
+- **Resume Grader:** Scores uploaded resumes against a target job with recruiter-style feedback, ATS breakdowns, section scores, keyword gaps, and prioritized fixes.
+- **OCR-Backed PDF Parsing:** Handles text PDFs and falls back to OCR for scanned/image-based PDFs that would otherwise fail parsing.
+- **Role Comparison:** Compare the same resume against multiple target roles from the grader.
+- **Recruiter Tone Modes:** Review a resume through different lenses such as ATS strict, HR recruiter, hiring manager, or campus placement.
+- **Weak Bullet Rewriting:** Surface weak bullets, generate stronger rewrites, and apply selected rewrites into the improved-draft flow.
+- **One-Click Improvement Pass:** Turn grader feedback into an improved resume draft and open it in the builder for further editing.
+- **Export and Persistence:** Save resumes in Firestore with local caching and export final versions to PDF or DOCX.
 
 ## Tech Stack
 

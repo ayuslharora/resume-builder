@@ -5,14 +5,13 @@ import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";
 import EmptyState from "../components/dashboard/EmptyState";
 import Spinner from "../components/ui/Spinner";
-import { getCachedResumeList, setCachedResumeList } from "../services/resumeCache";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
   const { deleteResume, duplicateResume, getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fromCache, setFromCache] = useState(false);
+  const [actionError, setActionError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,28 +20,13 @@ export default function Dashboard() {
     let cancelled = false;
 
     async function loadResumes() {
-      let cached = getCachedResumeList(currentUser.uid);
-      if (cached.length > 0) {
-        cached = cached.map(r => {
-          if (r.resumeData?.summary && typeof r.resumeData.summary === 'object') {
-            r.resumeData.summary = r.resumeData.summary.summary || "";
-          }
-          return r;
-        });
-        setResumes(cached);
-        setFromCache(true);
-      }
-
       try {
         const data = await getUserResumes(currentUser.uid);
         if (cancelled) return;
         setResumes(data);
-        setFromCache(false);
-        setCachedResumeList(currentUser.uid, data);
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching resumes:", error);
-          setFromCache(false);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -67,13 +51,15 @@ export default function Dashboard() {
         <h1 className="page-title">Project Workspace</h1>
         <div className="flex items-center gap-2">
            <p className="page-subtitle">My Resumes</p>
-           {fromCache && (
-             <span className="text-[10px] uppercase font-bold tracking-wider text-primary/70 animate-pulse bg-primary/10 px-2 py-0.5 rounded">
-               Syncing
-             </span>
-           )}
         </div>
       </div>
+      
+      {actionError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 flex justify-between items-center">
+          <p className="font-medium">{actionError}</p>
+          <button onClick={() => setActionError(null)} className="text-red-500 hover:text-red-700 font-bold px-2">&times;</button>
+        </div>
+      )}
 
       {resumes.length === 0 ? (
         <EmptyState onCreate={handleCreate} />
@@ -83,9 +69,15 @@ export default function Dashboard() {
             <ResumeCard
               key={resume.id}
               resume={resume}
-              onDelete={() => {
-                setResumes(prev => prev.filter(r => r.id !== resume.id));
-                deleteResume(resume.id).catch(console.error);
+              onDelete={async () => {
+                try {
+                  setActionError(null);
+                  await deleteResume(resume.id);
+                  setResumes(prev => prev.filter(r => r.id !== resume.id));
+                } catch (error) {
+                  console.error(error);
+                  setActionError("Failed to delete resume: " + error.message);
+                }
               }}
               onDuplicate={async () => {
                 try {

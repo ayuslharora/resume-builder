@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { Download, FileText, ArrowLeft, Home } from "lucide-react";
+import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
+import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
 
 export default function Export() {
   const { resumeId } = useParams();
@@ -17,7 +18,11 @@ export default function Export() {
   ));
   const [loading, setLoading] = useState(() => !(resumeId === "new" && stateBuilderData));
   const [exportingType, setExportingType] = useState(null);
-  const { getResume } = useFirestore();
+  const [isShared, setIsShared] = useState(false);
+  const [shareToken, setShareToken] = useState(null);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [shareBusy, setShareBusy] = useState(false);
+  const { getResume, updateResume } = useFirestore();
   const resumeRef = useRef(null);
   const navigate = useNavigate();
 
@@ -43,6 +48,8 @@ export default function Export() {
         if (data && data.resumeData) {
           setResumeData(data.resumeData);
           setTemplateId(data.templateId);
+          setIsShared(Boolean(data.isShared));
+          setShareToken(data.shareToken || null);
         } else if (stateBuilderData) {
           setResumeData(stateBuilderData.resumeData);
           setTemplateId(stateBuilderData.templateId);
@@ -115,6 +122,44 @@ export default function Export() {
     }
   };
 
+  const handleTogglePublish = async () => {
+    if (!resumeId || resumeId === "new") return;
+    try {
+      setShareBusy(true);
+      const nextShared = !isShared;
+      const nextToken = shareToken || createShareToken();
+      await updateResume(resumeId, {
+        isShared: nextShared,
+        shareToken: nextToken,
+      });
+      setIsShared(nextShared);
+      setShareToken(nextToken);
+
+      if (nextShared) {
+        const url = buildSharedResumeUrl(window.location.origin, nextToken);
+        await navigator.clipboard.writeText(url);
+        setCopiedShareLink(true);
+        setTimeout(() => setCopiedShareLink(false), 2000);
+      }
+    } catch (err) {
+      alert("Failed to update publish status: " + err.message);
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareToken) return;
+    try {
+      const url = buildSharedResumeUrl(window.location.origin, shareToken);
+      await navigator.clipboard.writeText(url);
+      setCopiedShareLink(true);
+      setTimeout(() => setCopiedShareLink(false), 2000);
+    } catch (err) {
+      alert("Failed to copy link: " + err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-surface/50 flex flex-col">
       {/* ── Sticky header bar ── */}
@@ -128,18 +173,35 @@ export default function Export() {
             <ArrowLeft size={18} /> Back to Editor
           </button>
         </div>
-        <div className="flex gap-4 min-h-[40px] items-center">
+        <div className="flex gap-3 min-h-[40px] items-center flex-wrap justify-end">
             <>
+              <button
+                onClick={handleTogglePublish}
+                disabled={shareBusy || resumeId === "new"}
+                className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition disabled:opacity-50"
+              >
+                {isShared ? <EyeOff size={16} /> : <Globe size={16} />}
+                {isShared ? "Unpublish" : "Publish"}
+              </button>
+              {isShared && shareToken && (
+                <button
+                  onClick={handleCopyShareLink}
+                  className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition"
+                >
+                  {copiedShareLink ? <Check size={16} className="text-green-400" /> : <LinkIcon size={16} />}
+                  {copiedShareLink ? "Copied" : "Copy Link"}
+                </button>
+              )}
               <button 
                  onClick={handleDownloadDOCX} 
-                 disabled={exportingType}
+                 disabled={exportingType || shareBusy}
                  className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition disabled:opacity-50 fade-in"
               >
                 <FileText size={18} /> {exportingType === 'docx' ? 'Exporting...' : 'DOCX'}
               </button>
               <button 
                  onClick={handleDownloadPDF} 
-                 disabled={exportingType}
+                 disabled={exportingType || shareBusy}
                  className="flex items-center gap-2 bg-primary text-surface px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition disabled:opacity-50 shadow-ambient fade-in"
               >
                 <Download size={18} /> {exportingType === 'pdf' ? 'Exporting...' : 'PDF'}

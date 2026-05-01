@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const GoogleIcon = () => (
@@ -20,10 +20,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/dashboard";
 
   useEffect(() => {
-    if (currentUser) navigate("/dashboard");
-  }, [currentUser, navigate]);
+    if (currentUser) navigate(redirectTo, { replace: true });
+  }, [currentUser, navigate, redirectTo]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function Login() {
       setError("");
       setLoading(true);
       await login(email, password, name);
-      navigate("/dashboard");
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setError("Failed to sign in. Check your credentials.");
       console.error(err);
@@ -45,7 +47,7 @@ export default function Login() {
       setError("");
       setLoading(true);
       await loginWithGoogle();
-      navigate("/dashboard");
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setError("Failed to sign in with Google. " + (err.message || ""));
       console.error(err);

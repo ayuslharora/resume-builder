@@ -12,6 +12,9 @@ export default function ResumePreview({
   isRegenerating, 
   onRegenerateItem,
   isRegeneratingItem,
+  onRewriteBulletRequest,
+  onUpdateBullet,
+  onAddBullet,
   scale = 0.85 
 }) {
   if (!templateId || !templates[templateId]) return <div className="p-10 text-center text-gray-500">No template selected</div>;
@@ -31,6 +34,9 @@ export default function ResumePreview({
           isRegenerating={isRegenerating}
           onRegenerateItem={onRegenerateItem}
           isRegeneratingItem={isRegeneratingItem}
+          onRewriteBulletRequest={onRewriteBulletRequest}
+          onUpdateBullet={onUpdateBullet}
+          onAddBullet={onAddBullet}
         />
       </div>
     </Suspense>

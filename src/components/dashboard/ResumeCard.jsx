@@ -1,14 +1,40 @@
-import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download } from "lucide-react";
+import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
+import { useFirestore } from "../../hooks/useFirestore";
+import { buildSharedResumeUrl, createShareToken } from "../../services/shareResume";
 
-export default function ResumeCard({ resume, onDelete, onDuplicate }) {
+export default function ResumeCard({ resume, onDelete }) {
   const navigate = useNavigate();
+  const { updateResume } = useFirestore();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef();
   const previewContainerRef = useRef(null);
   const [scale, setScale] = useState(0.38);
+  const [copied, setCopied] = useState(false);
+
+  const handleTogglePublic = async (e) => {
+    e.stopPropagation();
+    try {
+      const newStatus = !resume.isShared;
+      const shareToken = resume.shareToken || createShareToken();
+      await updateResume(resume.id, {
+        isShared: newStatus,
+        shareToken: newStatus ? shareToken : shareToken,
+      });
+      
+      if (newStatus) {
+        const url = buildSharedResumeUrl(window.location.origin, shareToken);
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+      setShowMenu(false);
+    } catch (err) {
+      console.error("Failed to toggle public status", err);
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -88,8 +114,16 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(7,13,31,0.3) 100%)" }} />
 
-        <div className={`absolute top-3 left-3 z-10 status-pill ${statusColors[resume.status] || "bg-surface-container-highest"}`}>
-          {resume.status}
+        <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2 max-w-[70%]">
+          <div className={`status-pill ${statusColors[resume.status] || "bg-surface-container-highest"}`}>
+            {resume.status}
+          </div>
+
+          {resume.isShared && (
+            <div className="status-pill bg-[rgba(6,182,212,0.15)] text-primary border border-primary/20 flex items-center gap-1">
+              <Globe size={10} /> Published
+            </div>
+          )}
         </div>
 
         <div className="absolute top-3 right-3 z-10" ref={menuRef}>
@@ -120,18 +154,34 @@ export default function ResumeCard({ resume, onDelete, onDuplicate }) {
               >
                 <Download size={14} className="text-on-surface-variant" /> Download
               </button>
+
+              <div className="h-px w-full my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
               <button
-                onClick={(e) => { e.stopPropagation(); onDuplicate(); setShowMenu(false); }}
-                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
+                onClick={handleTogglePublic}
+                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-[rgba(6,182,212,0.1)] flex items-center gap-2 transition-colors"
               >
-                <Copy size={14} className="text-on-surface-variant" /> Duplicate
+                {copied ? <Check size={14} className="text-green-400" /> : resume.isShared ? <EyeOff size={14} className="text-on-surface-variant" /> : <Globe size={14} className="text-primary" />}
+                {copied ? <span className="text-green-400">Copied Link!</span> : resume.isShared ? "Unpublish Resume" : "Publish Resume"}
               </button>
+              {resume.isShared && resume.shareToken && (
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const url = buildSharedResumeUrl(window.location.origin, resume.shareToken);
+                    await navigator.clipboard.writeText(url);
+                    setCopied(true);
+                    setTimeout(() => { setCopied(false); setShowMenu(false); }, 2000);
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
+                >
+                  <LinkIcon size={14} className="text-on-surface-variant" /> Copy Link
+                </button>
+              )}
               <div className="h-px w-full my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const ok = window.confirm("Are you sure you want to delete this resume?");
-                  if (ok) onDelete();
+                  onDelete();
                   setShowMenu(false);
                 }}
                 className="w-full text-left px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
