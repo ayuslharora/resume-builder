@@ -352,3 +352,43 @@ body.ats-panel-open .app-sidebar-mobile {
 body.builder-step-4-lock-scroll {
   overflow: hidden;
 }
+
+@media print {
+  @page {
+    margin: 0;
+  }
+  
+  body {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  /* Hide everything we don't want printed */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Reset container styles so the resume takes the full page */
+  .print-resume-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: none !important;
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  .print-resume-document {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Ensure background colors and images (like the sidebar) render perfectly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

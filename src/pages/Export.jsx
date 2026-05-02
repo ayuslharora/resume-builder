@@ -163,7 +163,7 @@ export default function Export() {
   return (
     <div className="min-h-screen bg-surface/50 flex flex-col">
       {/* ── Sticky header bar ── */}
-      <header className="glass-card shadow-sm border-b border-surface-container-high py-4 px-4 sm:px-6 sticky top-0 z-10 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
+      <header className="glass-card shadow-sm border-b border-surface-container-high py-4 px-4 sm:px-6 sticky top-0 z-10 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center print-hide">
         <div className="flex items-center gap-4 sm:gap-6">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition font-medium">
             <Home size={18} /> Dashboard
@@ -211,11 +211,11 @@ export default function Export() {
       </header>
 
       {/* ── Resume preview ── */}
-      <main className="flex-1 flex items-start justify-center p-6 sm:p-10">
-        <div className="w-full max-w-[920px] overflow-x-auto custom-scrollbar border border-surface-container-high rounded-xl bg-surface-lowest p-4 sm:p-8 flex justify-center">
+      <main className="flex-1 flex items-start justify-center p-6 sm:p-10 print-resume-wrapper">
+        <div className="w-full max-w-[920px] overflow-x-auto custom-scrollbar border border-surface-container-high rounded-xl bg-surface-lowest p-4 sm:p-8 flex justify-center print-resume-wrapper">
           <div
             ref={resumeRef}
-            className="bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+            className="bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] print-resume-document"
             style={{ width: '850px', flexShrink: 0 }}
           >
             <ResumePreview

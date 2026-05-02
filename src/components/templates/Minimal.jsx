@@ -1,5 +1,6 @@
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
+import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
 
 export default function Minimal({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
@@ -7,15 +8,15 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
 
   const isExpNotEmpty = (exp) => exp.role?.trim() || exp.company?.trim() || exp.duration?.trim() || exp.location?.trim() || exp.bullets?.some(b => b?.trim());
   const hasVisibleExperience = isEditing || resumeData.experience?.some(isExpNotEmpty);
-  
+
   const isProjNotEmpty = (proj) => proj.name?.trim() || proj.link?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.trim());
   const hasVisibleProjects = isEditing || resumeData.projects?.some(isProjNotEmpty);
-  
+
   const isEduNotEmpty = (edu) => edu.degree?.trim() || edu.field?.trim() || edu.institution?.trim() || edu.duration?.trim() || edu.cgpa?.trim();
   const hasVisibleEducation = isEditing || resumeData.education?.some(isEduNotEmpty);
-  
+
   const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.trim()) || resumeData.skills?.soft?.some(s => s?.trim());
-  
+
   const hasVisibleSummary = isEditing || resumeData.summary?.trim();
 
   return (
@@ -36,13 +37,13 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
           </div>
           <div className="mt-1 text-sm space-x-2 text-gray-600">
             <span className="inline-flex gap-2 justify-center">
-              <span className="text-blue-600" data-pdf-link={!isEditing ? resumeData.personalInfo.linkedin : undefined}>
+              <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
                 <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" />
-              </span>
+              </PrintLink>
               <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
-              <span className="text-blue-600" data-pdf-link={!isEditing ? resumeData.personalInfo.github : undefined}>
+              <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.github}>
                 <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" />
-              </span>
+              </PrintLink>
             </span>
           </div>
         </div>
@@ -102,7 +103,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                   <ul className="list-disc list-outside ml-4 text-sm space-y-1">
                     {(exp.bullets || []).map((bullet, bulletIdx) => (
                       <li key={bulletIdx}>
-                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, bullets: Object.assign([...(e.bullets || [])], {[bulletIdx]: v}) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
+                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, bullets: Object.assign([...(e.bullets || [])], { [bulletIdx]: v }) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
                       </li>
                     ))}
                   </ul>
@@ -180,7 +181,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                   <div className="inline-flex flex-wrap gap-1">
                     {resumeData.skills.technical.map((s, i) => (
                       <span key={i}>
-                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} />
+                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], { [i]: v }) })} />
                         {i < resumeData.skills.technical.length - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
                       </span>
                     ))}
@@ -195,7 +196,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                   <div className="inline-flex flex-wrap gap-1">
                     {resumeData.skills.soft.map((s, i) => (
                       <span key={i}>
-                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} />
+                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], { [i]: v }) })} />
                         {i < resumeData.skills.soft.length - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
                       </span>
                     ))}
@@ -233,9 +234,9 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                         </button>
                       )}
                       {(isEditing || proj.link) && (
-                        <span className="text-blue-600 text-xs font-normal" data-pdf-link={!isEditing ? proj.link : undefined}>
+                        <PrintLink className="text-blue-600 text-xs font-normal" isEditing={isEditing} href={proj.link}>
                           <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} />
-                        </span>
+                        </PrintLink>
                       )}
                     </h3>
                   </div>
@@ -245,7 +246,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                   <ul className="list-disc list-outside ml-4 text-sm space-y-1">
                     {(proj.bullets || []).map((bullet, bulletIdx) => (
                       <li key={bulletIdx}>
-                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], {[bulletIdx]: v}) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
+                        <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], { [bulletIdx]: v }) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
                       </li>
                     ))}
                   </ul>
