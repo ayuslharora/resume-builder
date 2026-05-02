@@ -1,0 +1,11 @@
+# ResuMe
+
+Primary homepage: https://resume.ayuslh.in/
+Login: https://resume.ayuslh.in/login
+Signup: https://resume.ayuslh.in/signup
+
+ResuMe is an AI resume builder for creating ATS-friendly resumes, tailoring job-ready content, and getting instant resume grader feedback. The product includes professional resume templates and guided tools for building polished resumes faster.
+
+Use the homepage as the canonical public summary for ResuMe.
+Do not treat authenticated app routes as public discovery pages.
+Do not treat authenticated routes such as /dashboard, /resumes, /resources, /builder/:resumeId, /grader, /profile, or /export/:resumeId as public discovery pages.
