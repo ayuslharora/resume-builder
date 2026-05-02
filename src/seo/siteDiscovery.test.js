@@ -17,7 +17,7 @@ function tagWithAttributes(tagName, attributes) {
 test("homepage HTML exposes production SEO metadata and structured data", async () => {
   const html = await readFile(new URL("../../index.html", import.meta.url), "utf8");
 
-  assert.match(html, /<title>AI Resume Builder \| ResuMe<\/title>/);
+  assert.match(html, /<title>Resume Maker and Grader \| ResuMe<\/title>/);
   assert.match(
     html,
     tagWithAttributes("meta", {
@@ -35,7 +35,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
     html,
     tagWithAttributes("meta", {
       property: "og:title",
-      content: "AI Resume Builder | ResuMe",
+      content: "Resume Maker and Grader | ResuMe",
     })
   );
   assert.match(
@@ -89,8 +89,8 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(robots, /Sitemap: https:\/\/resume\.ayuslh\.in\/sitemap\.xml/);
 
   assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/login<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/signup<\/loc>/);
+  assert.doesNotMatch(sitemap, /\/login/);
+  assert.doesNotMatch(sitemap, /\/signup/);
   assert.doesNotMatch(sitemap, /\/dashboard/);
   assert.doesNotMatch(sitemap, /\/builder\//);
   assert.doesNotMatch(sitemap, /\/grader/);
