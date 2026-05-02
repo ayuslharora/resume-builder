@@ -396,3 +396,31 @@ ${targetContext.sourceDocumentText ? `\n\nCandidate's raw background/source docu
 
   return result;
 }
+
+export async function generateCoverLetter(resumeData, jobDescription) {
+  const systemPrompt = `You are an expert career coach and executive resume writer.
+Your task is to write a highly professional, compelling, and tailored cover letter for the candidate.
+You will be provided with the candidate's resume data (in JSON format) and the target Job Description.
+
+CRITICAL RULES:
+1. Write in a confident, professional, and natural tone. Do not use overly flowery language or cliché openings like "I am writing to express my interest in..."
+2. Start with a strong hook that highlights a key relevant achievement.
+3. Draw DIRECT connections between the candidate's actual experience/skills from their resume and the core requirements in the job description.
+4. DO NOT invent or hallucinate any experience, metrics, or skills that are not present in the resume data.
+5. Format the output with clear paragraphs. Use standard cover letter conventions.
+6. The letter should be exactly 3 to 4 paragraphs long.
+7. Return ONLY a valid JSON object matching this schema exactly:
+{
+  "coverLetter": "The full text of the cover letter with paragraphs separated by double newlines (\\n\\n)"
+}
+Output only the JSON. Do not include markdown formatting or explanations.`;
+
+  const userPrompt = `Candidate's Resume Data:
+${JSON.stringify(resumeData, null, 2)}
+
+Target Job Description:
+${jobDescription || "Not provided (Write a strong general cover letter based on their most recent role)."}`;
+
+  const result = await callGemini(systemPrompt, userPrompt);
+  return result;
+}

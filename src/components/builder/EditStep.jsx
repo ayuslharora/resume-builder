@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
-import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import AiRewriteModal from "./AiRewriteModal";
 import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
@@ -15,7 +15,7 @@ const atsBreakdownLabels = [
 ];
 
 export default function EditStep() {
-  const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore } = useResume();
+  const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore, undo, redo, canUndo, canRedo } = useResume();
   const [activeSection, setActiveSection] = useState("personalInfo");
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isRegeneratingItem, setIsRegeneratingItem] = useState(null);
@@ -424,6 +424,25 @@ export default function EditStep() {
             <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] text-cyan-400/80 uppercase">
               Live Preview
             </span>
+            
+            <div className="flex items-center gap-0.5 ml-0 sm:ml-2 border-l border-white/10 pl-2 sm:pl-3">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className={`p-1.5 sm:p-1 rounded transition-colors ${canUndo ? "text-on-surface hover:bg-white/10" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                title="Undo (Browser Back)"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className={`p-1.5 sm:p-1 rounded transition-colors ${canRedo ? "text-on-surface hover:bg-white/10" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                title="Redo (Browser Forward)"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
           
           <div className="order-last w-full sm:order-none sm:w-auto">

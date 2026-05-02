@@ -18,6 +18,7 @@ const Export   = lazy(() => import("./pages/Export"));
 const Grader   = lazy(() => import("./pages/Grader"));
 const Profile  = lazy(() => import("./pages/Profile"));
 const PublicResume = lazy(() => import("./pages/PublicResume"));
+const CoverLetter = lazy(() => import("./pages/CoverLetter"));
 
 const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
         element: <FullscreenProtectedRoute />,
         children: [
           { path: "/export/:resumeId", element: <Export /> },
+          { path: "/cover-letter/:resumeId", element: <CoverLetter /> },
           { path: "/shared/:token", element: <PublicResume /> },
         ]
       },

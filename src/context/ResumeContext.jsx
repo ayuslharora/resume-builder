@@ -21,6 +21,8 @@ const initialBuilderState = {
   },
   templateId: null,
   resumeData: null,
+  pastResumeData: [],
+  futureResumeData: [],
   isGenerating: false,
   generationError: null,
   isSaving: false
@@ -37,17 +39,44 @@ function builderReducer(state, action) {
     case "SET_TEMPLATE_ID":
       return { ...state, templateId: action.payload };
     case "SET_RESUME_DATA":
-      return { ...state, resumeData: action.payload };
+      return { 
+        ...state, 
+        pastResumeData: state.resumeData ? [...state.pastResumeData, state.resumeData] : state.pastResumeData,
+        futureResumeData: [],
+        resumeData: action.payload 
+      };
     case "SET_GENERATING":
       return { ...state, isGenerating: action.payload.isGenerating, generationError: action.payload.error };
     case "UPDATE_SECTION":
       return {
         ...state,
+        pastResumeData: state.resumeData ? [...state.pastResumeData, state.resumeData] : state.pastResumeData,
+        futureResumeData: [],
         resumeData: {
           ...state.resumeData,
           [action.payload.sectionName]: action.payload.sectionData
         }
       };
+    case "UNDO_RESUME": {
+      if (state.pastResumeData.length === 0) return state;
+      const previous = state.pastResumeData[state.pastResumeData.length - 1];
+      return {
+        ...state,
+        pastResumeData: state.pastResumeData.slice(0, -1),
+        futureResumeData: [state.resumeData, ...state.futureResumeData],
+        resumeData: previous
+      };
+    }
+    case "REDO_RESUME": {
+      if (state.futureResumeData.length === 0) return state;
+      const next = state.futureResumeData[0];
+      return {
+        ...state,
+        pastResumeData: [...state.pastResumeData, state.resumeData],
+        futureResumeData: state.futureResumeData.slice(1),
+        resumeData: next
+      };
+    }
     case "SET_SAVING":
       return { ...state, isSaving: action.payload };
     case "LOAD_STATE": {
@@ -55,7 +84,7 @@ function builderReducer(state, action) {
       if (payload.resumeData?.summary && typeof payload.resumeData.summary === 'object') {
         payload.resumeData.summary = payload.resumeData.summary.summary || "";
       }
-      return { ...initialBuilderState, ...payload };
+      return { ...initialBuilderState, ...payload, pastResumeData: [], futureResumeData: [] };
     }
     case "RESET":
       return initialBuilderState;
@@ -214,11 +243,26 @@ export function ResumeProvider({ children }) {
     setCurrentStep(1);
   }, []);
 
+  const undo = useCallback(() => {
+    if (builderData.pastResumeData.length === 0) return;
+    const previous = builderData.pastResumeData[builderData.pastResumeData.length - 1];
+    dispatch({ type: "UNDO_RESUME" });
+    saveToFirestore({ resumeData: previous });
+  }, [builderData.pastResumeData, saveToFirestore]);
+
+  const redo = useCallback(() => {
+    if (builderData.futureResumeData.length === 0) return;
+    const next = builderData.futureResumeData[0];
+    dispatch({ type: "REDO_RESUME" });
+    saveToFirestore({ resumeData: next });
+  }, [builderData.futureResumeData, saveToFirestore]);
+
   const value = {
     builderData, dispatch,
     setBragSheet, setPhoto, setInterviewAnswers, setTemplateId, setResumeData, updateSection,
     currentStep, goToStep, nextStep, prevStep,
     activeResumeId, saveToFirestore, saveNow, loadResume: loadResumeData, resetBuilder,
+    undo, redo, canUndo: builderData.pastResumeData.length > 0, canRedo: builderData.futureResumeData.length > 0
   };
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
 }

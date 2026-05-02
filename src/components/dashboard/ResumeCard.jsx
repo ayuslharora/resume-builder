@@ -1,4 +1,4 @@
-import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check } from "lucide-react";
+import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
@@ -153,6 +153,13 @@ export default function ResumeCard({ resume, onDelete }) {
                 className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
               >
                 <Download size={14} className="text-on-surface-variant" /> Download
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); navigate(`/cover-letter/${resume.id}`); setShowMenu(false); }}
+                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
+              >
+                <Mail size={14} className="text-on-surface-variant" /> Write Cover Letter
               </button>
 
               <div className="h-px w-full my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
