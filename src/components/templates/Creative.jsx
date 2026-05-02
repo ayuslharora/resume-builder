@@ -40,8 +40,8 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               <span className="flex items-center gap-3"><span className="text-pink-400">⚲</span> <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" /></span>
             </div>
             <div className="mt-6 flex gap-4 text-sm font-medium">
-              <span className="text-purple-400 hover:text-purple-300"><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span>
-              <span className="text-purple-400 hover:text-purple-300"><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span>
+              <span className="text-purple-400 hover:text-purple-300" data-pdf-link={!isEditing ? resumeData.personalInfo.linkedin : undefined}><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span>
+              <span className="text-purple-400 hover:text-purple-300" data-pdf-link={!isEditing ? resumeData.personalInfo.github : undefined}><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span>
             </div>
           </div>
         </EditableSection>
@@ -184,7 +184,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         )}
                       </h3>
                       {(isEditing || proj.link) && (
-                        <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium"><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} /></span>
+                        <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded text-xs font-medium" data-pdf-link={!isEditing ? proj.link : undefined}><InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} /></span>
                       )}
                     </div>
                     <div className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 mb-3 inline-block">

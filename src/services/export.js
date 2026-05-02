@@ -34,6 +34,49 @@ export async function exportPDF(resumeElement, fileName) {
   });
   
   pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, 0, imgWidth, imgHeight);
+
+  // Add clickable links on top of the image
+  const linkElements = resumeElement.querySelectorAll('[data-pdf-link]');
+  const containerRect = resumeElement.getBoundingClientRect();
+  const pxToMm = imgWidth / containerRect.width;
+
+  console.log(`Found ${linkElements.length} link elements`);
+
+  linkElements.forEach(el => {
+    const url = el.getAttribute('data-pdf-link');
+    if (!url) return;
+
+    // Fix missing http/https
+    const validUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
+    const rect = el.getBoundingClientRect();
+    
+    // Coordinates relative to the resume container
+    const relativeX = rect.left - containerRect.left;
+    const relativeY = rect.top - containerRect.top;
+
+    const pdfX = relativeX * pxToMm;
+    const pdfY = relativeY * pxToMm;
+    const pdfW = rect.width * pxToMm;
+    const pdfH = rect.height * pxToMm;
+
+    console.log(`Link: ${validUrl}, x:${pdfX}, y:${pdfY}, w:${pdfW}, h:${pdfH}`);
+
+    // Use pdf.link to create an invisible clickable box
+    // DEBUG: Draw a visible red box so we can visually confirm it's in the right spot!
+    pdf.setDrawColor(255, 0, 0);
+    pdf.setLineWidth(0.5);
+    pdf.rect(pdfX, pdfY, pdfW, pdfH);
+    
+    // Add the actual link annotation
+    pdf.link(pdfX, pdfY, pdfW, pdfH, { url: validUrl });
+  });
+
+  // MASSIVE DEBUG LINK: Create a huge 100x100 link in the top left of the page to test if links work at all
+  pdf.setDrawColor(0, 0, 255);
+  pdf.rect(0, 0, 100, 100);
+  pdf.link(0, 0, 100, 100, { url: 'https://google.com' });
+
   pdf.save(`${fileName}.pdf`);
 }
 

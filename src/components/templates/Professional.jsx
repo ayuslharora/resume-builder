@@ -37,8 +37,8 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
               <span className="flex items-center gap-2">⚲ <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" /></span>
             </div>
             <div className="mt-4 text-sm flex flex-col gap-2 text-gray-300">
-              <span className="truncate hover:text-white"><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span>
-              <span className="truncate hover:text-white"><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span>
+              <span className="break-all hover:text-white" data-pdf-link={!isEditing ? resumeData.personalInfo.linkedin : undefined}><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span>
+              <span className="break-all hover:text-white" data-pdf-link={!isEditing ? resumeData.personalInfo.github : undefined}><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span>
             </div>
           </div>
         </EditableSection>
@@ -215,7 +215,7 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                           </button>
                         )}
                         {(isEditing || proj.link) && (
-                          <span className="text-blue-600 text-xs font-normal">
+                          <span className="text-blue-600 text-xs font-normal" data-pdf-link={!isEditing ? proj.link : undefined}>
                             <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} />
                           </span>
                         )}

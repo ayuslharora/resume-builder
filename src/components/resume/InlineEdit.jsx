@@ -52,7 +52,7 @@ export default function InlineEdit({
 
   return (
     <span className={`relative inline-block group w-full ${className}`}>
-      <div
+      <span
         ref={contentEditableRef}
         contentEditable={true}
         suppressContentEditableWarning={true}

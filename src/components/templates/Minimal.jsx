@@ -36,11 +36,11 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
           </div>
           <div className="mt-1 text-sm space-x-2 text-gray-600">
             <span className="inline-flex gap-2 justify-center">
-              <span className="text-blue-600">
+              <span className="text-blue-600" data-pdf-link={!isEditing ? resumeData.personalInfo.linkedin : undefined}>
                 <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" />
               </span>
               <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
-              <span className="text-blue-600">
+              <span className="text-blue-600" data-pdf-link={!isEditing ? resumeData.personalInfo.github : undefined}>
                 <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" />
               </span>
             </span>
@@ -233,7 +233,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                         </button>
                       )}
                       {(isEditing || proj.link) && (
-                        <span className="text-blue-600 text-xs font-normal">
+                        <span className="text-blue-600 text-xs font-normal" data-pdf-link={!isEditing ? proj.link : undefined}>
                           <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} />
                         </span>
                       )}

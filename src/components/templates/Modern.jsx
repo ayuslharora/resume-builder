@@ -37,8 +37,8 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
               <span className="flex items-center gap-2"><span className="text-blue-400">⚲</span> <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" /></span>
             </div>
             <div className="mt-5 flex flex-col gap-2 text-sm text-slate-400">
-              <span className="truncate hover:text-white transition-colors"><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span></span>
-              <span className="truncate hover:text-white transition-colors"><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span></span>
+              <span className="break-all hover:text-white transition-colors" data-pdf-link={!isEditing ? resumeData.personalInfo.linkedin : undefined}><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span></span>
+              <span className="break-all hover:text-white transition-colors" data-pdf-link={!isEditing ? resumeData.personalInfo.github : undefined}><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span></span>
             </div>
           </div>
         </EditableSection>
@@ -195,7 +195,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                         )}
                       </h3>
                       {(isEditing || proj.link) && (
-                        <span className="text-blue-400 text-xs font-medium bg-blue-900/20 px-2 py-1 rounded">
+                        <span className="text-blue-400 text-xs font-medium bg-blue-900/20 px-2 py-1 rounded" data-pdf-link={!isEditing ? proj.link : undefined}>
                           <InlineEdit value={resumeData.labels?.link ?? "Link:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, link: v })} /> <InlineEdit value={proj.link} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, link: v } : p))} />
                         </span>
                       )}
