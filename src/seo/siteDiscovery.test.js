@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { buildHomepageStaticHtml } from "./homepageSeoContent.js";
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -23,7 +24,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
     tagWithAttributes("meta", {
       name: "description",
       content:
-        "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
+        "ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
     }),
   );
   assert.match(
@@ -49,11 +50,15 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
   assert.match(html, tagWithAttributes("script", { type: "application/ld+json" }));
   assert.match(html, /"@type"\s*:\s*"WebSite"/);
   assert.match(html, /"@type"\s*:\s*"WebPage"/);
+  assert.match(html, /"@type"\s*:\s*"Person"/);
   assert.match(html, /"@type"\s*:\s*"SoftwareApplication"/);
   assert.match(html, /"@type"\s*:\s*"Organization"/);
   assert.match(html, /"@type"\s*:\s*"Offer"/);
+  assert.match(html, /"datePublished"\s*:\s*"2026-05-03"/);
+  assert.match(html, /"dateModified"\s*:\s*"2026-05-03"/);
   assert.match(html, /"price"\s*:\s*"0"/);
   assert.match(html, /"availability"\s*:\s*"https:\/\/schema\.org\/InStock"/);
+  assert.match(html, /<!-- HOMEPAGE_SEO_SHELL -->/);
 });
 
 test("public crawl and AI discovery assets are present and point at the production site", async () => {
@@ -92,9 +97,11 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(robots, /User-agent: \*/);
   assert.match(robots, /Content-Signal: search=yes,ai-input=yes,ai-train=no/);
   assert.match(robots, /Allow: \//);
-  assert.match(robots, /User-agent: GPTBot\s+Disallow: \//);
+  assert.match(robots, /User-agent: GPTBot\s+Allow: \//);
   assert.match(robots, /User-agent: OAI-SearchBot\s+Allow: \//);
-  assert.match(robots, /User-agent: ClaudeBot\s+Disallow: \//);
+  assert.match(robots, /User-agent: ChatGPT-User\s+Allow: \//);
+  assert.match(robots, /User-agent: ClaudeBot\s+Allow: \//);
+  assert.match(robots, /User-agent: PerplexityBot\s+Allow: \//);
   assert.match(robots, /User-agent: Google-Extended\s+Disallow: \//);
   assert.match(robots, /Sitemap: https:\/\/resume\.ayuslh\.in\/sitemap\.xml/);
 
@@ -113,4 +120,18 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(llms, /no subscriptions/i);
   assert.match(llms, /public pages are accessible without an account/i);
   assert.match(llms, /https:\/\/resume\.ayuslh\.in\//);
+  assert.match(llms, /Founder\/creator: Ayush/);
+  assert.match(llms, /## Main sections/);
+  assert.match(llms, /\[Homepage\]\(https:\/\/resume\.ayuslh\.in\/\)/);
+});
+
+test("homepage static shell contains the public answer blocks used for AI search", () => {
+  const shell = buildHomepageStaticHtml();
+
+  assert.match(shell, /id="homepage-static-shell"/);
+  assert.match(shell, /What is ResuMe\?/);
+  assert.match(shell, /How does the ATS grader work\?/);
+  assert.match(shell, /Start Building Free/);
+  assert.match(shell, /Grade My Resume/);
+  assert.match(shell, /Built and designed by Ayush/);
 });

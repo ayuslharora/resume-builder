@@ -1,11 +1,19 @@
 import { Link } from "react-router-dom";
 import { FileText, ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
 import {
-  HOME_DESCRIPTION,
   HOME_JSON_LD,
+  HOME_DESCRIPTION,
   HOME_TITLE,
   useRouteSeo,
 } from "../seo/routeSeo";
+import {
+  HOME_SEO_BADGE,
+  HOME_SEO_CITABLE_BLOCKS,
+  HOME_SEO_DESCRIPTION,
+  HOME_SEO_SECTIONS,
+  HOME_SEO_TITLE,
+  HOME_SEO_TRUST,
+} from "../seo/homepageSeoContent";
 
 export default function Landing() {
   useRouteSeo({
@@ -24,42 +32,17 @@ export default function Landing() {
     "Ayuslh.in",
   ];
 
-  const seoSections = [
-    {
-      title: "Audience fit",
-      icon: FileText,
-      body: "Students, career switchers, and working professionals can use ResuMe to turn rough experience into a cleaner resume for one specific job post.",
-    },
-    {
-      title: "ATS methodology",
-      icon: Shield,
-      body: "We look for the target role, surface the keywords that matter, and keep the structure easy for ATS systems to parse.",
-    },
-    {
-      title: "Differentiation",
-      icon: Sparkles,
-      body: "ResuMe combines resume creation and resume grading in one flow, so you can rewrite and check your resume without switching tools.",
-    },
-    {
-      title: "Limitations",
-      icon: Zap,
-      body: "No tool can promise interviews, and highly unusual formatting or missing job context can reduce the quality of the result.",
-    },
-    {
-      title: "FAQ",
-      icon: ArrowRight,
-      body: [
-        {
-          question: "Can I start with a rough draft?",
-          answer: "Yes. The app helps turn a rough summary of your work into a more job-ready resume.",
-        },
-        {
-          question: "What does the grader look at?",
-          answer: "It checks keywords, formatting, and structure, then gives clear next steps for improvement.",
-        },
-      ],
-    },
-  ];
+  const seoSections = HOME_SEO_SECTIONS.map((section) => ({
+    ...section,
+    icon:
+      section.title === "Audience fit"
+        ? FileText
+        : section.title === "ATS methodology"
+          ? Shield
+          : section.title === "Differentiation"
+            ? Sparkles
+            : Zap,
+  }));
 
   return (
     <div className="landing-desktop-shell min-h-screen px-6 pt-6 pb-24 fade-in relative overflow-hidden">
@@ -83,11 +66,11 @@ export default function Landing() {
               boxShadow: "0 0 16px rgba(6,182,212,0.15)"
             }}>
             <Sparkles size={12} />
-            ATS-Optimized Resumes
+            {HOME_SEO_BADGE}
           </div>
 
           <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
-            Free AI Resume Builder{" "}
+            {HOME_SEO_TITLE}{" "}
             <span style={{
               background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
               WebkitBackgroundClip: "text",
@@ -100,7 +83,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed">
-            Transform your raw experience into tailored, professional resumes with ATS-friendly guidance and clear grading feedback.
+            {HOME_SEO_DESCRIPTION}
           </p>
 
           {/* CTA Buttons */}
@@ -121,17 +104,18 @@ export default function Landing() {
 
           {/* Trust indicators */}
           <div className="flex items-center justify-center gap-5 pt-1 flex-wrap">
-            {[
-              { icon: Shield, label: "ATS Compliant" },
-              { icon: Zap, label: "AI-Powered" },
-              { icon: FileText, label: "Pro Templates" },
-            ].map((item) => {
-              const IconComponent = item.icon;
+            {HOME_SEO_TRUST.map((label) => {
+              const iconMap = {
+                "ATS Compliant": Shield,
+                "AI-Powered": Zap,
+                "Pro Templates": FileText,
+              };
+              const IconComponent = iconMap[label];
 
               return (
-                <div key={item.label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
+                <div key={label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
                   <IconComponent size={13} className="text-primary" />
-                  <span>{item.label}</span>
+                  <span>{label}</span>
                 </div>
               );
             })}
@@ -289,21 +273,43 @@ export default function Landing() {
                   <h3 className="text-sm font-semibold text-on-surface">{section.title}</h3>
                 </div>
 
-                {Array.isArray(section.body) ? (
-                  <dl className="mt-3 space-y-3">
-                    {section.body.map((item) => (
-                      <div key={item.question} className="space-y-1">
-                        <dt className="text-sm font-medium text-on-surface">{item.question}</dt>
-                        <dd className="text-sm leading-relaxed text-on-surface-variant">{item.answer}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{section.body}</p>
-                )}
+                <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{section.body}</p>
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section
+        className="relative z-10 mt-6 w-full max-w-7xl rounded-[1.5rem] p-4 sm:p-5"
+        style={{
+          background: "rgba(8, 15, 31, 0.46)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
+        }}
+        aria-labelledby="landing-citable-heading"
+      >
+        <div className="max-w-2xl space-y-1">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+            Citation Blocks
+          </p>
+          <h2 id="landing-citable-heading" className="text-xl sm:text-2xl font-bold text-on-surface">
+            Self-contained answers for AI search
+          </h2>
+        </div>
+
+        <div className="mt-4 grid gap-3 xl:grid-cols-2">
+          {HOME_SEO_CITABLE_BLOCKS.map((block) => (
+            <article
+              key={block.heading}
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:p-5"
+            >
+              <h3 className="text-base font-semibold text-on-surface">{block.heading}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{block.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 

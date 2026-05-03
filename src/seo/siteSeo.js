@@ -1,10 +1,16 @@
+import {
+  HOME_AUTHOR_NAME,
+  HOME_AUTHOR_URL,
+  HOME_SEO_DESCRIPTION,
+} from './homepageSeoContent.js'
+
 export const SITE_NAME = 'ResuMe'
 export const SITE_URL = 'https://resume.ayuslh.in/'
 export const SOCIAL_IMAGE = `${SITE_URL}social-preview.png`
 
 export const HOME_TITLE = 'Free AI Resume Builder | ResuMe'
-export const HOME_DESCRIPTION =
-  'Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.'
+export const HOME_DESCRIPTION = HOME_SEO_DESCRIPTION
+export const HOME_LAST_MODIFIED = '2026-05-03'
 
 export const HOME_JSON_LD = [
   {
@@ -23,6 +29,8 @@ export const HOME_JSON_LD = [
     name: HOME_TITLE,
     url: SITE_URL,
     description: HOME_DESCRIPTION,
+    datePublished: HOME_LAST_MODIFIED,
+    dateModified: HOME_LAST_MODIFIED,
     isPartOf: {
       '@id': `${SITE_URL}#website`,
     },
@@ -35,9 +43,22 @@ export const HOME_JSON_LD = [
     '@id': `${SITE_URL}#organization`,
     name: SITE_NAME,
     url: SITE_URL,
+    founder: {
+      '@id': `${SITE_URL}#person`,
+    },
+    sameAs: [HOME_AUTHOR_URL],
     logo: {
       '@type': 'ImageObject',
       url: `${SITE_URL}favicon.svg`,
+    },
+  },
+  {
+    '@type': 'Person',
+    '@id': `${SITE_URL}#person`,
+    name: HOME_AUTHOR_NAME,
+    url: HOME_AUTHOR_URL,
+    worksFor: {
+      '@id': `${SITE_URL}#organization`,
     },
   },
   {
@@ -50,6 +71,8 @@ export const HOME_JSON_LD = [
     url: SITE_URL,
     image: `${SITE_URL}favicon.svg`,
     description: HOME_DESCRIPTION,
+    datePublished: HOME_LAST_MODIFIED,
+    dateModified: HOME_LAST_MODIFIED,
     publisher: {
       '@id': `${SITE_URL}#organization`,
     },

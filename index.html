@@ -7,20 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Free AI Resume Builder | ResuMe</title>
   <meta name="description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
+    content="ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://resume.ayuslh.in/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="ResuMe" />
   <meta property="og:title" content="Free AI Resume Builder | ResuMe" />
   <meta property="og:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
+    content="ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals." />
   <meta property="og:url" content="https://resume.ayuslh.in/" />
   <meta property="og:image" content="https://resume.ayuslh.in/social-preview.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Free AI Resume Builder | ResuMe" />
   <meta name="twitter:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
+    content="ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals." />
   <meta name="twitter:image" content="https://resume.ayuslh.in/social-preview.png" />
   <script type="application/ld+json">
       {
@@ -31,7 +31,7 @@
             "@id": "https://resume.ayuslh.in/#website",
             "name": "ResuMe",
             "url": "https://resume.ayuslh.in/",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
+            "description": "ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
             "publisher": {
               "@id": "https://resume.ayuslh.in/#organization"
             }
@@ -41,7 +41,9 @@
             "@id": "https://resume.ayuslh.in/#webpage",
             "name": "Free AI Resume Builder | ResuMe",
             "url": "https://resume.ayuslh.in/",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
+            "description": "ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
+            "datePublished": "2026-05-03",
+            "dateModified": "2026-05-03",
             "isPartOf": {
               "@id": "https://resume.ayuslh.in/#website"
             },
@@ -54,9 +56,24 @@
             "@id": "https://resume.ayuslh.in/#organization",
             "name": "ResuMe",
             "url": "https://resume.ayuslh.in/",
+            "founder": {
+              "@id": "https://resume.ayuslh.in/#person"
+            },
+            "sameAs": [
+              "https://Ayuslh.in/"
+            ],
             "logo": {
               "@type": "ImageObject",
               "url": "https://resume.ayuslh.in/favicon.svg"
+            }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://resume.ayuslh.in/#person",
+            "name": "Ayush",
+            "url": "https://Ayuslh.in/",
+            "worksFor": {
+              "@id": "https://resume.ayuslh.in/#organization"
             }
           },
           {
@@ -68,7 +85,9 @@
             "operatingSystem": "Web",
             "url": "https://resume.ayuslh.in/",
             "image": "https://resume.ayuslh.in/favicon.svg",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
+            "description": "ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
+            "datePublished": "2026-05-03",
+            "dateModified": "2026-05-03",
             "publisher": {
               "@id": "https://resume.ayuslh.in/#organization"
             },
@@ -113,6 +132,7 @@
       };
 
       const routeSeo = authRoutes[window.location.pathname];
+      document.documentElement.dataset.route = window.location.pathname;
       if (!routeSeo) return;
 
       const upsert = (selector, tagName, attributes, textContent) => {
@@ -164,6 +184,15 @@
       }
     })();
   </script>
+  <style>
+    html[data-route="/"] #root {
+      display: none;
+    }
+
+    html[data-route]:not([data-route="/"]) #homepage-static-shell {
+      display: none;
+    }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
@@ -171,6 +200,7 @@
 </head>
 
 <body>
+  <!-- HOMEPAGE_SEO_SHELL -->
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

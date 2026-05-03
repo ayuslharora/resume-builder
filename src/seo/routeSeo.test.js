@@ -206,3 +206,13 @@ test('useRouteSeo is exported and wired to the DOM applier', async () => {
   assert.match(source, /React\.useLayoutEffect\(/);
   assert.match(source, /return applyRouteSeo\(document, seo\)/);
 });
+
+test('siteSeo includes creator and freshness schema signals', async () => {
+  const source = await readFile(new URL('./siteSeo.js', import.meta.url), 'utf8');
+
+  assert.match(source, /'@type': 'Person'/);
+  assert.match(source, /founder:/);
+  assert.match(source, /sameAs:/);
+  assert.match(source, /datePublished: HOME_LAST_MODIFIED/);
+  assert.match(source, /dateModified: HOME_LAST_MODIFIED/);
+});
