@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 test("Landing uses a desktop one-screen layout with marquee footer", async () => {
-  const source = await readFile(new URL("./Landing.jsx", import.meta.url), "utf8");
+  const landingSource = await readFile(new URL("./Landing.jsx", import.meta.url), "utf8");
+  const seoSource = await readFile(new URL("../seo/homepageSeoContent.js", import.meta.url), "utf8");
+  const source = landingSource + seoSource;
 
   assert.match(source, /Built and designed by Ayush/);
   assert.match(source, /Ayuslh\.in/);
@@ -24,7 +26,7 @@ test("Landing uses a desktop one-screen layout with marquee footer", async () =>
   assert.match(source, /Audience fit/);
   assert.match(source, /Students, career switchers, and working professionals/);
   assert.match(source, /ATS methodology/);
-  assert.match(source, /We look for the target role, surface the keywords that matter/);
+  assert.match(source, /ResuMe looks at the target role, surfaces the keywords that matter/);
   assert.match(source, /Differentiation/);
   assert.match(source, /resume creation and resume grading in one flow/);
   assert.match(source, /Limitations/);

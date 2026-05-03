@@ -5,6 +5,7 @@
 @layer base {
   body {
     @apply text-on-surface font-sans min-h-screen antialiased;
+    overflow-x: hidden;
     background-color: #0a0f1e;
     background-image:
       radial-gradient(ellipse at 15% 40%, rgba(6, 182, 212, 0.09) 0%, transparent 55%),
@@ -184,15 +185,16 @@
 
   .landing-desktop-shell {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .landing-hero-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-    align-items: center;
+    align-items: start;
   }
 
   .landing-credit-marquee {
@@ -246,9 +248,30 @@
 
   @media (min-width: 1024px) {
     .landing-hero-grid {
-      grid-template-columns: minmax(0, 1.1fr) minmax(22.5rem, 0.86fr);
-      gap: 1.9rem;
+      grid-template-columns: minmax(0, 1.22fr) minmax(21rem, 0.78fr);
+      grid-template-areas:
+        "hero feature"
+        "seo feature"
+        "citation citation";
+      gap: 1.5rem;
       min-height: calc(100vh - 9rem);
+    }
+
+    .landing-hero-panel {
+      grid-area: hero;
+    }
+
+    .landing-feature-panel {
+      grid-area: feature;
+      align-self: start;
+    }
+
+    .landing-seo-grid {
+      grid-area: seo;
+    }
+
+    .landing-citable-grid {
+      grid-area: citation;
     }
   }
 
