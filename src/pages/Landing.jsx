@@ -1,64 +1,18 @@
 import { Link } from "react-router-dom";
 import { FileText, ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
-import { useRouteSeo } from "../seo/routeSeo";
+import {
+  HOME_DESCRIPTION,
+  HOME_JSON_LD,
+  HOME_TITLE,
+  useRouteSeo,
+} from "../seo/routeSeo";
 
 export default function Landing() {
   useRouteSeo({
-    title: "ATS-Friendly Resumes Built Faster with AI",
-    description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     path: "/",
-    jsonLd: [
-      {
-        "@type": "WebSite",
-        name: "ResuMe",
-        url: "https://resume.ayuslh.in/",
-        description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
-      },
-      {
-        "@type": "SoftwareApplication",
-        name: "ResuMe",
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
-        description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-      },
-      {
-        "@type": "Organization",
-        name: "ResuMe",
-        url: "https://resume.ayuslh.in/",
-        logo: "https://resume.ayuslh.in/favicon.svg",
-      },
-      {
-        "@type": "Person",
-        name: "Ayush",
-        url: "https://Ayuslh.in",
-      },
-      {
-        "@type": "FAQPage",
-        mainEntity: [
-          {
-            "@type": "Question",
-            name: "Can I start with a rough draft?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "Yes. ResuMe helps turn a rough summary of your work into a more job-ready resume.",
-            },
-          },
-          {
-            "@type": "Question",
-            name: "What does the grader look at?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "The grader checks keywords, formatting, and structure, then gives clear next steps for improvement.",
-            },
-          },
-        ],
-      },
-    ],
+    jsonLd: HOME_JSON_LD,
   });
 
   const creditItems = [
@@ -133,7 +87,7 @@ export default function Landing() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
-            Craft{" "}
+            Free AI Resume Builder{" "}
             <span style={{
               background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
               WebkitBackgroundClip: "text",
@@ -141,13 +95,12 @@ export default function Landing() {
               backgroundClip: "text",
               filter: "drop-shadow(0 0 20px rgba(6,182,212,0.4))"
             }}>
-              Perfect Resumes
+              with ATS grading
             </span>
-            <br className="hidden xl:block" /> with AI precision.
           </h1>
 
           <p className="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed">
-            Transform your raw experience into tailored, professional resumes that pass ATS filters and land interviews.
+            Transform your raw experience into tailored, professional resumes with ATS-friendly guidance and clear grading feedback.
           </p>
 
           {/* CTA Buttons */}
@@ -224,14 +177,17 @@ export default function Landing() {
             >
               <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-on-surface-variant">
                 <span>Live Analysis Preview</span>
-                <span className="text-primary">82 / 100</span>
+                <span className="text-primary">Illustrative score</span>
               </div>
               <div className="h-2 rounded-full bg-white/6 overflow-hidden">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: "82%", background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%)" }}
+                  style={{ width: "78%", background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%)" }}
                 />
               </div>
+              <p className="text-[11px] text-on-surface-variant">
+                Sample only, not a guaranteed result.
+              </p>
               <div className="grid grid-cols-2 gap-2.5 text-sm">
                 <div className="rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
                   <p className="text-on-surface font-semibold">Keywords</p>

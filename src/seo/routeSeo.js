@@ -1,10 +1,12 @@
 import React from 'react'
-
-const DEFAULT_BASE_URL = 'https://resume.ayuslh.in'
-const DEFAULT_SITE_NAME = 'ResuMe'
-const DEFAULT_DESCRIPTION =
-  'Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.'
-const DEFAULT_IMAGE = `${DEFAULT_BASE_URL}/social-preview.png`
+import {
+  HOME_DESCRIPTION,
+  HOME_JSON_LD,
+  HOME_TITLE,
+  SITE_NAME,
+  SOCIAL_IMAGE,
+  SITE_URL,
+} from './siteSeo.js'
 
 function normalizePath(path = '/') {
   if (!path) return '/'
@@ -12,7 +14,7 @@ function normalizePath(path = '/') {
 }
 
 function buildUrl(path) {
-  return new URL(normalizePath(path), DEFAULT_BASE_URL).toString()
+  return new URL(normalizePath(path), SITE_URL).toString()
 }
 
 function formatTitle(title, siteName) {
@@ -90,13 +92,13 @@ function upsertSeoNode(document, selector, tagName, attributes, textContent) {
 
 export function buildRouteSeo(input = {}) {
   const {
-    title = DEFAULT_SITE_NAME,
-    description = DEFAULT_DESCRIPTION,
+    title = HOME_TITLE,
+    description = HOME_DESCRIPTION,
     path = '/',
     canonical = buildUrl(path),
     robots = 'index, follow',
-    siteName = DEFAULT_SITE_NAME,
-    image = DEFAULT_IMAGE,
+    siteName = SITE_NAME,
+    image = SOCIAL_IMAGE,
     noIndex = false,
     jsonLd = [],
   } = input
@@ -261,7 +263,7 @@ export function useRouteSeo(input = {}) {
     [title, description, path, canonical, robots, siteName, image, noIndex, jsonLdKey],
   )
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (typeof document === 'undefined') {
       return undefined
     }
@@ -271,3 +273,5 @@ export function useRouteSeo(input = {}) {
 
   return seo
 }
+
+export { HOME_DESCRIPTION, HOME_JSON_LD, HOME_TITLE, SITE_NAME, SOCIAL_IMAGE, SITE_URL }

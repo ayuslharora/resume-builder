@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { applyRouteSeo, buildRouteSeo } from './routeSeo.js';
+import { HOME_DESCRIPTION, HOME_TITLE } from './siteSeo.js';
 
 function createElementStub(tagName) {
   return {
@@ -119,8 +120,8 @@ test('buildRouteSeo normalizes route metadata', () => {
 
 test('buildRouteSeo normalizes homepage metadata', () => {
   const seo = buildRouteSeo({
-    title: 'ATS-Friendly Resumes Built Faster with AI',
-    description: 'Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     path: '/',
     jsonLd: [
       {
@@ -134,8 +135,8 @@ test('buildRouteSeo normalizes homepage metadata', () => {
     ],
   });
 
-  assert.equal(seo.title, 'ATS-Friendly Resumes Built Faster with AI | ResuMe');
-  assert.equal(seo.description, 'Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.');
+  assert.equal(seo.title, 'Free AI Resume Builder | ResuMe');
+  assert.equal(seo.description, HOME_DESCRIPTION);
   assert.equal(seo.canonical, 'https://resume.ayuslh.in/');
   assert.equal(seo.robots, 'index, follow');
   assert.equal(seo.jsonLd.length, 2);
@@ -202,6 +203,6 @@ test('useRouteSeo is exported and wired to the DOM applier', async () => {
   const source = await readFile(new URL('./routeSeo.js', import.meta.url), 'utf8');
 
   assert.match(source, /export function useRouteSeo\(/);
-  assert.match(source, /React\.useEffect\(/);
+  assert.match(source, /React\.useLayoutEffect\(/);
   assert.match(source, /return applyRouteSeo\(document, seo\)/);
 });

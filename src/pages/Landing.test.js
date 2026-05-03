@@ -38,4 +38,9 @@ test("Landing uses a desktop one-screen layout with marquee footer", async () =>
   assert.match(source, /Resume Grader/);
   assert.match(source, /href="https:\/\/Ayuslh\.in"/);
   assert.match(source, /target="_blank"/);
+  assert.match(source, /Free AI Resume Builder/);
+  assert.match(source, /Illustrative score/);
+  assert.match(source, /Sample only, not a guaranteed result\./);
+  assert.doesNotMatch(source, /ATS-Friendly Resumes Built Faster with AI/);
+  assert.doesNotMatch(source, /82 \/ 100/);
 });

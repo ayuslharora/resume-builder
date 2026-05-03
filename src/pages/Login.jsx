@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { AUTH_ROUTE_SEO } from "../seo/siteSeo";
 import { useRouteSeo } from "../seo/routeSeo";
 
 const GoogleIcon = () => (
@@ -15,10 +16,10 @@ const GoogleIcon = () => (
 
 export default function Login() {
   useRouteSeo({
-    title: "Log In",
-    description: "Log in to your ResuMe workspace.",
+    title: AUTH_ROUTE_SEO["/login"].title,
+    description: AUTH_ROUTE_SEO["/login"].description,
     path: "/login",
-    robots: "noindex,follow",
+    robots: AUTH_ROUTE_SEO["/login"].robots,
   });
 
   const [name, setName] = useState("");

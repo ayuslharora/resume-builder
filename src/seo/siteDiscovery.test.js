@@ -17,13 +17,13 @@ function tagWithAttributes(tagName, attributes) {
 test("homepage HTML exposes production SEO metadata and structured data", async () => {
   const html = await readFile(new URL("../../index.html", import.meta.url), "utf8");
 
-  assert.match(html, /<title>ATS-Friendly Resumes Built Faster with AI \| ResuMe<\/title>/);
+  assert.match(html, /<title>Free AI Resume Builder \| ResuMe<\/title>/);
   assert.match(
     html,
     tagWithAttributes("meta", {
       name: "description",
       content:
-        "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+        "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
     }),
   );
   assert.match(
@@ -35,7 +35,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
     html,
     tagWithAttributes("meta", {
       property: "og:title",
-      content: "ATS-Friendly Resumes Built Faster with AI | ResuMe",
+      content: "Free AI Resume Builder | ResuMe",
     })
   );
   assert.match(
@@ -111,5 +111,6 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(llms, /one workflow/i);
   assert.match(llms, /Limitations|limitations:/);
   assert.match(llms, /no subscriptions/i);
+  assert.match(llms, /public pages are accessible without an account/i);
   assert.match(llms, /https:\/\/resume\.ayuslh\.in\//);
 });

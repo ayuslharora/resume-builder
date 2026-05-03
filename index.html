@@ -5,22 +5,22 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATS-Friendly Resumes Built Faster with AI | ResuMe</title>
+  <title>Free AI Resume Builder | ResuMe</title>
   <meta name="description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://resume.ayuslh.in/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="ResuMe" />
-  <meta property="og:title" content="ATS-Friendly Resumes Built Faster with AI | ResuMe" />
+  <meta property="og:title" content="Free AI Resume Builder | ResuMe" />
   <meta property="og:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
   <meta property="og:url" content="https://resume.ayuslh.in/" />
   <meta property="og:image" content="https://resume.ayuslh.in/social-preview.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ATS-Friendly Resumes Built Faster with AI | ResuMe" />
+  <meta name="twitter:title" content="Free AI Resume Builder | ResuMe" />
   <meta name="twitter:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe." />
   <meta name="twitter:image" content="https://resume.ayuslh.in/social-preview.png" />
   <script type="application/ld+json">
       {
@@ -31,7 +31,7 @@
             "@id": "https://resume.ayuslh.in/#website",
             "name": "ResuMe",
             "url": "https://resume.ayuslh.in/",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
             "publisher": {
               "@id": "https://resume.ayuslh.in/#organization"
             }
@@ -39,9 +39,9 @@
           {
             "@type": "WebPage",
             "@id": "https://resume.ayuslh.in/#webpage",
-            "name": "ATS-Friendly Resumes Built Faster with AI | ResuMe",
+            "name": "Free AI Resume Builder | ResuMe",
             "url": "https://resume.ayuslh.in/",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
             "isPartOf": {
               "@id": "https://resume.ayuslh.in/#website"
             },
@@ -68,7 +68,7 @@
             "operatingSystem": "Web",
             "url": "https://resume.ayuslh.in/",
             "image": "https://resume.ayuslh.in/favicon.svg",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and get free resume grading with ResuMe.",
             "publisher": {
               "@id": "https://resume.ayuslh.in/#organization"
             },
@@ -97,6 +97,73 @@
         ]
       }
     </script>
+  <script>
+    (() => {
+      const authRoutes = {
+        '/login': {
+          title: 'Log in to ResuMe',
+          description: 'Log in to your ResuMe workspace.',
+          robots: 'noindex,follow',
+        },
+        '/signup': {
+          title: 'Create a ResuMe account',
+          description: 'Create your ResuMe account and start building better resumes.',
+          robots: 'noindex,follow',
+        },
+      };
+
+      const routeSeo = authRoutes[window.location.pathname];
+      if (!routeSeo) return;
+
+      const upsert = (selector, tagName, attributes, textContent) => {
+        let node = document.head.querySelector(selector);
+        if (!node) {
+          node = document.createElement(tagName);
+          document.head.appendChild(node);
+        }
+
+        Object.entries(attributes).forEach(([name, value]) => {
+          node.setAttribute(name, value);
+        });
+
+        if (textContent !== undefined) {
+          node.textContent = textContent;
+        }
+      };
+
+      document.title = routeSeo.title;
+      upsert('meta[name="description"]', 'meta', { name: 'description', content: routeSeo.description });
+      upsert('meta[name="robots"]', 'meta', { name: 'robots', content: routeSeo.robots });
+      upsert('link[rel="canonical"]', 'link', {
+        rel: 'canonical',
+        href: new URL(window.location.pathname, window.location.origin).toString(),
+      });
+      upsert('meta[property="og:type"]', 'meta', { property: 'og:type', content: 'website' });
+      upsert('meta[property="og:site_name"]', 'meta', { property: 'og:site_name', content: 'ResuMe' });
+      upsert('meta[property="og:title"]', 'meta', { property: 'og:title', content: routeSeo.title });
+      upsert('meta[property="og:description"]', 'meta', { property: 'og:description', content: routeSeo.description });
+      upsert('meta[property="og:url"]', 'meta', {
+        property: 'og:url',
+        content: new URL(window.location.pathname, window.location.origin).toString(),
+      });
+      upsert('meta[property="og:image"]', 'meta', {
+        property: 'og:image',
+        content: 'https://resume.ayuslh.in/social-preview.png',
+      });
+      upsert('meta[name="twitter:card"]', 'meta', { name: 'twitter:card', content: 'summary_large_image' });
+      upsert('meta[name="twitter:title"]', 'meta', { name: 'twitter:title', content: routeSeo.title });
+      upsert('meta[name="twitter:description"]', 'meta', { name: 'twitter:description', content: routeSeo.description });
+      upsert('meta[name="twitter:image"]', 'meta', {
+        name: 'twitter:image',
+        content: 'https://resume.ayuslh.in/social-preview.png',
+      });
+
+      const structuredData = document.head.querySelector('script[type="application/ld+json"]');
+      if (structuredData) {
+        structuredData.textContent = '';
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"

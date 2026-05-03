@@ -2,7 +2,7 @@
 
 > Free ATS-friendly resume builder and grader for students, fresh graduates, and early-career professionals.
 
-ResuMe helps job seekers build ATS-friendly resumes, tailor content to a target role, and grade the finished resume in one workflow. It combines resume creation, AI-assisted rewrite suggestions, and instant ATS feedback so users can improve a resume without switching between separate tools or hitting a paywall. It is not designed for creative, graphic, or portfolio-style resumes.
+ResuMe helps job seekers build ATS-friendly resumes, tailor content to a target role, and grade the finished resume in one workflow. Public pages are accessible without an account, but the builder, export tools, and cover-letter flow require sign-in. It combines resume creation, AI-assisted rewrite suggestions, and instant ATS feedback so users can improve a resume without switching between separate tools. It is not designed for creative, graphic, or portfolio-style resumes.
 
 ## What Makes ResuMe Different
 
@@ -15,7 +15,7 @@ Most resume tools do one thing: build, improve, or grade. ResuMe does all three 
 - Instant resume grading with actionable feedback before applying
 - Curated professional templates for tech and corporate hiring
 - Distraction-free editing focused on content quality over visual complexity
-- No account required to start, no export restrictions, no upsells
+- Public pages are accessible without an account, while core creation tools require sign-in
 - Clear guidance on limitations, tradeoffs, and when a creative resume tool is a better fit
 
 ## Ideal For
@@ -41,7 +41,7 @@ Most resume tools do one thing: build, improve, or grade. ResuMe does all three 
 
 ## Pricing
 
-Completely free. No subscriptions, no trials, no locked features, no export paywalls.
+Completely free to start. No subscriptions, no trials, and no locked public features. Core app actions require sign-in.
 
 ## Limitations
 
