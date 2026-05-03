@@ -5,22 +5,22 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resume Maker and Grader | ResuMe</title>
+  <title>ATS-Friendly Resumes Built Faster with AI | ResuMe</title>
   <meta name="description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://resume.ayuslh.in/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="ResuMe" />
-  <meta property="og:title" content="Resume Maker and Grader | ResuMe" />
+  <meta property="og:title" content="ATS-Friendly Resumes Built Faster with AI | ResuMe" />
   <meta property="og:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
   <meta property="og:url" content="https://resume.ayuslh.in/" />
   <meta property="og:image" content="https://resume.ayuslh.in/social-preview.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Resume Maker and Grader | ResuMe" />
+  <meta name="twitter:title" content="ATS-Friendly Resumes Built Faster with AI | ResuMe" />
   <meta name="twitter:description"
-    content="Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe." />
+    content="Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe." />
   <meta name="twitter:image" content="https://resume.ayuslh.in/social-preview.png" />
   <script type="application/ld+json">
       {
@@ -28,19 +28,71 @@
         "@graph": [
           {
             "@type": "WebSite",
+            "@id": "https://resume.ayuslh.in/#website",
             "name": "ResuMe",
             "url": "https://resume.ayuslh.in/",
-            "image": "https://resume.ayuslh.in/favicon.svg",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe."
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "publisher": {
+              "@id": "https://resume.ayuslh.in/#organization"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://resume.ayuslh.in/#webpage",
+            "name": "ATS-Friendly Resumes Built Faster with AI | ResuMe",
+            "url": "https://resume.ayuslh.in/",
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "isPartOf": {
+              "@id": "https://resume.ayuslh.in/#website"
+            },
+            "about": {
+              "@id": "https://resume.ayuslh.in/#softwareapplication"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://resume.ayuslh.in/#organization",
+            "name": "ResuMe",
+            "url": "https://resume.ayuslh.in/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://resume.ayuslh.in/favicon.svg"
+            }
           },
           {
             "@type": "SoftwareApplication",
+            "@id": "https://resume.ayuslh.in/#softwareapplication",
             "name": "ResuMe",
             "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "Resume Builder",
             "operatingSystem": "Web",
             "url": "https://resume.ayuslh.in/",
             "image": "https://resume.ayuslh.in/favicon.svg",
-            "description": "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe."
+            "description": "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
+            "publisher": {
+              "@id": "https://resume.ayuslh.in/#organization"
+            },
+            "offers": {
+              "@id": "https://resume.ayuslh.in/#offer"
+            },
+            "featureList": [
+              "ATS-friendly resume building",
+              "AI-assisted content improvement",
+              "Instant resume grading",
+              "Free access with no subscription"
+            ]
+          },
+          {
+            "@type": "Offer",
+            "@id": "https://resume.ayuslh.in/#offer",
+            "url": "https://resume.ayuslh.in/",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "category": "Free access",
+            "itemOffered": {
+              "@id": "https://resume.ayuslh.in/#softwareapplication"
+            }
           }
         ]
       }

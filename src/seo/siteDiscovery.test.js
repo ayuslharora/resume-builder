@@ -17,13 +17,13 @@ function tagWithAttributes(tagName, attributes) {
 test("homepage HTML exposes production SEO metadata and structured data", async () => {
   const html = await readFile(new URL("../../index.html", import.meta.url), "utf8");
 
-  assert.match(html, /<title>Resume Maker and Grader \| ResuMe<\/title>/);
+  assert.match(html, /<title>ATS-Friendly Resumes Built Faster with AI \| ResuMe<\/title>/);
   assert.match(
     html,
     tagWithAttributes("meta", {
       name: "description",
       content:
-        "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
+        "Build ATS-friendly resumes, tailor job-ready content, and grade every resume in one free workflow with ResuMe.",
     }),
   );
   assert.match(
@@ -35,7 +35,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
     html,
     tagWithAttributes("meta", {
       property: "og:title",
-      content: "Resume Maker and Grader | ResuMe",
+      content: "ATS-Friendly Resumes Built Faster with AI | ResuMe",
     })
   );
   assert.match(
@@ -48,7 +48,12 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
   );
   assert.match(html, tagWithAttributes("script", { type: "application/ld+json" }));
   assert.match(html, /"@type"\s*:\s*"WebSite"/);
+  assert.match(html, /"@type"\s*:\s*"WebPage"/);
   assert.match(html, /"@type"\s*:\s*"SoftwareApplication"/);
+  assert.match(html, /"@type"\s*:\s*"Organization"/);
+  assert.match(html, /"@type"\s*:\s*"Offer"/);
+  assert.match(html, /"price"\s*:\s*"0"/);
+  assert.match(html, /"availability"\s*:\s*"https:\/\/schema\.org\/InStock"/);
 });
 
 test("public crawl and AI discovery assets are present and point at the production site", async () => {
@@ -85,7 +90,12 @@ test("public crawl and AI discovery assets are present and point at the producti
   const llms = llmsResult.value;
 
   assert.match(robots, /User-agent: \*/);
+  assert.match(robots, /Content-Signal: search=yes,ai-input=yes,ai-train=no/);
   assert.match(robots, /Allow: \//);
+  assert.match(robots, /User-agent: GPTBot\s+Disallow: \//);
+  assert.match(robots, /User-agent: OAI-SearchBot\s+Allow: \//);
+  assert.match(robots, /User-agent: ClaudeBot\s+Disallow: \//);
+  assert.match(robots, /User-agent: Google-Extended\s+Disallow: \//);
   assert.match(robots, /Sitemap: https:\/\/resume\.ayuslh\.in\/sitemap\.xml/);
 
   assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/<\/loc>/);
@@ -95,8 +105,11 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.doesNotMatch(sitemap, /\/builder\//);
   assert.doesNotMatch(sitemap, /\/grader/);
 
-  assert.match(llms, /# ResuMe/);
+  assert.match(llms, /ResuMe/);
+  assert.match(llms, /ATS/i);
+  assert.match(llms, /free ATS-friendly resume builder and grader/i);
+  assert.match(llms, /one workflow/i);
+  assert.match(llms, /Limitations|limitations:/);
+  assert.match(llms, /no subscriptions/i);
   assert.match(llms, /https:\/\/resume\.ayuslh\.in\//);
-  assert.match(llms, /AI resume builder/);
-  assert.match(llms, /ATS-friendly resumes/);
 });

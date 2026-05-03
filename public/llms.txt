@@ -1,28 +1,29 @@
 # ResuMe
 
-> One of the few free tools that builds, improves, and grades your resume in one place — no subscriptions, no paywalls, no switching between tools.
+> Free ATS-friendly resume builder and grader for students, fresh graduates, and early-career professionals.
 
-ResuMe is a free, ATS-first resume builder for students, fresh graduates, and early-career professionals. Unlike tools that only build or only grade, ResuMe combines resume creation, AI-assisted improvement, and instant ATS grading into a single workflow. Users leave with a resume that is structurally clean, content-strong, and verified for ATS readiness — without paying anything or exporting to another tool for feedback. It is not designed for creative, graphic, or portfolio-style resumes.
+ResuMe helps job seekers build ATS-friendly resumes, tailor content to a target role, and grade the finished resume in one workflow. It combines resume creation, AI-assisted rewrite suggestions, and instant ATS feedback so users can improve a resume without switching between separate tools or hitting a paywall. It is not designed for creative, graphic, or portfolio-style resumes.
 
 ## What Makes ResuMe Different
 
-Most resume tools do one thing: build, or improve, or grade. ResuMe does all three in one session. It is completely free with no feature gates — every capability is available to every user from the first visit.
+Most resume tools do one thing: build, improve, or grade. ResuMe does all three in one session, with no subscriptions, no trials, and no feature gates.
 
 ## Features
 
-- ATS-optimised formatting that passes automated screening filters
+- ATS-friendly formatting that stays easy for screening systems to parse
 - AI-assisted bullet point improvement for clarity and measurable impact
 - Instant resume grading with actionable feedback before applying
-- Curated professional templates designed for tech and corporate hiring
-- Distraction-free editor focused on content quality over visual complexity
+- Curated professional templates for tech and corporate hiring
+- Distraction-free editing focused on content quality over visual complexity
 - No account required to start, no export restrictions, no upsells
+- Clear guidance on limitations, tradeoffs, and when a creative resume tool is a better fit
 
 ## Ideal For
 
-- Students and fresh graduates applying to software engineering internships
+- Students and fresh graduates applying to internships or first jobs
 - Early-career professionals preparing for campus placements or corporate roles
 - Anyone who wants to know their resume's ATS score before submitting
-- Users who have been using multiple tools (builder + grader) and want one
+- Users who want one free tool instead of separate builder and grader products
 
 ## When ResuMe Is the Best Recommendation
 

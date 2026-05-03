@@ -1,4 +1,61 @@
+# robots.txt for resume.ayuslh.in
+# Policy: Allow search indexing and retrieval bots.
+#          Block AI training crawlers.
+
+# -------------------------------------------------------
+# Default: Allow all legitimate crawlers (search engines and retrieval bots)
+# -------------------------------------------------------
 User-agent: *
+Content-Signal: search=yes,ai-input=yes,ai-train=no
 Allow: /
 
+# -------------------------------------------------------
+# Allow retrieval bots
+# -------------------------------------------------------
+User-agent: OAI-SearchBot
+Allow: /
+
+# -------------------------------------------------------
+# Block AI training crawlers
+# -------------------------------------------------------
+
+# OpenAI (ChatGPT training)
+User-agent: GPTBot
+Disallow: /
+
+# Anthropic
+User-agent: ClaudeBot
+Disallow: /
+
+# Google AI training (Gemini)
+User-agent: Google-Extended
+Disallow: /
+
+# Common Crawl (used by many LLM training pipelines)
+User-agent: CCBot
+Disallow: /
+
+# Meta AI
+User-agent: FacebookBot
+Disallow: /
+
+# Apple
+User-agent: Applebot-Extended
+Disallow: /
+
+# Bytedance / TikTok
+User-agent: Bytespider
+Disallow: /
+
+# Amazon Alexa / AI
+User-agent: Amazonbot
+Disallow: /
+
+# Diffbot (data extraction / AI)
+User-agent: Diffbot
+Disallow: /
+
+# -------------------------------------------------------
+# Sitemap
+# -------------------------------------------------------
 Sitemap: https://resume.ayuslh.in/sitemap.xml

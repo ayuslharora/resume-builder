@@ -1,7 +1,66 @@
 import { Link } from "react-router-dom";
 import { FileText, ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
+import { useRouteSeo } from "../seo/routeSeo";
 
 export default function Landing() {
+  useRouteSeo({
+    title: "ATS-Friendly Resumes Built Faster with AI",
+    description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
+    path: "/",
+    jsonLd: [
+      {
+        "@type": "WebSite",
+        name: "ResuMe",
+        url: "https://resume.ayuslh.in/",
+        description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "ResuMe",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: "Build ATS-friendly resumes, tailor job-ready content, and get instant resume grading with ResuMe.",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+      },
+      {
+        "@type": "Organization",
+        name: "ResuMe",
+        url: "https://resume.ayuslh.in/",
+        logo: "https://resume.ayuslh.in/favicon.svg",
+      },
+      {
+        "@type": "Person",
+        name: "Ayush",
+        url: "https://Ayuslh.in",
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "Can I start with a rough draft?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes. ResuMe helps turn a rough summary of your work into a more job-ready resume.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What does the grader look at?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "The grader checks keywords, formatting, and structure, then gives clear next steps for improvement.",
+            },
+          },
+        ],
+      },
+    ],
+  });
+
   const creditItems = [
     "Built and designed by Ayush",
     "Ayuslh.in",
@@ -9,6 +68,43 @@ export default function Landing() {
     "Ayuslh.in",
     "Built and designed by Ayush",
     "Ayuslh.in",
+  ];
+
+  const seoSections = [
+    {
+      title: "Audience fit",
+      icon: FileText,
+      body: "Students, career switchers, and working professionals can use ResuMe to turn rough experience into a cleaner resume for one specific job post.",
+    },
+    {
+      title: "ATS methodology",
+      icon: Shield,
+      body: "We look for the target role, surface the keywords that matter, and keep the structure easy for ATS systems to parse.",
+    },
+    {
+      title: "Differentiation",
+      icon: Sparkles,
+      body: "ResuMe combines resume creation and resume grading in one flow, so you can rewrite and check your resume without switching tools.",
+    },
+    {
+      title: "Limitations",
+      icon: Zap,
+      body: "No tool can promise interviews, and highly unusual formatting or missing job context can reduce the quality of the result.",
+    },
+    {
+      title: "FAQ",
+      icon: ArrowRight,
+      body: [
+        {
+          question: "Can I start with a rough draft?",
+          answer: "Yes. The app helps turn a rough summary of your work into a more job-ready resume.",
+        },
+        {
+          question: "What does the grader look at?",
+          answer: "It checks keywords, formatting, and structure, then gives clear next steps for improvement.",
+        },
+      ],
+    },
   ];
 
   return (
@@ -197,6 +293,63 @@ export default function Landing() {
           </div>
         </aside>
       </div>
+
+      <section
+        className="landing-seo-grid relative z-10 mt-8 w-full max-w-7xl rounded-[1.5rem] p-4 sm:p-5"
+        style={{
+          background: "rgba(8, 15, 31, 0.52)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 14px 36px rgba(0,0,0,0.18)",
+        }}
+        aria-labelledby="landing-seo-heading"
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-xl space-y-1">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+              Public SEO
+            </p>
+            <h2 id="landing-seo-heading" className="text-xl sm:text-2xl font-bold text-on-surface">
+              Built for people searching for resume help
+            </h2>
+          </div>
+          <p className="max-w-2xl text-sm text-on-surface-variant leading-relaxed">
+            These sections explain who ResuMe is for, how the ATS workflow works, where it differs, and what it does not promise.
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {seoSections.map((section) => {
+            const IconComponent = section.icon;
+
+            return (
+              <article
+                key={section.title}
+                className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              >
+                <div className="flex items-center gap-2 text-primary">
+                  <IconComponent size={15} />
+                  <h3 className="text-sm font-semibold text-on-surface">{section.title}</h3>
+                </div>
+
+                {Array.isArray(section.body) ? (
+                  <dl className="mt-3 space-y-3">
+                    {section.body.map((item) => (
+                      <div key={item.question} className="space-y-1">
+                        <dt className="text-sm font-medium text-on-surface">{item.question}</dt>
+                        <dd className="text-sm leading-relaxed text-on-surface-variant">{item.answer}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{section.body}</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
       <div className="landing-credit-marquee">
         <div className="landing-credit-track">

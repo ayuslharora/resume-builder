@@ -10,9 +10,10 @@ export default function CoverLetter() {
   const { resumeId } = useParams();
   const { getResume } = useFirestore();
   const navigate = useNavigate();
+  const hasResumeId = Boolean(resumeId && resumeId !== "new");
   
   const [resumeData, setResumeData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => hasResumeId);
   
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetterText, setCoverLetterText] = useState("");
@@ -24,8 +25,7 @@ export default function CoverLetter() {
   const contentRef = useRef(null);
 
   useEffect(() => {
-    if (!resumeId || resumeId === "new") {
-      setLoading(false);
+    if (!hasResumeId) {
       return;
     }
     getResume(resumeId)
@@ -39,7 +39,7 @@ export default function CoverLetter() {
         console.error("Failed to load resume:", e);
         setLoading(false);
       });
-  }, [getResume, resumeId]);
+  }, [getResume, hasResumeId, resumeId]);
 
   const handleGenerate = async () => {
     if (!resumeData) return;
