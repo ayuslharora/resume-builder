@@ -184,10 +184,19 @@
   }
 
   .landing-desktop-shell {
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    overflow-x: clip;
+  }
+
+  .landing-page-content {
+    width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: center;
   }
 
   .landing-hero-grid {
@@ -197,12 +206,14 @@
     align-items: start;
   }
 
+  .landing-hero-panel {
+    justify-self: center;
+  }
+
   .landing-credit-marquee {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
     z-index: 10;
+    width: 100%;
+    margin-top: auto;
     overflow: hidden;
     border-top: 1px solid rgba(6, 182, 212, 0.24);
     background:
@@ -215,9 +226,15 @@
       0 -1px 0 rgba(6, 182, 212, 0.14) inset;
   }
 
+  .landing-credit-inner {
+    width: 100%;
+    overflow: hidden;
+  }
+
   .landing-credit-track {
     display: flex;
     width: max-content;
+    min-width: 200%;
     align-items: center;
     gap: 0;
     padding: 0.95rem 0;
@@ -231,9 +248,19 @@
     will-change: transform;
   }
 
+  .landing-credit-segment {
+    min-width: 100%;
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 1.25rem;
+  }
+
   .landing-credit-item {
     display: inline-flex;
     align-items: center;
+    flex: 0 0 auto;
   }
 
   .landing-credit-separator {
@@ -254,11 +281,14 @@
         "seo feature"
         "citation citation";
       gap: 1.5rem;
-      min-height: calc(100vh - 9rem);
+      min-height: calc(100dvh - 8rem);
     }
 
     .landing-hero-panel {
       grid-area: hero;
+      align-self: center;
+      justify-content: center;
+      margin-inline: auto;
     }
 
     .landing-feature-panel {

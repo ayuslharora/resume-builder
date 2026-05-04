@@ -102,15 +102,18 @@ export function buildHomepageStaticHtml() {
   ).join('')
 
   return `
-    <div id="homepage-static-shell" class="landing-desktop-shell min-h-screen px-6 pt-6 pb-24 fade-in relative overflow-x-hidden">
-      <div class="orb w-[600px] h-[600px] bg-cyan-500/10 -top-64 -left-48 animate-float-slow"></div>
-      <div class="orb w-[500px] h-[500px] bg-blue-600/8 -bottom-48 -right-48 animate-float-medium" style="animation-delay:-3s"></div>
-      <div class="orb w-[300px] h-[300px] bg-cyan-400/6 top-1/3 right-1/4 animate-pulse-glow" style="animation-delay:-1.5s"></div>
-      <div class="orb w-[200px] h-[200px] bg-blue-500/8 bottom-1/3 left-1/4 animate-float-fast" style="animation-delay:-2s"></div>
+    <div id="homepage-static-shell" class="landing-desktop-shell min-h-screen fade-in relative overflow-x-hidden">
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="orb w-[600px] h-[600px] bg-cyan-500/10 -top-64 -left-48 animate-float-slow"></div>
+        <div class="orb w-[500px] h-[500px] bg-blue-600/8 -bottom-48 -right-48 animate-float-medium" style="animation-delay:-3s"></div>
+        <div class="orb w-[300px] h-[300px] bg-cyan-400/6 top-1/3 right-1/4 animate-pulse-glow" style="animation-delay:-1.5s"></div>
+        <div class="orb w-[200px] h-[200px] bg-blue-500/8 bottom-1/3 left-1/4 animate-float-fast" style="animation-delay:-2s"></div>
+      </div>
 
-      <div class="w-full max-w-7xl relative z-10 flex flex-col gap-6 xl:gap-8">
-        <div class="landing-hero-grid w-full">
-          <section class="landing-hero-panel w-full max-w-3xl space-y-5 text-center lg:text-left flex flex-col items-center lg:items-start">
+      <div class="landing-page-content">
+        <div class="w-full max-w-7xl relative z-10 flex flex-col gap-6 px-6 pt-6 pb-8 xl:gap-8">
+          <div class="landing-hero-grid w-full">
+          <section class="landing-hero-panel w-full max-w-3xl space-y-5 text-center flex flex-col items-center">
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest" style="background:rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.2);color:#06b6d4;backdrop-filter:blur(8px);box-shadow:0 0 16px rgba(6,182,212,0.15)">
               <span aria-hidden="true">✦</span>
               ${escapeHtml(HOME_SEO_BADGE)}
@@ -163,8 +166,8 @@ export function buildHomepageStaticHtml() {
           </aside>
         </div>
 
-        <div class="grid gap-6 xl:grid-cols-12">
-          <section class="landing-seo-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-7 glass" aria-labelledby="landing-seo-heading-static">
+          <div class="grid gap-6 xl:grid-cols-12">
+            <section class="landing-seo-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-7 glass" aria-labelledby="landing-seo-heading-static">
             <div class="flex flex-col gap-3">
               <div class="space-y-1">
                 <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Public SEO</p>
@@ -182,7 +185,7 @@ export function buildHomepageStaticHtml() {
             </div>
           </section>
 
-          <section class="landing-citable-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-5" style="background:rgba(8, 15, 31, 0.46);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06);box-shadow:0 14px 36px rgba(0,0,0,0.16)" aria-labelledby="landing-citable-heading-static">
+            <section class="landing-citable-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-5" style="background:rgba(8, 15, 31, 0.46);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06);box-shadow:0 14px 36px rgba(0,0,0,0.16)" aria-labelledby="landing-citable-heading-static">
             <div class="max-w-2xl space-y-1">
               <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Citation Blocks</p>
               <h2 id="landing-citable-heading-static" class="text-xl sm:text-2xl font-bold text-on-surface">
@@ -193,16 +196,31 @@ export function buildHomepageStaticHtml() {
             <div class="mt-4 grid gap-3">
               ${citableMarkup}
             </div>
-          </section>
+            </section>
+          </div>
         </div>
       </div>
 
       <div class="landing-credit-marquee">
-        <div class="landing-credit-track">
-          <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-          <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
-          <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-          <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+        <div class="landing-credit-inner">
+          <div class="landing-credit-track">
+            <div class="landing-credit-segment">
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+            </div>
+            <div class="landing-credit-segment" aria-hidden="true">
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
+              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

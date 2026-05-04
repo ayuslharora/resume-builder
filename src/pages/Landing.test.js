@@ -4,17 +4,22 @@ import { readFile } from "node:fs/promises";
 
 test("Landing uses a desktop one-screen layout with marquee footer", async () => {
   const landingSource = await readFile(new URL("./Landing.jsx", import.meta.url), "utf8");
+  const cssSource = await readFile(new URL("../index.css", import.meta.url), "utf8");
   const seoSource = await readFile(new URL("../seo/homepageSeoContent.js", import.meta.url), "utf8");
-  const source = landingSource + seoSource;
+  const indexSource = await readFile(new URL("../../index.html", import.meta.url), "utf8");
+  const source = landingSource + cssSource + seoSource + indexSource;
 
   assert.match(source, /Built and designed by Ayush/);
   assert.match(source, /Ayuslh\.in/);
-  assert.match(source, /pb-24/);
+  assert.match(source, /landing-page-content/);
   assert.match(source, /landing-desktop-shell/);
+  assert.match(source, /absolute inset-0 overflow-hidden pointer-events-none/);
   assert.match(source, /landing-hero-grid/);
   assert.match(source, /text-center/);
   assert.match(source, /items-center/);
   assert.match(source, /justify-center/);
+  assert.doesNotMatch(source, /lg:text-left/);
+  assert.doesNotMatch(source, /lg:items-start/);
   assert.match(source, /landing-feature-panel/);
   assert.match(source, /landing-feature-preview/);
   assert.match(source, /Tailored rewrite suggestions/);
@@ -43,6 +48,19 @@ test("Landing uses a desktop one-screen layout with marquee footer", async () =>
   assert.match(source, /Free AI Resume Builder/);
   assert.match(source, /Illustrative score/);
   assert.match(source, /Sample only, not a guaranteed result\./);
+  assert.match(cssSource, /\.landing-page-content\s*\{/);
+  assert.match(cssSource, /\.landing-hero-panel\s*\{[\s\S]*justify-self:\s*center;/);
+  assert.match(cssSource, /\.landing-hero-panel\s*\{[\s\S]*align-self:\s*center;/);
+  assert.match(cssSource, /\.landing-hero-panel\s*\{[\s\S]*justify-content:\s*center;/);
+  assert.match(source, /landing-credit-inner/);
+  assert.match(source, /landing-credit-segment/);
+  assert.match(cssSource, /\.landing-desktop-shell\s*\{[\s\S]*min-height:\s*100dvh;/);
+  assert.match(cssSource, /\.landing-credit-marquee\s*\{[\s\S]*margin-top:\s*auto;/);
+  assert.match(cssSource, /\.landing-credit-segment\s*\{[\s\S]*min-width:\s*100%/);
+  assert.doesNotMatch(cssSource, /\.landing-credit-marquee\s*\{[\s\S]*position:\s*fixed;/);
+  assert.doesNotMatch(cssSource, /--landing-footer-height:/);
+  assert.match(indexSource, /id="homepage-static-shell" class="landing-desktop-shell min-h-screen fade-in relative overflow-x-hidden"/);
+  assert.doesNotMatch(indexSource, /id="homepage-static-shell" class="[^"]*pb-24/);
   assert.doesNotMatch(source, /ATS-Friendly Resumes Built Faster with AI/);
   assert.doesNotMatch(source, /82 \/ 100/);
 });
