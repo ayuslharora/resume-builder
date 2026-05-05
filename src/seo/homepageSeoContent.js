@@ -8,6 +8,17 @@ export const HOME_SEO_DESCRIPTION =
 export const HOME_AUTHOR_NAME = 'Ayush'
 export const HOME_AUTHOR_URL = 'https://Ayuslh.in/'
 
+export const HOME_CREDIT_ITEMS = [
+  'Built and designed by Ayush',
+  'Ayuslh.in',
+  'Built and designed by Ayush',
+  'Ayuslh.in',
+  'Built and designed by Ayush',
+  'Ayuslh.in',
+  'Built and designed by Ayush',
+  'Ayuslh.in',
+]
+
 export const HOME_SEO_TRUST = [
   'ATS Compliant',
   'AI-Powered',
@@ -77,7 +88,19 @@ function buildList(items, className = '') {
   return `<ul class="${resolvedClassName}">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
 }
 
+function buildCreditItems() {
+  return HOME_CREDIT_ITEMS.map((item) => {
+    const content = item === 'Ayuslh.in'
+      ? `<a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">${escapeHtml(item)}</a>`
+      : `<span>${escapeHtml(item)}</span>`
+
+    return `<span class="landing-credit-item">${content}<span class="landing-credit-separator">•</span></span>`
+  }).join('\n              ')
+}
+
 export function buildHomepageStaticHtml() {
+  const creditMarkup = buildCreditItems()
+
   const trustItems = HOME_SEO_TRUST.map(
     (item) =>
       `<span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant"><span class="text-primary">•</span><span>${escapeHtml(item)}</span></span>`,
@@ -110,7 +133,7 @@ export function buildHomepageStaticHtml() {
         <div class="orb w-[200px] h-[200px] bg-blue-500/8 bottom-1/3 left-1/4 animate-float-fast" style="animation-delay:-2s"></div>
       </div>
 
-      <div class="landing-page-content">
+      <div class="landing-page-content landing-static-content-offset">
         <div class="w-full max-w-7xl relative z-10 flex flex-col gap-6 px-6 pt-6 pb-8 xl:gap-8">
           <div class="landing-hero-grid w-full">
           <section class="landing-hero-panel w-full max-w-3xl space-y-5 text-center flex flex-col items-center">
@@ -205,20 +228,10 @@ export function buildHomepageStaticHtml() {
         <div class="landing-credit-inner">
           <div class="landing-credit-track">
             <div class="landing-credit-segment">
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              ${creditMarkup}
             </div>
             <div class="landing-credit-segment" aria-hidden="true">
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><span>Built and designed by Ayush</span><span class="landing-credit-separator">•</span></span>
-              <span class="landing-credit-item"><a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">Ayuslh.in</a><span class="landing-credit-separator">•</span></span>
+              ${creditMarkup}
             </div>
           </div>
         </div>

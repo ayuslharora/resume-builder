@@ -9,6 +9,7 @@ import {
 import {
   HOME_SEO_BADGE,
   HOME_SEO_CITABLE_BLOCKS,
+  HOME_CREDIT_ITEMS,
   HOME_SEO_DESCRIPTION,
   HOME_SEO_SECTIONS,
   HOME_SEO_TITLE,
@@ -23,15 +24,6 @@ export default function Landing() {
     jsonLd: HOME_JSON_LD,
   });
 
-  const creditItems = [
-    "Built and designed by Ayush",
-    "Ayuslh.in",
-    "Built and designed by Ayush",
-    "Ayuslh.in",
-    "Built and designed by Ayush",
-    "Ayuslh.in",
-  ];
-
   const seoSections = HOME_SEO_SECTIONS.map((section) => ({
     ...section,
     icon:
@@ -45,7 +37,7 @@ export default function Landing() {
   }));
 
   const renderCreditItems = (segmentKey) => (
-    creditItems.map((item, index) => (
+    HOME_CREDIT_ITEMS.map((item, index) => (
       <span key={`${segmentKey}-${index}`} className="landing-credit-item">
         {item === "Ayuslh.in" ? (
           <a
@@ -80,76 +72,76 @@ export default function Landing() {
           <div className="landing-hero-grid w-full">
             {/* ── Hero section ── */}
             <section className="landing-hero-panel w-full max-w-3xl space-y-5 text-center flex flex-col items-center">
-            {/* Badge */}
-            <div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest"
-              style={{
-                background: "rgba(6, 182, 212, 0.08)",
-                borderColor: "rgba(6, 182, 212, 0.2)",
-                color: "#06b6d4",
-                backdropFilter: "blur(8px)",
-                boxShadow: "0 0 16px rgba(6,182,212,0.15)",
-              }}
-            >
-              <Sparkles size={12} />
-              {HOME_SEO_BADGE}
-            </div>
+              {/* Badge */}
+              <div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest"
+                style={{
+                  background: "rgba(6, 182, 212, 0.08)",
+                  borderColor: "rgba(6, 182, 212, 0.2)",
+                  color: "#06b6d4",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: "0 0 16px rgba(6,182,212,0.15)",
+                }}
+              >
+                <Sparkles size={12} />
+                {HOME_SEO_BADGE}
+              </div>
 
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
-                {HOME_SEO_TITLE}{" "}
-                <span
-                  style={{
-                    background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    filter: "drop-shadow(0 0 20px rgba(6,182,212,0.4))",
-                  }}
+              <div className="space-y-4 w-full">
+                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
+                  {HOME_SEO_TITLE}{" "}
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 20px rgba(6,182,212,0.4))",
+                    }}
+                  >
+                    with ATS grading
+                  </span>
+                </h1>
+
+                <p className="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed mx-auto">
+                  {HOME_SEO_DESCRIPTION}
+                </p>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Link
+                  to="/signup"
+                  className="w-full sm:w-auto btn-primary px-8 py-3.5 text-base"
                 >
-                  with ATS grading
-                </span>
-              </h1>
+                  Start Building Free <ArrowRight size={18} />
+                </Link>
+                <Link
+                  to="/login"
+                  className="w-full sm:w-auto btn-ghost px-8 py-3.5 text-base text-on-surface"
+                >
+                  Log In
+                </Link>
+              </div>
 
-              <p className="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed">
-                {HOME_SEO_DESCRIPTION}
-              </p>
-            </div>
+              {/* Trust indicators */}
+              <div className="flex items-center justify-center gap-5 pt-1 flex-wrap">
+                {HOME_SEO_TRUST.map((label) => {
+                  const iconMap = {
+                    "ATS Compliant": Shield,
+                    "AI-Powered": Zap,
+                    "Pro Templates": FileText,
+                  };
+                  const IconComponent = iconMap[label];
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <Link
-                to="/signup"
-                className="w-full sm:w-auto btn-primary px-8 py-3.5 text-base"
-              >
-                Start Building Free <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/login"
-                className="w-full sm:w-auto btn-ghost px-8 py-3.5 text-base text-on-surface"
-              >
-                Log In
-              </Link>
-            </div>
-
-            {/* Trust indicators */}
-            <div className="flex items-center justify-center gap-5 pt-1 flex-wrap">
-              {HOME_SEO_TRUST.map((label) => {
-                const iconMap = {
-                  "ATS Compliant": Shield,
-                  "AI-Powered": Zap,
-                  "Pro Templates": FileText,
-                };
-                const IconComponent = iconMap[label];
-
-                return (
-                  <div key={label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-                    <IconComponent size={13} className="text-primary" />
-                    <span>{label}</span>
-                  </div>
-                );
-              })}
-            </div>
+                  return (
+                    <div key={label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
+                      <IconComponent size={13} className="text-primary" />
+                      <span>{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
 
             {/* ── Feature card ── */}
