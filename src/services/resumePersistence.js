@@ -14,6 +14,17 @@ export function buildResumeWriteData(existingResume, data) {
   };
 }
 
+export function normalizeResumeTitle(title, fallback = "Untitled Resume") {
+  const normalized = typeof title === "string" ? title.trim() : "";
+  return normalized || fallback;
+}
+
+export function buildResumeTitleUpdate(title) {
+  return {
+    title: normalizeResumeTitle(title),
+  };
+}
+
 export function getUserResumeQueryConstraints(whereFn, userId) {
   return [whereFn("userId", "==", userId)];
 }

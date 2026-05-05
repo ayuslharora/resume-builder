@@ -1,11 +1,12 @@
-import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail } from "lucide-react";
+import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
 import { useFirestore } from "../../hooks/useFirestore";
+import { buildResumeTitleUpdate, normalizeResumeTitle } from "../../services/resumePersistence";
 import { buildSharedResumeUrl, createShareToken } from "../../services/shareResume";
 
-export default function ResumeCard({ resume, onDelete }) {
+export default function ResumeCard({ resume, onDelete, onRename }) {
   const navigate = useNavigate();
   const { updateResume } = useFirestore();
   const [showMenu, setShowMenu] = useState(false);
@@ -13,6 +14,10 @@ export default function ResumeCard({ resume, onDelete }) {
   const previewContainerRef = useRef(null);
   const [scale, setScale] = useState(0.38);
   const [copied, setCopied] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(() => normalizeResumeTitle(resume.title));
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState(null);
 
   const handleTogglePublic = async (e) => {
     e.stopPropagation();
@@ -57,6 +62,55 @@ export default function ResumeCard({ resume, onDelete }) {
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const displayTitle = normalizeResumeTitle(resume.title);
+
+  const handleStartTitleEdit = (e) => {
+    e.stopPropagation();
+    setDraftTitle(displayTitle);
+    setTitleError(null);
+    setIsEditingTitle(true);
+    setShowMenu(false);
+  };
+
+  const handleCancelTitleEdit = (e) => {
+    e?.stopPropagation?.();
+    setDraftTitle(displayTitle);
+    setTitleError(null);
+    setIsEditingTitle(false);
+  };
+
+  const handleSaveTitle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const nextTitle = normalizeResumeTitle(draftTitle);
+    if (nextTitle === displayTitle) {
+      setDraftTitle(nextTitle);
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      setIsSavingTitle(true);
+      setTitleError(null);
+      await updateResume(resume.id, buildResumeTitleUpdate(draftTitle));
+      setDraftTitle(nextTitle);
+      onRename?.(resume.id, nextTitle);
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error("Failed to rename resume", error);
+      setTitleError("Could not rename");
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      handleCancelTitleEdit(e);
+    }
+  };
 
   const dateStr = resume.updatedAt?.seconds
     ? new Date(resume.updatedAt.seconds * 1000).toLocaleDateString()
@@ -202,9 +256,58 @@ export default function ResumeCard({ resume, onDelete }) {
 
       {/* Card body */}
       <div className="px-4 py-4 flex flex-col" onClick={() => navigate(`/builder/${resume.id}`)}>
-        <h3 className="font-bold text-[15px] text-on-surface line-clamp-1 group-hover:text-primary transition-colors" title={resume.title}>
-          {resume.title}
-        </h3>
+        {isEditingTitle ? (
+          <form className="space-y-2" onSubmit={handleSaveTitle} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={draftTitle}
+                disabled={isSavingTitle}
+                aria-label="Resume title"
+                onChange={(e) => setDraftTitle(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
+                className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[13px] font-semibold text-on-surface outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-70"
+              />
+              <button
+                type="submit"
+                aria-label="Save resume title"
+                title="Save resume title"
+                disabled={isSavingTitle}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Check size={14} />
+              </button>
+              <button
+                type="button"
+                aria-label="Cancel title edit"
+                title="Cancel title edit"
+                disabled={isSavingTitle}
+                onClick={handleCancelTitleEdit}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-on-surface-variant transition hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            {titleError && (
+              <p className="text-[11px] font-medium text-red-400">{titleError}</p>
+            )}
+          </form>
+        ) : (
+          <div className="flex items-start gap-2">
+            <h3 className="min-w-0 flex-1 font-bold text-[15px] text-on-surface line-clamp-1 group-hover:text-primary transition-colors" title={displayTitle}>
+              {displayTitle}
+            </h3>
+            <button
+              type="button"
+              aria-label="Rename resume title"
+              title="Rename resume title"
+              onClick={handleStartTitleEdit}
+              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-on-surface-variant transition hover:bg-white/5 hover:text-on-surface"
+            >
+              <Pencil size={13} />
+            </button>
+          </div>
+        )}
         <p className="text-[13px] text-on-surface-variant mt-1 flex items-center gap-1.5 truncate">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/50"></span>
           {resume.targetRole || "No role specified"}

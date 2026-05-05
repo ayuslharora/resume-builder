@@ -79,6 +79,11 @@ export default function Dashboard() {
                   setActionError("Failed to delete resume: " + error.message);
                 }
               }}
+              onRename={(resumeId, title) => {
+                setResumes(prev => prev.map(r => (
+                  r.id === resumeId ? { ...r, title } : r
+                )));
+              }}
               onDuplicate={async () => {
                 try {
                   await duplicateResume(resume.id);

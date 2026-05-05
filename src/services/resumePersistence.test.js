@@ -2,9 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  buildResumeTitleUpdate,
   buildResumeWriteData,
   getResumeBuilderStep,
   getUserResumeQueryConstraints,
+  normalizeResumeTitle,
 } from "./resumePersistence.js";
 
 test("getResumeBuilderStep restores the farthest completed builder step", () => {
@@ -33,6 +35,19 @@ test("buildResumeWriteData prefers explicit userId from incoming data", () => {
       { userId: "user-2", title: "New" }
     ),
     { userId: "user-2", title: "New" }
+  );
+});
+
+test("normalizeResumeTitle trims titles and falls back when empty", () => {
+  assert.equal(normalizeResumeTitle("  Product Manager Resume  "), "Product Manager Resume");
+  assert.equal(normalizeResumeTitle("   "), "Untitled Resume");
+  assert.equal(normalizeResumeTitle(null), "Untitled Resume");
+});
+
+test("buildResumeTitleUpdate creates the Firestore title patch", () => {
+  assert.deepEqual(
+    buildResumeTitleUpdate("  Backend Resume  "),
+    { title: "Backend Resume" }
   );
 });
 
