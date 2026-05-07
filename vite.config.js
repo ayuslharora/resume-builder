@@ -16,8 +16,8 @@ function homepageSeoShellPlugin() {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
-  plugins: [react(), command === 'build' ? homepageSeoShellPlugin() : null].filter(Boolean),
+export default defineConfig(() => ({
+  plugins: [react(), homepageSeoShellPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(srcPath),
