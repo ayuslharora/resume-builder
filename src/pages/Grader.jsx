@@ -1,15 +1,22 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addGraderHistoryEntry, getGraderHistory } from "../services/graderHistory";
+import {
+  buildSharedResumeGradeSource,
+  extractShareTokenFromResumeLink,
+} from "../services/sharedResumeGraderSource";
 import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "../context/useAuth";
 import {
   AlertCircle,
   Briefcase,
   CheckCircle,
+  ClipboardList,
   FileSearch,
+  Link2,
   Loader2,
   RefreshCw,
+  Send,
   Sparkles,
   Target,
   UploadCloud,
@@ -46,6 +53,8 @@ export default function Grader() {
   const [jobDescription, setJobDescription] = useState("");
   const [compareRoles, setCompareRoles] = useState("");
   const [reviewTone, setReviewTone] = useState(REVIEW_TONES[0]);
+  const [pastedResumeText, setPastedResumeText] = useState("");
+  const [resumeLink, setResumeLink] = useState("");
   const [history, setHistory] = useState(() => getGraderHistory());
   const [bulletRewrites, setBulletRewrites] = useState([]);
   const [selectedBullet, setSelectedBullet] = useState("");
@@ -53,98 +62,159 @@ export default function Grader() {
   const [rewritingBullet, setRewritingBullet] = useState(false);
   const [improvingResume, setImprovingResume] = useState(false);
 
-  const { createResume } = useFirestore();
+  const { createResume, getResumeByShareToken } = useFirestore();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   const alternateRoles = useMemo(() => parseRoleList(compareRoles), [compareRoles]);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const ensureTargetRole = (action) => {
     if (!targetRole.trim()) {
-      setError("Add the job or role you are targeting before uploading your resume.");
-      e.target.value = "";
-      return;
+      setError(`Add the job or role you are targeting before ${action}.`);
+      return false;
     }
+    return true;
+  };
 
+  const prepareForGrade = () => {
     setLoading(true);
     setError(null);
     setResult(null);
     setSelectedBullet("");
     setBulletRewrites([]);
     setAppliedRewrites({});
+  };
 
+  const gradeResumeText = async ({ text, metadata, fileName }) => {
+    if (!text.trim()) throw new Error("Document is empty.");
+
+    const { gradeResume } = await loadGroq();
+    const primaryContext = {
+      targetRole: targetRole.trim(),
+      jobDescription: jobDescription.trim(),
+      reviewTone,
+    };
+
+    const [primaryGrade, comparisonGrades] = await Promise.all([
+      gradeResume(text, primaryContext),
+      Promise.all(
+        alternateRoles.map(async (role) => ({
+          role,
+          grade: await gradeResume(text, {
+            targetRole: role,
+            jobDescription: jobDescription.trim(),
+            reviewTone,
+          }),
+        }))
+      ),
+    ]);
+
+    const extractionConfidence = metadata?.confidence || {
+      label: "Medium",
+      score: 70,
+      note: "Text extraction completed with standard confidence.",
+    };
+
+    const combinedRisks = dedupeRiskList([
+      ...(primaryGrade.atsRisks || []),
+      ...buildHeuristicAtsRisks(text, metadata),
+    ]);
+
+    const nextResult = {
+      fileName,
+      resumeText: text,
+      targetRole: targetRole.trim(),
+      jobDescription: jobDescription.trim(),
+      reviewTone,
+      metadata,
+      extractionConfidence,
+      primaryGrade: { ...primaryGrade, atsRisks: combinedRisks },
+      comparisons: comparisonGrades,
+      bulletCandidates: deriveWeakBulletCandidates(primaryGrade.weakBullets, text),
+    };
+
+    setResult(nextResult);
+
+    const nextHistory = addGraderHistoryEntry({
+      id: `${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      fileName,
+      targetRole: primaryContext.targetRole,
+      reviewTone,
+      score: primaryGrade.score,
+      comparisonScores: comparisonGrades.map((item) => ({
+        role: item.role,
+        score: item.grade.score,
+      })),
+    });
+    setHistory(nextHistory);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!ensureTargetRole("uploading your resume")) {
+      e.target.value = "";
+      return;
+    }
+
+    prepareForGrade();
     try {
-      const [{ parseDocument }, { gradeResume }] = await Promise.all([loadParser(), loadGroq()]);
+      const { parseDocument } = await loadParser();
       const { text, metadata, fileName } = await parseDocument(file);
-      if (!text.trim()) throw new Error("Document is empty.");
-
-      const primaryContext = {
-        targetRole: targetRole.trim(),
-        jobDescription: jobDescription.trim(),
-        reviewTone,
-      };
-
-      const [primaryGrade, comparisonGrades] = await Promise.all([
-        gradeResume(text, primaryContext),
-        Promise.all(
-          alternateRoles.map(async (role) => ({
-            role,
-            grade: await gradeResume(text, {
-              targetRole: role,
-              jobDescription: jobDescription.trim(),
-              reviewTone,
-            }),
-          }))
-        ),
-      ]);
-
-      const extractionConfidence = metadata?.confidence || {
-        label: "Medium",
-        score: 70,
-        note: "Text extraction completed with standard confidence.",
-      };
-
-      const combinedRisks = dedupeRiskList([
-        ...(primaryGrade.atsRisks || []),
-        ...buildHeuristicAtsRisks(text, metadata),
-      ]);
-
-      const nextResult = {
-        fileName,
-        resumeText: text,
-        targetRole: targetRole.trim(),
-        jobDescription: jobDescription.trim(),
-        reviewTone,
-        metadata,
-        extractionConfidence,
-        primaryGrade: { ...primaryGrade, atsRisks: combinedRisks },
-        comparisons: comparisonGrades,
-        bulletCandidates: deriveWeakBulletCandidates(primaryGrade.weakBullets, text),
-      };
-
-      setResult(nextResult);
-
-      const nextHistory = addGraderHistoryEntry({
-        id: `${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        fileName,
-        targetRole: primaryContext.targetRole,
-        reviewTone,
-        score: primaryGrade.score,
-        comparisonScores: comparisonGrades.map((item) => ({
-          role: item.role,
-          score: item.grade.score,
-        })),
-      });
-      setHistory(nextHistory);
+      await gradeResumeText({ text, metadata, fileName });
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
       e.target.value = "";
+    }
+  };
+
+  const handlePastedTextGrade = async () => {
+    if (!ensureTargetRole("grading pasted resume text")) return;
+
+    prepareForGrade();
+    try {
+      await gradeResumeText({
+        text: pastedResumeText,
+        fileName: "Pasted Resume Text",
+        metadata: {
+          extractionMethod: "pasted-text",
+          usedOcr: false,
+          extractionWarning: null,
+          confidence: {
+            label: "High",
+            score: 92,
+            note: "This grade used text pasted directly into the grader, so OCR was not needed.",
+          },
+        },
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSharedResumeLinkGrade = async () => {
+    if (!ensureTargetRole("grading a ResuMe link")) return;
+
+    const shareToken = extractShareTokenFromResumeLink(resumeLink);
+    if (!shareToken) {
+      setError("Paste a valid ResuMe shared resume link.");
+      return;
+    }
+
+    prepareForGrade();
+    try {
+      const resume = await getResumeByShareToken(shareToken);
+      await gradeResumeText(buildSharedResumeGradeSource(resume));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -351,9 +421,60 @@ export default function Grader() {
               Your Resume
             </div>
             <p className="text-sm text-on-surface-variant max-w-2xl leading-relaxed">
-              Upload the document you want graded after the role setup is in place. PDFs, DOCX files, and plain text
-              resumes are supported.
+              Choose the cleanest source available: a ResuMe share link for structured text, pasted text for manual
+              review, or upload for external documents.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5">
+            <SourcePanel
+              label="Paste ResuMe Link"
+              icon={<Link2 size={18} className="text-primary shrink-0" />}
+              action={
+                <button
+                  type="button"
+                  onClick={handleSharedResumeLinkGrade}
+                  disabled={!resumeLink.trim()}
+                  className="btn-primary justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send size={15} /> Grade from Link
+                </button>
+              }
+            >
+              <input
+                value={resumeLink}
+                onChange={(e) => setResumeLink(e.target.value)}
+                placeholder="https://resume.ayuslh.in/shared/..."
+                className="w-full rounded-xl px-4 py-3 bg-transparent outline-none text-sm text-on-surface placeholder:text-on-surface-variant"
+                style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+              />
+              <p className="text-xs text-on-surface-variant leading-relaxed">
+                Best for resumes created here because it reads structured, selectable text.
+              </p>
+            </SourcePanel>
+
+            <SourcePanel
+              label="Paste Resume Text"
+              icon={<ClipboardList size={18} className="text-primary shrink-0" />}
+              action={
+                <button
+                  type="button"
+                  onClick={handlePastedTextGrade}
+                  disabled={!pastedResumeText.trim()}
+                  className="btn-primary justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send size={15} /> Grade Text
+                </button>
+              }
+            >
+              <textarea
+                value={pastedResumeText}
+                onChange={(e) => setPastedResumeText(e.target.value)}
+                placeholder="Paste the resume content here..."
+                className="w-full min-h-[132px] resize-none rounded-xl px-4 py-3 bg-transparent outline-none text-sm leading-relaxed text-on-surface placeholder:text-on-surface-variant"
+                style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+              />
+            </SourcePanel>
           </div>
 
           <div
@@ -722,6 +843,29 @@ function InputCard({ label, icon, control }) {
         <div className="w-full pt-0.5">{control}</div>
       </div>
     </label>
+  );
+}
+
+function SourcePanel({ label, icon, action, children }) {
+  return (
+    <div
+      className="rounded-2xl p-5 md:p-6 flex flex-col gap-4"
+      style={{
+        background: "rgba(25,31,49,0.4)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          {icon}
+          <h3 className="text-sm font-semibold text-on-surface truncate">{label}</h3>
+        </div>
+        <div className="shrink-0">{action}</div>
+      </div>
+      {children}
+    </div>
   );
 }
 
