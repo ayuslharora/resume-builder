@@ -3,6 +3,7 @@ import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Plus, User } 
 import { useAuth } from "../../context/useAuth";
 import { useEffect, useState } from "react";
 import { useFirestore } from "../../hooks/useFirestore";
+import { subscribeToResumeDeleted } from "../../services/resumeListSync";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -30,6 +31,12 @@ export default function Sidebar() {
       cancelled = true;
     };
   }, [currentUser, getUserResumes]);
+
+  useEffect(() => {
+    return subscribeToResumeDeleted((deletedResumeId) => {
+      setResumes(prev => prev.filter(resume => resume.id !== deletedResumeId));
+    });
+  }, []);
 
   async function handleCreate() {
     if (!currentUser) return;

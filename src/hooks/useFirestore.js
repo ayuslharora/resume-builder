@@ -8,6 +8,7 @@ import {
   buildResumeWriteData,
   getUserResumeQueryConstraints,
 } from "../services/resumePersistence";
+import { notifyResumeDeleted } from "../services/resumeListSync";
 
 function sanitizeResume(resume) {
   if (resume?.resumeData?.summary && typeof resume.resumeData.summary === 'object') {
@@ -75,6 +76,7 @@ export function useFirestore() {
   // ─── Delete ────────────────────────────────────────────────────────────────
   const deleteResume = useCallback(async (resumeId) => {
     await deleteDoc(doc(db, "resumes", resumeId));
+    notifyResumeDeleted(resumeId);
   }, []);
 
   // ─── Duplicate ─────────────────────────────────────────────────────────────

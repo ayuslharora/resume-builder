@@ -56,3 +56,24 @@ test("ResumeCard keeps the published dropdown visible while clipping only the pr
   assert.match(source, /className="absolute inset-0 overflow-hidden pointer-events-none z-0"/);
   assert.match(source, /<Trash2 size=\{14\} \/> Delete/);
 });
+
+test("successful resume deletes notify the sidebar list immediately", async () => {
+  const firestoreSource = await readFile(new URL("../../hooks/useFirestore.js", import.meta.url), "utf8");
+  const sidebarSource = await readFile(new URL("../layout/Sidebar.jsx", import.meta.url), "utf8");
+  const deleteStart = firestoreSource.indexOf("const deleteResume");
+  const deleteEnd = firestoreSource.indexOf("  // ─── Duplicate", deleteStart);
+  const deleteSource = firestoreSource.slice(deleteStart, deleteEnd);
+
+  assert.match(firestoreSource, /notifyResumeDeleted/);
+  assert.match(sidebarSource, /subscribeToResumeDeleted/);
+  assert.match(sidebarSource, /setResumes\(prev => prev\.filter\(resume => resume\.id !== deletedResumeId\)\)/);
+
+  const firestoreDeleteIndex = deleteSource.indexOf("await deleteDoc");
+  const notifyIndex = deleteSource.indexOf("notifyResumeDeleted(resumeId)");
+  assert.notEqual(firestoreDeleteIndex, -1);
+  assert.notEqual(notifyIndex, -1);
+  assert.ok(
+    firestoreDeleteIndex < notifyIndex,
+    "sidebar should only drop the name after the Firestore delete succeeds"
+  );
+});
