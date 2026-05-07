@@ -6,7 +6,7 @@ import { useFirestore } from "../../hooks/useFirestore";
 import { buildResumeTitleUpdate, normalizeResumeTitle } from "../../services/resumePersistence";
 import { buildSharedResumeUrl, createShareToken } from "../../services/shareResume";
 
-export default function ResumeCard({ resume, onDelete, onRename }) {
+export default function ResumeCard({ resume, onDelete, onRename, onPublishChange }) {
   const navigate = useNavigate();
   const { updateResume } = useFirestore();
   const [showMenu, setShowMenu] = useState(false);
@@ -21,12 +21,23 @@ export default function ResumeCard({ resume, onDelete, onRename }) {
 
   const handleTogglePublic = async (e) => {
     e.stopPropagation();
+    const newStatus = !resume.isShared;
+    const shareToken = resume.shareToken || createShareToken();
+    const previousPublishState = {
+      isShared: resume.isShared,
+      shareToken: resume.shareToken,
+    };
+
+    onPublishChange?.(resume.id, {
+      isShared: newStatus,
+      shareToken,
+    });
+    setShowMenu(false);
+
     try {
-      const newStatus = !resume.isShared;
-      const shareToken = resume.shareToken || createShareToken();
       await updateResume(resume.id, {
         isShared: newStatus,
-        shareToken: newStatus ? shareToken : shareToken,
+        shareToken,
       });
       
       if (newStatus) {
@@ -35,8 +46,8 @@ export default function ResumeCard({ resume, onDelete, onRename }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
-      setShowMenu(false);
     } catch (err) {
+      onPublishChange?.(resume.id, previousPublishState);
       console.error("Failed to toggle public status", err);
     }
   };
@@ -145,28 +156,34 @@ export default function ResumeCard({ resume, onDelete, onRename }) {
       {/* Preview area */}
       <div
         ref={previewContainerRef}
-        className="relative flex justify-center items-start overflow-hidden transition-colors w-full"
+        className="relative flex justify-center items-start overflow-visible transition-colors w-full"
         style={{ aspectRatio: "210/148", background: "rgba(7,13,31,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         onClick={() => navigate(`/builder/${resume.id}`)}
       >
-        {resume.templateId && resume.resumeData ? (
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none transition-transform duration-300 group-hover:scale-105 z-0">
-            <div 
-              style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
-              className="bg-white"
-            >
-              <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          {resume.templateId && resume.resumeData ? (
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none transition-transform duration-300 group-hover:scale-105">
+              <div
+                style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
+                className="bg-white"
+              >
+                <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
+              </div>
             </div>
-          </div>
-        ) : resume.templateId ? (
-          <LayoutTemplate className="w-12 h-12 text-on-surface-variant/20" strokeWidth={1.5} />
-        ) : (
-          <FileText className="w-12 h-12 text-on-surface-variant/20" strokeWidth={1.5} />
-        )}
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              {resume.templateId ? (
+                <LayoutTemplate className="w-12 h-12 text-on-surface-variant/20" strokeWidth={1.5} />
+              ) : (
+                <FileText className="w-12 h-12 text-on-surface-variant/20" strokeWidth={1.5} />
+              )}
+            </div>
+          )}
 
-        {/* Subtle gradient overlay on preview */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(7,13,31,0.3) 100%)" }} />
+          {/* Subtle gradient overlay on preview */}
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(7,13,31,0.3) 100%)" }} />
+        </div>
 
         <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2 max-w-[70%]">
           <div className={`status-pill ${statusColors[resume.status] || "bg-surface-container-highest"}`}>

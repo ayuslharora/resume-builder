@@ -103,6 +103,11 @@ export default function Resumes() {
                   r.id === resumeId ? { ...r, title } : r
                 )));
               }}
+              onPublishChange={(resumeId, publishState) => {
+                setResumes(prev => prev.map(r => (
+                  r.id === resumeId ? { ...r, ...publishState } : r
+                )));
+              }}
               onDuplicate={async () => {
                 try {
                   await duplicateResume(resume.id);
