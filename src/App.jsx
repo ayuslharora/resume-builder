@@ -11,7 +11,6 @@ const Landing  = lazy(() => import("./pages/Landing"));
 const Login    = lazy(() => import("./pages/Login"));
 const Signup   = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Resumes  = lazy(() => import("./pages/Resumes"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Builder  = lazy(() => import("./pages/Builder"));
 const Export   = lazy(() => import("./pages/Export"));
@@ -34,7 +33,6 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "/dashboard", element: <Dashboard /> },
-          { path: "/resumes", element: <Resumes /> },
           { path: "/resources", element: <Resources /> },
           { path: "/builder/:resumeId", element: <Builder /> },
           { path: "/grader", element: <Grader /> },

@@ -54,7 +54,6 @@ export default function Sidebar() {
 
   const links = [
     { name: "Dashboard",     path: "/dashboard", icon: LayoutDashboard },
-    { name: "My Resumes",    path: "/resumes",   icon: FileText },
     { name: "Resume Grader", path: "/grader",    icon: CheckSquare },
     { name: "Resources",     path: "/resources", icon: BookOpen },
   ];
@@ -139,8 +138,8 @@ export default function Sidebar() {
                 <span className={isActive ? "text-on-surface font-semibold" : ""}>{link.name}</span>
               </Link>
 
-              {/* Resume sub-items under "My Resumes" */}
-              {link.name === "My Resumes" && resumes.length > 0 && (
+              {/* Resume sub-items under Dashboard */}
+              {link.name === "Dashboard" && resumes.length > 0 && (
                 <div className="ml-7 pl-3 mt-0.5 mb-1 space-y-0.5" style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
                   {resumes.slice(0, 6).map(resume => {
                     const isResumeActive = location.pathname === `/builder/${resume.id}`;

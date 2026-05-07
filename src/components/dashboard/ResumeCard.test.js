@@ -15,19 +15,15 @@ test("ResumeCard exposes an inline title editor that saves through Firestore", a
   assert.match(source, /Cancel title edit/);
 });
 
-test("ResumeCard reports publish state changes to list pages for immediate badge updates", async () => {
+test("ResumeCard reports publish state changes to Dashboard for immediate badge updates", async () => {
   const cardSource = await readFile(new URL("./ResumeCard.jsx", import.meta.url), "utf8");
   const dashboardSource = await readFile(new URL("../../pages/Dashboard.jsx", import.meta.url), "utf8");
-  const resumesSource = await readFile(new URL("../../pages/Resumes.jsx", import.meta.url), "utf8");
 
   assert.match(cardSource, /onPublishChange/);
   assert.match(cardSource, /onPublishChange\?\.\(resume\.id,\s*\{\s*isShared: newStatus,\s*shareToken,\s*\}\)/s);
-
-  for (const source of [dashboardSource, resumesSource]) {
-    assert.match(source, /onPublishChange=\{\(resumeId,\s*publishState\) => \{/);
-    assert.match(source, /setResumes\(prev => prev\.map\(r => \(/);
-    assert.match(source, /r\.id === resumeId \? \{ \.\.\.r,\s*\.\.\.publishState \} : r/s);
-  }
+  assert.match(dashboardSource, /onPublishChange=\{\(resumeId,\s*publishState\) => \{/);
+  assert.match(dashboardSource, /setResumes\(prev => prev\.map\(r => \(/);
+  assert.match(dashboardSource, /r\.id === resumeId \? \{ \.\.\.r,\s*\.\.\.publishState \} : r/s);
 });
 
 test("ResumeCard applies publish changes before Firestore resolves and rolls back on failure", async () => {
