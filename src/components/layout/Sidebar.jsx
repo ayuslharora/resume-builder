@@ -1,9 +1,132 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, BookOpen, CheckSquare, LogOut, Plus, User } from "lucide-react";
+import {
+  BookOpen,
+  CheckSquare,
+  ChevronUp,
+  HelpCircle,
+  Keyboard,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  ShieldCheck,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { useAuth } from "../../context/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFirestore } from "../../hooks/useFirestore";
 import { subscribeToResumeDeleted } from "../../services/resumeListSync";
+import { ShortcutsModal } from "./ShortcutsModal";
+
+function ProfileMenuItem({ icon, label, danger = false, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] transition hover:bg-[var(--surface-2)] ${
+        danger ? "text-[var(--bad)]" : "text-[var(--text)]"
+      }`}
+    >
+      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-current opacity-85">
+        {icon}
+      </span>
+      <span className="truncate">{label}</span>
+    </button>
+  );
+}
+
+function ProfilePopover({ onClose, onProfileSettings, onLogout, onOpenShortcuts }) {
+  const navigate = useNavigate();
+
+  const [theme, setTheme] = useState(() => localStorage.getItem("app-theme") || "light");
+  const [accent, setAccent] = useState(() => localStorage.getItem("app-accent") || "blue");
+
+  const updateTheme = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem("app-theme", newTheme);
+    if (newTheme === "dark") document.body.setAttribute("data-theme", "dark");
+    else document.body.removeAttribute("data-theme");
+  };
+
+  const updateAccent = (newAccent) => {
+    setAccent(newAccent);
+    localStorage.setItem("app-accent", newAccent);
+    if (newAccent === "mono") document.body.setAttribute("data-accent", "mono");
+    else document.body.removeAttribute("data-accent");
+  };
+
+  const menuItems = [
+    { label: "Profile settings", icon: <User size={14} />, onClick: onProfileSettings },
+    { label: "Account & billing", icon: <ShieldCheck size={14} />, onClick: () => { onClose(); navigate("/pricing"); } },
+    { label: "Keyboard shortcuts", icon: <Keyboard size={14} />, onClick: onOpenShortcuts },
+    { separator: true },
+    { label: "Help & docs", icon: <HelpCircle size={14} />, onClick: () => { onClose(); navigate("/help"); } },
+    { label: "What's new", icon: <Sparkles size={14} />, onClick: () => { onClose(); navigate("/whats-new"); } },
+    { separator: true },
+    { label: "Sign out", icon: <LogOut size={14} />, danger: true, onClick: onLogout },
+  ];
+
+  return (
+    <div
+      role="menu"
+      aria-label="Account menu"
+      onClick={(event) => event.stopPropagation()}
+      className="panel absolute bottom-[calc(100%+8px)] left-3 right-3 z-50 p-1 shadow-[var(--shadow-lg)]"
+    >
+      <div className="border-b border-[var(--border)] px-3 py-2.5">
+        <div className="lbl-mono mb-2">Appearance</div>
+        <div className="seg w-full">
+          <button type="button" data-active={theme === "light"} onClick={() => updateTheme("light")}>
+            Light
+          </button>
+          <button type="button" data-active={theme === "dark"} onClick={() => updateTheme("dark")}>
+            Dark
+          </button>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <span className="text-[11.5px] text-[var(--muted)]">Accent</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="Blue accent preview"
+              onClick={() => updateAccent("blue")}
+              className="h-[18px] w-[18px] rounded-full border border-[var(--border-strong)] bg-[#2563eb] shadow-[0_0_0_1px_var(--bg)_inset] transition-all"
+              style={{
+                boxShadow: accent === "blue" ? "0 0 0 1.5px var(--bg) inset, 0 0 0 1px var(--text)" : "0 0 0 1px var(--bg) inset",
+                transform: accent === "blue" ? "scale(1.1)" : "scale(1)"
+              }}
+            />
+            <button
+              type="button"
+              aria-label="Mono accent preview"
+              onClick={() => updateAccent("mono")}
+              className="h-[18px] w-[18px] rounded-full border border-[var(--border-strong)] bg-[var(--text)] shadow-[0_0_0_1px_var(--bg)_inset] transition-all"
+              style={{
+                boxShadow: accent === "mono" ? "0 0 0 1.5px var(--bg) inset, 0 0 0 1px var(--text)" : "0 0 0 1px var(--bg) inset",
+                transform: accent === "mono" ? "scale(1.1)" : "scale(1)"
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {menuItems.map((item, index) => (
+        item.separator ? (
+          <hr key={`separator-${index}`} className="hr my-1" />
+        ) : (
+          <ProfileMenuItem
+            key={item.label}
+            icon={item.icon}
+            label={item.label}
+            danger={item.danger}
+            onClick={item.onClick || onClose}
+          />
+        )
+      ))}
+
+    </div>
+  );
+}
 
 export default function Sidebar() {
   const location = useLocation();
@@ -11,6 +134,9 @@ export default function Sidebar() {
   const { currentUser, userDoc, logout } = useAuth();
   const { getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const profileMenuRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -38,9 +164,41 @@ export default function Sidebar() {
     });
   }, []);
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("app-theme") || "light";
+    const savedAccent = localStorage.getItem("app-accent") || "blue";
+    if (savedTheme === "dark") document.body.setAttribute("data-theme", "dark");
+    if (savedAccent === "mono") document.body.setAttribute("data-accent", "mono");
+  }, []);
+
+  useEffect(() => {
+    if (!profileOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [profileOpen]);
+
   async function handleCreate() {
     if (!currentUser) return;
-    navigate(`/builder/new`);
+    navigate("/builder/new");
   }
 
   async function handleLogout() {
@@ -52,10 +210,25 @@ export default function Sidebar() {
     }
   }
 
+  function openProfileSettings() {
+    setProfileOpen(false);
+    navigate("/profile");
+  }
+
+  async function signOutFromMenu() {
+    setProfileOpen(false);
+    await handleLogout();
+  }
+
+  function openShortcutsMenu() {
+    setProfileOpen(false);
+    setShortcutsOpen(true);
+  }
+
   const links = [
-    { name: "Dashboard",     path: "/dashboard", icon: LayoutDashboard },
-    { name: "Resume Grader", path: "/grader",    icon: CheckSquare },
-    { name: "Resources",     path: "/resources", icon: BookOpen },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Resume Grader", path: "/grader", icon: CheckSquare },
+    { name: "Resources", path: "/resources", icon: BookOpen },
   ];
 
   const mobileLinks = [
@@ -67,7 +240,7 @@ export default function Sidebar() {
   ];
 
   const initials = userDoc?.displayName
-    ? userDoc.displayName.split(" ").map(n => n[0]).slice(0, 2).join("")
+    ? userDoc.displayName.split(" ").map(name => name[0]).slice(0, 2).join("")
     : "U";
 
   const isMobileLinkActive = (path) => (
@@ -78,163 +251,141 @@ export default function Sidebar() {
 
   const MobileProfileAvatar = ({ active }) => (
     <div
-      className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold transition-all ${
-        active ? "text-on-surface shadow-[0_0_14px_rgba(6,182,212,0.24)]" : "text-on-surface-variant"
+      className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-[11px] font-bold transition-all ${
+        active ? "text-[var(--text)]" : "text-[var(--muted)]"
       }`}
       style={{
-        background: active ? "linear-gradient(180deg, rgba(8,145,178,0.28) 0%, rgba(14,116,144,0.18) 100%)" : "rgba(35,41,60,0.9)",
-        border: active ? "1px solid rgba(6,182,212,0.38)" : "1px solid rgba(255,255,255,0.12)",
+        background: active ? "var(--surface-2)" : "var(--bg)",
+        border: "1px solid var(--border)",
       }}
     >
       {userDoc?.photoURL
-        ? <img src={userDoc.photoURL} alt="Profile" className="w-full h-full object-cover" />
+        ? <img src={userDoc.photoURL} alt="Profile" className="h-full w-full object-cover" />
         : initials
       }
     </div>
   );
 
-  function renderSidebarContent() {
-    return (
-    <div className="flex flex-col h-full">
-      {/* ── Brand ── */}
-      <div className="px-5 pt-6 pb-5 flex items-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <Link to="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)", boxShadow: "0 0 12px rgba(6,182,212,0.4)" }}>
-            <FileText size={14} className="text-surface" />
-          </div>
-          <span className="font-bold text-base text-on-surface tracking-tight">
-            Resu<span className="text-primary">Me</span>
-          </span>
-        </Link>
-      </div>
-
-      {/* ── New Resume ── */}
-      <div className="px-4 pt-5 pb-3">
-        <button
-          onClick={handleCreate}
-          className="w-full btn-primary text-sm py-2"
-        >
-          <Plus size={15} />
-          New Resume
-        </button>
-      </div>
-
-      {/* ── Navigation ── */}
-      <nav className="flex-1 px-3 py-2 overflow-y-auto custom-scrollbar space-y-0.5">
-        {links.map(link => {
-          const isActive = location.pathname.startsWith(link.path) && link.path !== "/";
-          return (
-            <div key={link.name}>
-              <Link
-                to={link.path}
-                aria-current={isActive ? "page" : undefined}
-                className={`nav-link ${isActive ? "active" : ""}`}
-              >
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r" />
-                )}
-                <link.icon size={16} strokeWidth={isActive ? 2.5 : 2} className={isActive ? "text-primary" : ""} />
-                <span className={isActive ? "text-on-surface font-semibold" : ""}>{link.name}</span>
-              </Link>
-
-              {/* Resume sub-items under Dashboard */}
-              {link.name === "Dashboard" && resumes.length > 0 && (
-                <div className="ml-7 pl-3 mt-0.5 mb-1 space-y-0.5" style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
-                  {resumes.slice(0, 6).map(resume => {
-                    const isResumeActive = location.pathname === `/builder/${resume.id}`;
-                    return (
-                      <Link
-                        key={resume.id}
-                        to={`/builder/${resume.id}`}
-                        className={`block text-xs py-1 px-2 rounded truncate transition-colors ${
-                          isResumeActive
-                            ? "text-primary font-semibold bg-primary/5"
-                            : "text-on-surface-variant hover:text-on-surface"
-                        }`}
-                        title={resume.title || "Untitled Resume"}
-                      >
-                        {resume.title || "Untitled Resume"}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* ── User footer ── */}
-      <div className="px-4 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center justify-between gap-3">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2.5 min-w-0 flex-1 rounded-lg p-1.5 -m-1.5 transition-all duration-200 hover:bg-white/5 text-left"
-          >
-            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-xs font-bold text-on-surface"
-              style={{ background: "rgba(35,41,60,0.8)", border: "1px solid rgba(6,182,212,0.2)", boxShadow: "0 0 8px rgba(6,182,212,0.1)" }}>
-              {userDoc?.photoURL
-                ? <img src={userDoc.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                : initials
-              }
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-on-surface truncate">{userDoc?.displayName || "User"}</p>
-              <p className="text-[10px] text-on-surface-variant truncate">Edit profile</p>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]">
-                <a
-                  href="https://Ayuslh.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary/80 transition-colors hover:text-primary"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  ResuMe by Ayush
-                </a>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 text-on-surface-variant hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors flex-shrink-0"
-            title="Log Out"
-          >
-            <LogOut size={15} />
-          </button>
-        </div>
-      </div>
-    </div>
-    );
-  }
-
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside
-        className="app-sidebar-desktop hidden lg:flex fixed top-0 left-0 h-screen z-20 flex-col w-[260px]"
-        style={{
-          background: "rgba(7,13,31,0.82)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          borderRight: "1px solid rgba(255,255,255,0.06)"
-        }}
-      >
-        {renderSidebarContent()}
+      <aside className="app-design app-sidebar-desktop hidden lg:flex fixed left-0 top-0 z-20 h-screen w-[248px] flex-col border-r border-[var(--border)] bg-[var(--bg)]">
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between px-4 pb-3 pt-4">
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <div
+                className="flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]"
+                style={{
+                  boxShadow: "0 1px 2px rgba(15,23,42,.16)",
+                }}
+              >
+                <img src="/favicon.svg" alt="" aria-hidden="true" className="h-full w-full" />
+              </div>
+              <span className="text-[15px] font-semibold tracking-[-0.01em]">
+                Resu<span className="serif italic font-normal">Me</span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="px-3 pb-3">
+            <button onClick={handleCreate} className="btn btn-accent w-full">
+              <Plus size={14} /> New resume
+            </button>
+          </div>
+
+          <nav className="scroll flex-1 overflow-y-auto px-2">
+            <div className="lbl-mono px-2 pb-2 pt-2">Workspace</div>
+            {links.map(link => {
+              const isActive = location.pathname.startsWith(link.path) && link.path !== "/";
+              return (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  aria-current={isActive ? "page" : undefined}
+                  className="navlink"
+                  data-active={isActive}
+                >
+                  <link.icon size={15} />
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
+
+            {resumes.length > 0 && (
+              <>
+                <div className="lbl-mono px-2 pb-2 pt-5">Recent</div>
+                {resumes.slice(0, 6).map(resume => {
+                  const isResumeActive = location.pathname === `/builder/${resume.id}`;
+                  return (
+                    <Link
+                      key={resume.id}
+                      to={`/builder/${resume.id}`}
+                      className="navlink"
+                      data-active={isResumeActive}
+                      title={resume.title || "Untitled Resume"}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-[2px]"
+                        style={{ background: resume.isShared ? "var(--accent)" : "var(--border-strong)" }}
+                      />
+                      <span className="truncate text-[12.5px]">{resume.title || "Untitled Resume"}</span>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+          </nav>
+
+          <div className="relative border-t border-[var(--border)] p-3" ref={profileMenuRef}>
+            {profileOpen && (
+              <ProfilePopover
+                userDoc={userDoc}
+                currentUser={currentUser}
+                initials={initials}
+                onClose={() => setProfileOpen(false)}
+                onProfileSettings={openProfileSettings}
+                onLogout={signOutFromMenu}
+                onOpenShortcuts={openShortcutsMenu}
+              />
+            )}
+
+            <button
+              type="button"
+              aria-label="Open account menu"
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              onClick={() => setProfileOpen(open => !open)}
+              className="flex w-full items-center gap-2.5 rounded-md p-1 text-left transition hover:bg-[var(--surface)]"
+              data-active={profileOpen}
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+                <div className="avatar flex h-[30px] w-[30px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-xs font-semibold text-[var(--text)]">
+                  {userDoc?.photoURL
+                    ? <img src={userDoc.photoURL} alt="Profile" className="h-full w-full object-cover" />
+                    : initials
+                  }
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[13px] font-medium">{userDoc?.displayName || currentUser?.displayName || "User"}</div>
+                  <div className="truncate text-[11px] text-[var(--muted)]">{currentUser?.email || "Account menu"}</div>
+                </div>
+              </div>
+              <ChevronUp
+                size={14}
+                className={`shrink-0 text-[var(--muted)] transition-transform ${profileOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <div className="mono px-1 pt-3 text-[10.5px] text-[var(--faint)]">
+              ResuMe by Ayush ·{" "}
+              <a href="https://Ayuslh.in" target="_blank" rel="noreferrer" className="ulink text-[var(--muted)]">
+                Ayuslh.in
+              </a>
+            </div>
+          </div>
+        </div>
       </aside>
 
-      <nav
-        className="app-sidebar-mobile lg:hidden fixed inset-x-3 z-30 grid grid-cols-5 gap-1 rounded-[1.75rem] p-2"
-        style={{
-          bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
-          paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))",
-          background: "linear-gradient(180deg, rgba(10,18,38,0.92) 0%, rgba(7,13,31,0.96) 100%)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 18px 45px rgba(2,8,23,0.45), 0 0 0 1px rgba(6,182,212,0.05) inset"
-        }}
-      >
+      <nav className="app-design app-sidebar-mobile app-mobile-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 gap-1 px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 lg:hidden">
         {mobileLinks.map((link) => {
           const isActive = isMobileLinkActive(link.path);
           const isCenterAction = link.name === "New";
@@ -243,59 +394,34 @@ export default function Sidebar() {
               key={link.name}
               to={link.path}
               aria-current={isActive ? "page" : undefined}
-              className={`flex flex-col items-center justify-center px-2 text-[11px] font-medium transition-all duration-200 ${
-                isCenterAction
-                  ? "-mt-3 gap-1.5"
-                  : "gap-1 rounded-2xl py-2.5"
-              } ${
-                isActive || isCenterAction
-                  ? "text-on-surface"
-                  : "text-on-surface-variant hover:text-on-surface"
+              className={`flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[10.5px] ${
+                isActive ? "text-[var(--text)]" : "text-[var(--muted)]"
               }`}
-              style={{
-                background: isCenterAction
-                  ? "transparent"
-                  : isActive
-                    ? "linear-gradient(180deg, rgba(8,145,178,0.22) 0%, rgba(14,116,144,0.14) 100%)"
-                    : "transparent",
-                boxShadow: isCenterAction
-                  ? "none"
-                  : isActive
-                    ? "0 0 18px rgba(6,182,212,0.14)"
-                    : "none",
-              }}
             >
               {link.name === "Profile" ? (
                 <MobileProfileAvatar active={isActive} />
-              ) : isCenterAction ? (
-                <div
-                  className="w-12 h-12 rounded-[1rem] flex items-center justify-center transition-transform duration-200"
+              ) : (
+                <span
+                  className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px]"
                   style={{
-                    background: isActive
-                      ? "linear-gradient(180deg, rgba(14,165,233,0.38) 0%, rgba(8,145,178,0.24) 100%)"
-                      : "linear-gradient(180deg, rgba(14,165,233,0.28) 0%, rgba(8,145,178,0.18) 100%)",
-                    border: "1px solid rgba(103,232,249,0.28)",
-                    boxShadow: "0 8px 20px rgba(6,182,212,0.18), 0 0 0 1px rgba(255,255,255,0.05) inset",
+                    background: isCenterAction
+                      ? "var(--accent)"
+                      : isActive
+                        ? "var(--surface-2)"
+                        : "transparent",
+                    color: isCenterAction ? "white" : "currentColor",
                   }}
                 >
-                  <link.icon
-                    size={20}
-                    strokeWidth={2.6}
-                    className="text-cyan-50"
-                  />
-                </div>
-              ) : (
-                <link.icon
-                  size={18}
-                  strokeWidth={isActive ? 2.4 : 2}
-                  className={isActive ? "text-primary" : ""}
-                />
+                  <link.icon size={isCenterAction ? 18 : 19} strokeWidth={isActive || isCenterAction ? 2.4 : 2} />
+                </span>
               )}
-              <span className={isCenterAction ? "font-semibold tracking-[0.01em]" : ""}>{link.name}</span>
+              <span className={isCenterAction ? "font-semibold" : ""}>{link.name}</span>
             </Link>
           );
         })}
       </nav>
+
+      <ShortcutsModal isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </>
   );
 }

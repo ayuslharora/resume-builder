@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 
-export default function InlineEdit({ 
+let _activeRewriteFn = null;
+export function triggerActiveRewrite() { _activeRewriteFn?.(); }
+
+export default function InlineEdit({
   value, 
   onChange, 
   isEditing = false, 
@@ -50,12 +53,19 @@ export default function InlineEdit({
     if (onAiRewrite) onAiRewrite(value || "");
   };
 
+  const handleFocus = () => {
+    _activeRewriteFn = onAiRewrite
+      ? () => onAiRewrite(contentEditableRef.current?.innerHTML || value || "")
+      : null;
+  };
+
   return (
     <span className={`relative inline-block group w-full ${className}`}>
       <span
         ref={contentEditableRef}
         contentEditable={true}
         suppressContentEditableWarning={true}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         className={`outline-none min-w-[20px] whitespace-pre-wrap ${multiline ? 'block w-full' : 'inline-block'} [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:my-1`}

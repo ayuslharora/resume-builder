@@ -6,6 +6,8 @@ import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, Pa
 import AiRewriteModal from "./AiRewriteModal";
 import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
+import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
+import { triggerActiveRewrite } from "../resume/InlineEdit";
 
 const atsBreakdownLabels = [
   ["formatting", "Formatting"],
@@ -93,6 +95,48 @@ export default function EditStep() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount — data is already in context
+
+  useKeyboardShortcut("s", () => {
+    if (resumeData) {
+      const title = resumeData.personalInfo?.fullName
+        ? `${resumeData.personalInfo.fullName} — ${interviewAnswers.targetRole || 'Resume'}`
+        : interviewAnswers.targetRole || 'New Resume';
+      saveNow({
+        resumeData,
+        templateId,
+        interviewAnswers,
+        title,
+        targetRole: interviewAnswers.targetRole || "",
+        status: "complete",
+      });
+    }
+  });
+
+  useKeyboardShortcut("/", () => {
+    setIsAtsPanelOpen(prev => !prev);
+  });
+
+  useKeyboardShortcut("p", () => {
+    if (activeResumeId) {
+      saveNow({ status: "complete" }).then(() => {
+        navigate(`/export/${activeResumeId}`, { state: { builderData } });
+      });
+    }
+  });
+
+  useKeyboardShortcut("g", () => {
+    if (!isScanningAts) {
+      handleAtsRescan();
+    }
+  });
+
+  useKeyboardShortcut("z", () => {
+    if (canUndo) undo();
+  }, { global: true });
+
+  useKeyboardShortcut("r", () => {
+    triggerActiveRewrite();
+  }, { global: false });
 
   if (!resumeData) return <div className="p-8 text-center text-gray-500">No resume data found</div>;
 
@@ -271,8 +315,10 @@ export default function EditStep() {
     }
   };
 
+  const atsCardStyle = { background: "var(--surface)", border: "1px solid var(--border)" };
+
   return (
-    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full min-h-0 lg:h-[calc(100dvh-190px)] justify-center">
+    <div className="app-design flex flex-col lg:flex-row gap-4 lg:gap-6 w-full min-h-0 lg:h-[calc(100dvh-190px)] justify-center">
       {isAtsPanelOpen && (
         <button
           type="button"
@@ -283,24 +329,23 @@ export default function EditStep() {
       )}
 
       <aside
-        className={`glass-card ghost-border rounded-2xl overflow-hidden shrink-0 order-last transition-all duration-300 ease-in-out fixed inset-x-3 top-[5.5rem] bottom-[calc(7rem+env(safe-area-inset-bottom))] z-40 lg:static lg:order-first ${
+        className={`app-design ats-feedback-panel panel rounded-xl overflow-hidden shrink-0 order-last transition-all duration-300 ease-in-out fixed inset-x-3 top-[5.5rem] bottom-[calc(7rem+env(safe-area-inset-bottom))] z-40 lg:static lg:order-first ${
           isAtsPanelOpen
             ? "translate-y-0 opacity-100 pointer-events-auto lg:w-[360px]"
             : "translate-y-6 opacity-0 pointer-events-none lg:w-0 lg:border-none"
         } min-h-0 lg:h-full`}
-        style={{ background: "rgba(12,18,36,0.82)" }}
       >
         <div className="w-full lg:w-[360px] lg:min-w-[360px] min-h-0 h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
             <div>
-              <div className="text-[10px] font-bold tracking-[0.2em] text-primary/80 uppercase mb-1">
+              <div className="lbl-mono mb-1">
                 ATS Feedback
               </div>
-              <h3 className="text-sm font-bold text-on-surface">Current Draft Scan</h3>
+              <h3 className="text-sm font-semibold text-on-surface">Current Draft Scan</h3>
             </div>
             <button
               onClick={() => setIsAtsPanelOpen(false)}
-              className="p-2 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors"
+              className="btn btn-ghost btn-sm !h-8 !w-8 !p-0"
               aria-label="Close ATS panel"
             >
               <X size={16} />
@@ -311,36 +356,36 @@ export default function EditStep() {
             <button
               onClick={handleAtsRescan}
               disabled={isScanningAts}
-              className="btn-primary w-full"
+              className="btn-accent w-full"
             >
               {isScanningAts ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
               Re-scan
             </button>
 
             {!atsResult && !atsError && (
-              <div className="rounded-xl p-4 text-sm text-on-surface-variant leading-relaxed"
-                style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="ats-feedback-card rounded-xl p-4 text-sm text-on-surface-variant leading-relaxed"
+                style={atsCardStyle}>
                 Review the current version of your resume against the target role. Rescans only run when you click the button.
               </div>
             )}
 
             {atsError && (
-              <div className="rounded-xl p-4"
-                style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <div className="ats-feedback-card rounded-xl p-4"
+                style={{ background: "var(--bad-soft)", border: "1px solid rgba(185,28,28,0.18)" }}>
                 <div className="flex items-start gap-3">
                   <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-300 leading-relaxed">{atsError}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--bad)" }}>{atsError}</p>
                 </div>
               </div>
             )}
 
             {atsResult && (
               <>
-                <div className="rounded-xl p-4"
-                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="ats-feedback-card rounded-xl p-4"
+                  style={atsCardStyle}>
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
-                      <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-on-surface-variant mb-2">
+                      <div className="lbl-mono mb-2">
                         ATS Score
                       </div>
                       <div className="text-sm text-on-surface">{interviewAnswers.targetRole}</div>
@@ -351,8 +396,8 @@ export default function EditStep() {
                   <p className="text-sm text-on-surface-variant leading-relaxed">{atsResult.fitAssessment}</p>
                 </div>
 
-                <div className="rounded-xl p-4 space-y-3"
-                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="ats-feedback-card rounded-xl p-4 space-y-3"
+                  style={atsCardStyle}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-on-surface">
                     <Sparkles size={16} className="text-primary" />
                     ATS Breakdown
@@ -363,12 +408,11 @@ export default function EditStep() {
                         <span className="text-on-surface">{label}</span>
                         <span className="text-on-surface-variant">{atsResult.atsBreakdown?.[key] ?? 0}/100</span>
                       </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="scorebar">
                         <div
-                          className="h-full rounded-full"
                           style={{
                             width: `${atsResult.atsBreakdown?.[key] ?? 0}%`,
-                            background: "linear-gradient(90deg, #06b6d4 0%, #67e8f9 100%)",
+                            background: "var(--accent)",
                           }}
                         />
                       </div>
@@ -376,8 +420,8 @@ export default function EditStep() {
                   ))}
                 </div>
 
-                <div className="rounded-xl p-4"
-                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="ats-feedback-card rounded-xl p-4"
+                  style={atsCardStyle}>
                   <div className="text-sm font-semibold text-on-surface mb-3">Missing Keywords</div>
                   <div className="space-y-2">
                     {(atsResult.keywordGaps?.length ? atsResult.keywordGaps : ["No major keyword gaps identified."]).map((item, index) => (
@@ -388,8 +432,8 @@ export default function EditStep() {
                   </div>
                 </div>
 
-                <div className="rounded-xl p-4"
-                  style={{ background: "rgba(7,13,31,0.45)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="ats-feedback-card rounded-xl p-4"
+                  style={atsCardStyle}>
                   <div className="text-sm font-semibold text-on-surface mb-3">Top Priority Fixes</div>
                   <div className="space-y-3">
                     {(atsResult.priorityFixes || []).slice(0, 3).map((fix, index) => (
@@ -409,27 +453,33 @@ export default function EditStep() {
         </div>
       </aside>
 
-      {/* ── Right panel: live preview ref'd for PDF/html2canvas capture ── */}
-      <div className="flex-1 max-w-[1000px] glass-card ghost-border rounded-2xl flex flex-col relative min-h-[60vh] lg:min-h-0 order-first lg:order-last transition-all duration-300">
-        <div className="bg-surface-lowest/80 backdrop-blur-md border-b border-white/5 p-3 sm:px-5 sm:py-3 flex flex-wrap gap-3 justify-between items-center z-50 sticky top-0 lg:top-[85px] rounded-t-2xl">
+      {/* ── Live preview ref'd for PDF/html2canvas capture ── */}
+      <div
+        className="builder-live-preview flex-1 max-w-[1000px] rounded-2xl flex flex-col relative min-h-[60vh] lg:min-h-0 order-first lg:order-last transition-all duration-300"
+        style={{ background: "var(--builder-form-surface)", border: "1px solid var(--builder-form-border-soft)", boxShadow: "0 18px 40px -28px rgba(15,15,20,0.22), 0 1px 2px rgba(15,15,20,0.04)" }}
+      >
+        <div
+          className="builder-live-preview-toolbar border-b p-3 sm:px-5 sm:py-3 flex flex-wrap gap-3 justify-between items-center z-50 sticky top-0 lg:top-[85px] rounded-t-2xl"
+          style={{ background: "var(--builder-form-surface)", borderColor: "var(--builder-form-border-soft)" }}
+        >
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={() => setIsAtsPanelOpen(!isAtsPanelOpen)}
-              className="p-1.5 text-on-surface hover:bg-white/10 rounded transition-colors bg-white/5 mr-2"
+              className="p-1.5 text-on-surface hover:bg-surface-container rounded transition-colors bg-primary/5 mr-2"
               title="Toggle ATS Feedback Panel"
             >
               {isAtsPanelOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
             </button>
-            <div className="hidden sm:flex w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />
-            <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] text-cyan-400/80 uppercase">
+            <div className="hidden sm:flex w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }} />
+            <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] text-primary uppercase">
               Live Preview
             </span>
             
-            <div className="flex items-center gap-0.5 ml-0 sm:ml-2 border-l border-white/10 pl-2 sm:pl-3">
+            <div className="flex items-center gap-0.5 ml-0 sm:ml-2 border-l border-surface-container-high pl-2 sm:pl-3">
               <button
                 onClick={undo}
                 disabled={!canUndo}
-                className={`p-1.5 sm:p-1 rounded transition-colors ${canUndo ? "text-on-surface hover:bg-white/10" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                className={`p-1.5 sm:p-1 rounded transition-colors ${canUndo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
                 title="Undo (Browser Back)"
               >
                 <ChevronLeft size={16} />
@@ -437,7 +487,7 @@ export default function EditStep() {
               <button
                 onClick={redo}
                 disabled={!canRedo}
-                className={`p-1.5 sm:p-1 rounded transition-colors ${canRedo ? "text-on-surface hover:bg-white/10" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                className={`p-1.5 sm:p-1 rounded transition-colors ${canRedo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
                 title="Redo (Browser Forward)"
               >
                 <ChevronRight size={16} />
@@ -470,12 +520,12 @@ export default function EditStep() {
               </div>
             ) : (
               isSaving ? (
-                <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                <span className="text-[10px] font-mono text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/20">
                   <Loader2 size={12} className="inline mr-1 animate-spin" />
                   SAVING
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-cyan-500/60 bg-cyan-500/10 px-2 py-1 rounded-md border border-cyan-500/20">
+                <span className="text-[10px] font-mono text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/20">
                   <Save size={12} className="inline mr-1" />
                   AUTO-SAVED
                 </span>
@@ -484,7 +534,7 @@ export default function EditStep() {
             <button
               onClick={handleAtsRescan}
               disabled={isScanningAts}
-              className="btn-ghost w-full sm:w-auto"
+              className="btn-ghost h-10 w-full !border-[#d4d4d8] sm:w-auto"
             >
               {isScanningAts ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
               Re-scan
@@ -494,7 +544,7 @@ export default function EditStep() {
                 await saveNow({ status: "complete" });
                 navigate(`/export/${activeResumeId}`, { state: { builderData } });
               }}
-              className="bg-primary text-surface rounded-md px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-ambient w-full sm:w-auto"
+              className="btn-primary h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
               <FileText size={14} /> 
               Complete Rendering
@@ -506,13 +556,13 @@ export default function EditStep() {
           ref={previewContainerRef}
           className="w-full flex-1 min-h-0 overflow-y-auto overflow-x-auto lg:overflow-x-hidden custom-scrollbar p-2 sm:p-4 lg:p-10 flex justify-start sm:justify-center relative"
           style={{
-            backgroundColor: "#0b1021",
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
+            backgroundColor: "var(--builder-form-surface-muted)",
+            backgroundImage: "radial-gradient(color-mix(in oklch, var(--builder-form-border-soft) 85%, transparent) 1px, transparent 1px)",
             backgroundSize: "24px 24px"
           }}
         >
           {/* Ambient Glow Behind Document */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] blur-[120px] rounded-full pointer-events-none" style={{ background: "var(--accent-soft)" }}></div>
 
           <div 
             className="bg-white relative z-10 transition-transform duration-200" 
@@ -522,7 +572,7 @@ export default function EditStep() {
               transform: isMobilePreview ? `scale(${previewScale})` : undefined,
               zoom: isMobilePreview ? undefined : previewScale,
               transformOrigin: isMobilePreview ? "top left" : "top center",
-              boxShadow: "0 0 0 1px rgba(0,0,0,0.05), 0 30px 60px -15px rgba(0,0,0,0.6), 0 0 50px rgba(6, 182, 212, 0.15)",
+              boxShadow: "0 0 0 1px rgba(15,15,20,0.06), 0 30px 60px -20px rgba(15,15,20,0.24), 0 0 50px rgba(37,99,235,0.08)",
               borderRadius: "4px"
             }}
           >
