@@ -14,6 +14,29 @@ const GoogleIcon = () => (
   </svg>
 );
 
+function BrandLogo() {
+  return (
+    <>
+      <div
+        className="flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]"
+        style={{
+          boxShadow: "0 1px 2px rgba(15,23,42,.16)",
+        }}
+      >
+        <img
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full"
+        />
+      </div>
+      <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--text)]">
+        Resu<span className="serif italic font-normal">Me</span>
+      </span>
+    </>
+  );
+}
+
 export default function Login() {
   useRouteSeo({
     title: AUTH_ROUTE_SEO["/login"].title,
@@ -66,94 +89,92 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 relative overflow-hidden">
-
-      {/* Background orbs */}
-      <div className="orb w-[500px] h-[500px] bg-cyan-500/10 -top-48 -left-32 animate-float-slow" />
-      <div className="orb w-[400px] h-[400px] bg-purple-600/8 -bottom-32 -right-32 animate-float-medium" style={{ animationDelay: "-3s" }} />
-      <div className="orb w-[200px] h-[200px] bg-cyan-400/6 top-1/2 right-1/3 animate-pulse-glow" style={{ animationDelay: "-1s" }} />
-
-      <div className="auth-panel max-w-[420px] w-full p-8 sm:p-10 fade-in relative z-10">
-
-        {/* Subtle inner glow top edge */}
-        <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.4), transparent)" }} />
-
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block font-bold text-xl text-on-surface tracking-tight mb-6">
-            Resu<span className="text-primary">Me</span>
+    <div className="app-design min-h-screen flex items-center justify-center px-4 py-10 relative bg-[var(--bg)]" style={{ background: "var(--bg)", minHeight: "100%" }}>
+      
+      <div className="w-full max-w-[400px]">
+        
+        <div className="flex justify-center mb-8 fade-in">
+          <Link to="/" className="flex items-center gap-2">
+            <BrandLogo />
           </Link>
-          <h2 className="text-2xl font-bold text-on-surface mb-2">Welcome Back</h2>
-          <p className="text-sm text-on-surface-variant">Log in to your workspace.</p>
         </div>
 
-        {error && (
-          <div className="bg-red-500/10 text-red-400 p-3 rounded-lg mb-6 text-sm border border-red-500/20 font-medium text-center"
-            style={{ backdropFilter: "blur(8px)" }}>
-            {error}
-          </div>
-        )}
+        <div className="fade-in border border-[var(--border)] rounded-[18px] bg-[var(--surface)] p-8 sm:p-10 shadow-[var(--shadow-md)]">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="field-label">Preferred Name (for Profile)</label>
-            <input
-              type="text"
-              required
-              className="input-field"
-              value={name} onChange={e => setName(e.target.value)}
-              placeholder="e.g. Jane Doe"
-            />
+          <div className="text-center mb-8">
+            <h2 className="h-display text-[26px] mb-2" style={{ letterSpacing: "-0.02em", margin: 0 }}>Welcome Back</h2>
+            <p className="text-[13.5px] text-[var(--text-2)]" style={{ margin: 0 }}>Log in to your workspace.</p>
           </div>
-          <div>
-            <label className="field-label">Email Address</label>
-            <input
-              type="email"
-              required
-              className="input-field"
-              value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
+
+          {error && (
+            <div className="bg-[var(--bad-soft)] text-[var(--bad)] p-3 rounded-lg mb-6 text-[13px] border border-[color-mix(in_oklch,var(--bad)_20%,transparent)] font-medium text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="lbl">Preferred Name (for Profile)</label>
+              <input
+                type="text"
+                required
+                className="field"
+                value={name} onChange={e => setName(e.target.value)}
+                placeholder="e.g. Jane Doe"
+              />
+            </div>
+            <div>
+              <label className="lbl">Email Address</label>
+              <input
+                type="email"
+                required
+                className="field"
+                value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="lbl">Password</label>
+              <input
+                type="password"
+                required
+                className="field"
+                value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              disabled={loading}
+              type="submit"
+              className="btn btn-accent w-full mt-6 flex justify-center"
+              style={{ height: 44, borderRadius: 10, marginTop: 24 }}
+            >
+              {loading ? "Authenticating..." : "Sign In"} <ArrowRight size={15} />
+            </button>
+          </form>
+
+          <div className="my-6 flex items-center justify-between" style={{ marginTop: 24, marginBottom: 24 }}>
+            <div className="h-px flex-1 bg-[var(--border-strong)] opacity-50" />
+            <span className="lbl-mono px-3" style={{ margin: 0 }}>OR</span>
+            <div className="h-px flex-1 bg-[var(--border-strong)] opacity-50" />
           </div>
-          <div>
-            <label className="field-label">Password</label>
-            <input
-              type="password"
-              required
-              className="input-field"
-              value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
+
           <button
+            onClick={handleGoogleLogin}
             disabled={loading}
-            type="submit"
-            className="w-full btn-primary mt-6 py-3 text-base"
+            className="btn w-full flex justify-center"
+            style={{ height: 44, borderRadius: 10, background: "var(--bg)", border: "1px solid var(--border-strong)" }}
           >
-            {loading ? "Authenticating..." : "Sign In"} <ArrowRight size={16} />
+            <GoogleIcon />
+            <span style={{ color: "var(--text)" }}>Continue with Google</span>
           </button>
-        </form>
 
-        <div className="my-6 flex items-center justify-between">
-          <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-          <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">OR</span>
-          <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-        </div>
-
-        <button
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full btn-ghost py-3 text-sm font-semibold text-on-surface"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
-
-        <div className="mt-8 text-center text-sm text-on-surface-variant">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-primary font-semibold hover:underline decoration-primary/30 underline-offset-4 ml-1">
-            Sign Up
-          </Link>
+          <div className="mt-8 text-center text-[13px] text-[var(--text-2)]" style={{ marginTop: 32 }}>
+            Don't have an account?{" "}
+            <Link to="/signup" className="font-medium text-[var(--accent)] hover:underline underline-offset-4 ml-1">
+              Sign Up
+            </Link>
+          </div>
         </div>
       </div>
     </div>

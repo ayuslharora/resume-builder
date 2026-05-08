@@ -1,28 +1,97 @@
 export const HOME_SEO_BADGE = 'ATS-Optimized Resumes'
 
-export const HOME_SEO_TITLE = 'Free AI Resume Builder'
+export const HOME_SEO_TITLE = 'Unlimited AI Resume Builder'
 
 export const HOME_SEO_DESCRIPTION =
-  'ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.'
+  'ResuMe is an open-access ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.'
 
 export const HOME_AUTHOR_NAME = 'Ayush'
 export const HOME_AUTHOR_URL = 'https://Ayuslh.in/'
-
-export const HOME_CREDIT_ITEMS = [
-  'Built and designed by Ayush',
-  'Ayuslh.in',
-  'Built and designed by Ayush',
-  'Ayuslh.in',
-  'Built and designed by Ayush',
-  'Ayuslh.in',
-  'Built and designed by Ayush',
-  'Ayuslh.in',
-]
 
 export const HOME_SEO_TRUST = [
   'ATS Compliant',
   'AI-Powered',
   'Pro Templates',
+]
+
+export const HOME_LANDING_FEATURES = [
+  {
+    title: 'AI builder',
+    body:
+      'Describe the role you want. ResuMe turns your real experience into a focused resume draft without generic filler.',
+  },
+  {
+    title: 'ATS grader',
+    body:
+      'Score your resume out of 100 against any job description, then see exactly what to fix first.',
+  },
+  {
+    title: 'Four templates',
+    body:
+      'Minimal, Modern, Professional, and Creative layouts keep the structure clean while giving you a usable starting point.',
+  },
+  {
+    title: 'Inline editor',
+    body:
+      'Edit sections directly, keep the resume readable, and move from draft to export without losing context.',
+  },
+  {
+    title: 'Targeted rewrites',
+    body:
+      'Improve a single bullet for stronger impact, compare the result, and keep the version that fits the role.',
+  },
+  {
+    title: 'PDF and DOCX',
+    body:
+      'Export recruiter-ready files from the same workspace after your resume has been built and graded.',
+  },
+]
+
+export const HOME_LANDING_METRICS = [
+  {
+    value: '38k',
+    label: 'Resumes built',
+  },
+  {
+    value: '92',
+    suffix: '/100',
+    label: 'Average ATS score',
+  },
+  {
+    value: '2.4x',
+    label: 'More callbacks vs. baseline',
+  },
+  {
+    value: '< 4 min',
+    label: 'To a tailored draft',
+  },
+]
+
+export const HOME_TEMPLATE_PREVIEWS = [
+  {
+    id: 'minimal',
+    name: 'Minimal',
+    desc: 'Clean and distraction-free',
+    image: '/templates/minimal.png',
+  },
+  {
+    id: 'modern',
+    name: 'Modern',
+    desc: 'Bold typography with accents',
+    image: '/templates/modern.png',
+  },
+  {
+    id: 'professional',
+    name: 'Professional',
+    desc: 'Classic corporate structure',
+    image: '/templates/professional.png',
+  },
+  {
+    id: 'creative',
+    name: 'Creative',
+    desc: 'Vibrant and asymmetrical',
+    image: '/templates/creative.png',
+  },
 ]
 
 export const HOME_SEO_SECTIONS = [
@@ -65,7 +134,7 @@ export const HOME_SEO_CITABLE_BLOCKS = [
   {
     heading: 'What is ResuMe?',
     body:
-      'ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals. It helps a user move from rough notes to a cleaner resume, tailor that resume to a specific role, and check the result in one workflow. The goal is speed and clarity, not fancy layout control. Public pages are available without an account, while the builder, export tools, and cover-letter flow require sign-in. ResuMe is intentionally opinionated toward resumes that applicant tracking systems can parse, so it is a better fit for engineering, corporate, and campus-placement applications than for graphic or portfolio-style documents.',
+      'ResuMe is an open-access ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals. It helps a user move from rough notes to a cleaner resume, tailor that resume to a specific role, and check the result in one workflow. The goal is speed and clarity, not fancy layout control. Public pages are available without an account, while the builder, export tools, and cover-letter flow require sign-in. ResuMe is intentionally opinionated toward resumes that applicant tracking systems can parse, so it is a better fit for engineering, corporate, and campus-placement applications than for graphic or portfolio-style documents.',
   },
   {
     heading: 'How does the ATS grader work?',
@@ -88,154 +157,291 @@ function buildList(items, className = '') {
   return `<ul class="${resolvedClassName}">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
 }
 
-function buildCreditItems() {
-  return HOME_CREDIT_ITEMS.map((item) => {
-    const content = item === 'Ayuslh.in'
-      ? `<a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="transition-colors hover:text-primary">${escapeHtml(item)}</a>`
-      : `<span>${escapeHtml(item)}</span>`
+function buildHeroScoreBars() {
+  return [
+    ['Formatting', 92],
+    ['Keywords', 78],
+    ['Impact', 88],
+    ['Clarity', 91],
+  ].map(([label, value]) => `
+    <div>
+      <div class="mb-1 flex justify-between text-[11px] text-[var(--text-2)]">
+        <span>${escapeHtml(label)}</span>
+        <span class="mono text-[var(--muted)]">${value}</span>
+      </div>
+      <div class="scorebar"><i style="width:${value}%"></i></div>
+    </div>
+  `).join('')
+}
 
-    return `<span class="landing-credit-item">${content}<span class="landing-credit-separator">•</span></span>`
-  }).join('\n              ')
+function buildBrandMarkup() {
+  return `
+    <a href="/" class="flex items-center gap-2">
+      <div class="flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]" style="box-shadow:0 1px 2px rgba(15,23,42,.16)">
+        <img src="/favicon.svg" alt="" aria-hidden="true" style="height:100%;width:100%;display:block">
+      </div>
+      <span class="text-[15px] font-semibold tracking-[-0.01em]">Resu<span class="serif italic font-normal">Me</span></span>
+    </a>
+  `.trim()
 }
 
 export function buildHomepageStaticHtml() {
-  const creditMarkup = buildCreditItems()
-
   const trustItems = HOME_SEO_TRUST.map(
     (item) =>
-      `<span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant"><span class="text-primary">•</span><span>${escapeHtml(item)}</span></span>`,
+      `<span class="inline-flex items-center gap-1.5 text-[12.5px] text-[var(--muted)]"><span class="text-[var(--accent)]">✓</span><span>${escapeHtml(item)}</span></span>`,
   ).join('')
 
-  const sectionMarkup = HOME_SEO_SECTIONS.map(
+  const featureMarkup = HOME_LANDING_FEATURES.map(
     (section) => `
-      <article class="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5">
-        <h3 class="text-sm font-semibold text-on-surface">${escapeHtml(section.title)}</h3>
-        <p class="mt-3 text-sm leading-relaxed text-on-surface-variant">${escapeHtml(section.body)}</p>
+      <article class="bg-[var(--bg)] p-7">
+        <div class="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent)]">+</div>
+        <h3 class="m-0 text-base font-semibold text-[var(--text)]">${escapeHtml(section.title)}</h3>
+        <p class="mt-2 text-[13.5px] leading-relaxed text-[var(--muted)]">${escapeHtml(section.body)}</p>
       </article>
     `,
   ).join('')
 
-  const citableMarkup = HOME_SEO_CITABLE_BLOCKS.map(
-    (block) => `
-      <article class="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5">
-        <h2 class="text-base font-semibold text-on-surface">${escapeHtml(block.heading)}</h2>
-        <p class="mt-3 text-sm leading-relaxed text-on-surface-variant">${escapeHtml(block.body)}</p>
+  const metricMarkup = HOME_LANDING_METRICS.map(
+    (metric) => `
+      <div>
+        <div class="h-display text-[40px] leading-none">
+          ${escapeHtml(metric.value)}${metric.suffix ? `<span class="text-[22px] text-[var(--muted)]">${escapeHtml(metric.suffix)}</span>` : ''}
+        </div>
+        <div class="mt-1.5 text-[12.5px] text-[var(--muted)]">${escapeHtml(metric.label)}</div>
+      </div>
+    `,
+  ).join('')
+
+  const templateMarkup = HOME_TEMPLATE_PREVIEWS.map(
+    (template, index) => `
+      <article class="panel lift bg-[var(--surface)] p-3.5">
+        <div class="mb-3 aspect-[0.75] overflow-hidden rounded-md border border-[var(--border)] bg-white p-3.5">
+          <img src="${escapeHtml(template.image)}" alt="${escapeHtml(template.name)} resume template preview" class="h-full w-full rounded-sm object-contain" loading="lazy" />
+        </div>
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="m-0 text-sm font-semibold text-[var(--text)]">${escapeHtml(template.name)}</h3>
+          <span class="lbl-mono text-[10px]">0${index + 1}</span>
+        </div>
+        <p class="mt-1 text-xs text-[var(--muted)]">${escapeHtml(template.desc)}</p>
       </article>
     `,
   ).join('')
+
+  const seoOnlyMarkup = [
+    ...HOME_SEO_CITABLE_BLOCKS.map(
+      (block) => `
+        <article>
+          <h2>${escapeHtml(block.heading)}</h2>
+          <p>${escapeHtml(block.body)}</p>
+        </article>
+      `,
+    ),
+    ...HOME_SEO_FAQ.map(
+      (item) => `
+        <article>
+          <h2>${escapeHtml(item.question)}</h2>
+          <p>${escapeHtml(item.answer)}</p>
+        </article>
+      `,
+    ),
+  ].join('')
 
   return `
-    <div id="homepage-static-shell" class="landing-desktop-shell min-h-screen fade-in relative overflow-x-hidden">
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="orb w-[600px] h-[600px] bg-cyan-500/10 -top-64 -left-48 animate-float-slow"></div>
-        <div class="orb w-[500px] h-[500px] bg-blue-600/8 -bottom-48 -right-48 animate-float-medium" style="animation-delay:-3s"></div>
-        <div class="orb w-[300px] h-[300px] bg-cyan-400/6 top-1/3 right-1/4 animate-pulse-glow" style="animation-delay:-1.5s"></div>
-        <div class="orb w-[200px] h-[200px] bg-blue-500/8 bottom-1/3 left-1/4 animate-float-fast" style="animation-delay:-2s"></div>
-      </div>
+    <div id="homepage-static-shell" class="app-design min-h-screen bg-[var(--bg)]">
+      <header class="sticky top-0 z-30 border-b border-[var(--border)]" style="background:color-mix(in oklch, var(--bg) 78%, transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)">
+        <div class="container" style="display:flex;align-items:center;height:64px;gap:24px">
+          ${buildBrandMarkup()}
+          <nav class="hidden md:flex" style="gap:22px;margin-left:32px">
+            <a href="/" class="ulink text-[13.5px] text-[var(--text-2)]">Product</a>
+            <a href="/templates" class="ulink text-[13.5px] text-[var(--text-2)]">Templates</a>
+            <a href="/grader-info" class="ulink text-[13.5px] text-[var(--text-2)]">Grader</a>
+            <a href="/pricing" class="ulink text-[13.5px] text-[var(--text-2)]">Pricing</a>
+          </nav>
+          <span class="flex-1"></span>
+          <div class="flex items-center gap-3">
+            <button
+              id="static-theme-toggle"
+              aria-label="Toggle theme"
+              class="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)] transition-colors"
+            >
+              <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <div class="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block"></div>
+            <a href="/login" class="btn btn-outline btn-sm">Log in</a>
+            <a href="/signup" class="btn btn-primary btn-sm">Get started</a>
+          </div>
+        </div>
+      </header>
 
-      <div class="landing-page-content landing-static-content-offset">
-        <div class="w-full max-w-7xl relative z-10 flex flex-col gap-6 px-6 pt-6 pb-8 xl:gap-8">
-          <div class="landing-hero-grid w-full">
-          <section class="landing-hero-panel w-full max-w-3xl space-y-5 text-center flex flex-col items-center">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest" style="background:rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.2);color:#06b6d4;backdrop-filter:blur(8px);box-shadow:0 0 16px rgba(6,182,212,0.15)">
-              <span aria-hidden="true">✦</span>
-              ${escapeHtml(HOME_SEO_BADGE)}
-            </div>
-
-            <div class="space-y-4">
-              <h1 class="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
-                ${escapeHtml(HOME_SEO_TITLE)} <span style="background:linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(6,182,212,0.4))">with ATS grading</span>
+      <main>
+        <section id="product" class="container" style="padding-top:88px;padding-bottom:96px">
+          <style>
+            .landing-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+            @media (max-width:1024px){.landing-hero-grid{grid-template-columns:1fr;gap:48px}.landing-hero-grid .landing-hero-visual-wrap{max-width:560px;margin-left:0}}
+            .landing-features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px}
+            @media (max-width:900px){.landing-features-grid{grid-template-columns:repeat(2,1fr)}.landing-templates-grid{grid-template-columns:repeat(2,1fr)}}
+            @media (max-width:600px){.landing-features-grid{grid-template-columns:1fr}}
+            .landing-templates-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+            .landing-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+            @media (max-width:700px){.landing-metric-grid{grid-template-columns:repeat(2,1fr);gap:24px}}
+          </style>
+          <div class="landing-hero-grid">
+            <div>
+              <h1 class="h-display" style="font-size:clamp(40px,5.6vw,72px);line-height:1.02;margin:0;letter-spacing:-0.035em">
+                ${escapeHtml(HOME_SEO_TITLE)} <span class="serif italic font-normal text-[var(--accent)]">with ATS grading.</span>
               </h1>
-
-              <p class="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed">
+              <p style="font-size:17.5px;line-height:1.55;color:var(--text-2);margin-top:22px;max-width:540px">
                 ${escapeHtml(HOME_SEO_DESCRIPTION)}
               </p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-              <a href="/signup" class="w-full sm:w-auto btn-primary px-8 py-3.5 text-base">Start Building Free</a>
-              <a href="/login" class="w-full sm:w-auto btn-ghost px-8 py-3.5 text-base text-on-surface">Log In</a>
-            </div>
-
-            <div class="flex items-center justify-center lg:justify-start gap-5 pt-1 flex-wrap">
-              ${trustItems}
-            </div>
-          </section>
-
-          <aside class="landing-feature-panel w-full max-w-[440px] lg:justify-self-end lg:mt-6 rounded-[1.5rem] p-5.5 xl:p-6 relative glass-strong">
-            <div class="relative space-y-3.5">
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-bold" style="background:rgba(6,182,212,0.1);color:#06b6d4;border:1px solid rgba(6,182,212,0.15)">
-                FREE TOOL
+              <div style="display:flex;gap:10px;margin-top:32px;flex-wrap:wrap">
+                <a href="/signup" class="btn btn-accent btn-lg">Start Building Now</a>
+                <a href="/grader" class="btn btn-outline btn-lg">Grade My Resume</a>
               </div>
-              <div class="space-y-2.5">
-                <h2 class="text-2xl xl:text-[1.7rem] font-bold text-on-surface">Resume Grader</h2>
-                <p class="text-on-surface-variant text-[0.95rem] leading-relaxed max-w-md">
-                  Turn any uploaded resume into a scored, ATS-aware report with clear fixes you can act on in minutes.
-                </p>
-              </div>
-              <div class="rounded-2xl p-4 space-y-3 bg-white/[0.03] border border-white/[0.06]">
-                <p class="text-[11px] uppercase tracking-[0.18em] text-on-surface-variant">What it checks</p>
-                ${buildList(['Keywords aligned to the target role', 'Readable structure and formatting', 'Specific rewrite suggestions'])}
-              </div>
-              <div class="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-on-surface-variant">
-                <span>PDF/DOCX</span><span>•</span><span>Instant Feedback</span><span>•</span><span>ATS Checks</span>
-              </div>
-              <div class="flex flex-col gap-2">
-                <a href="/grader" class="inline-flex w-full items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-on-surface transition-all duration-200 bg-white/[0.05] border border-white/[0.1]">
-                  Grade My Resume
-                </a>
+              <div style="margin-top:28px;display:flex;gap:22px;color:var(--muted);font-size:12.5px;flex-wrap:wrap">
+                ${trustItems}
               </div>
             </div>
-          </aside>
-        </div>
 
-          <div class="grid gap-6 xl:grid-cols-12">
-            <section class="landing-seo-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-7 glass" aria-labelledby="landing-seo-heading-static">
-            <div class="flex flex-col gap-3">
-              <div class="space-y-1">
-                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Public SEO</p>
-                <h2 id="landing-seo-heading-static" class="text-xl sm:text-2xl font-bold text-on-surface">
-                  Built for people searching for resume help
-                </h2>
+            <div class="landing-hero-visual-wrap">
+            <div style="position:relative;aspect-ratio:1.05;max-width:560px;margin-left:auto;min-width:0">
+              <div class="absolute inset-0 rounded-[18px] border border-[var(--border)] bg-[var(--surface)]" style="background-image:radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--border-strong) 60%, transparent) 1px, transparent 0);background-size:20px 20px"></div>
+              <div class="paper absolute left-[8%] top-[8%] aspect-[0.78] w-[62%] rounded-lg px-[22px] py-6 text-[11px] leading-[1.45]" style="transform:rotate(-2.5deg)">
+                <div class="serif text-[22px] font-semibold leading-none">Aarav Mehta</div>
+                <div class="mt-1 text-[10px] text-[#71717a]">Senior Frontend · aarav@mehta.dev · Bengaluru</div>
+                <div class="my-3 h-px bg-[#ececef]"></div>
+                <div class="mb-1 text-[9px] font-semibold uppercase text-[var(--accent)]">Experience</div>
+                <div class="text-[11px] font-semibold">Razorpay · Senior Frontend</div>
+                <div class="mb-1 text-[9px] text-[#71717a]">Aug 2022 - Present</div>
+                ${buildList(['Owned onboarding redesign, raising activation by 18%.', 'Built component kit used by 9 product teams.', 'Trimmed dashboard TTI from 4.2s to 1.3s.'], 'm-0 list-disc pl-4 text-[10px] leading-relaxed text-[#27272a]')}
+                <div class="mb-1 mt-2 text-[9px] font-semibold uppercase text-[var(--accent)]">Skills</div>
+                <div class="flex flex-wrap gap-1">
+                  ${['TypeScript', 'React', 'Next.js', 'GraphQL', 'Tailwind', 'Vite'].map((skill) => `<span class="rounded bg-[#f4f4f5] px-1.5 py-0.5 text-[9px]">${escapeHtml(skill)}</span>`).join('')}
+                </div>
               </div>
-              <p class="max-w-2xl text-sm text-on-surface-variant leading-relaxed">
-                These sections explain who ResuMe is for, how the ATS workflow works, where it differs, and what it does not promise.
-              </p>
+              <div id="grader" class="panel absolute right-[4%] top-[32%] w-[52%] rounded-[14px] p-[18px]" style="transform:rotate(2deg);--bg:#ffffff;--surface:#fafafa;--surface-2:#f4f4f5;--border:#ececef;--border-strong:#d4d4d8;--text:#0a0a0b;--text-2:#3f3f46;--muted:#71717a;--accent:#2563eb;--accent-soft:#eff6ff;--accent-fg:#ffffff;color:var(--text)">
+                <div class="mb-4 flex items-center justify-between">
+                  <span class="lbl-mono">ATS Grade</span>
+                  <span class="pill pill-good"><span class="dot" style="background:currentColor"></span>Strong</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span class="h-display text-[56px] leading-none">87</span>
+                  <span class="text-[var(--muted)]">/100</span>
+                </div>
+                <div class="mt-4 space-y-3">
+                  ${buildHeroScoreBars()}
+                </div>
+                <div class="absolute -bottom-5 -left-5 hidden items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-3.5 py-2.5 shadow-[var(--shadow-md)] sm:flex" style="transform:rotate(-2deg)">
+                  <span class="flex h-7 w-7 items-center justify-center rounded-[7px] bg-[var(--accent-soft)] text-[var(--accent)]">+</span>
+                  <span>
+                    <span class="block text-xs font-medium text-[var(--text)]">Rewrote 3 bullets</span>
+                    <span class="block text-[10.5px] text-[var(--muted)]">+12 impact score</span>
+                  </span>
+                </div>
+              </div>
             </div>
-
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-              ${sectionMarkup}
-            </div>
-          </section>
-
-            <section class="landing-citable-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-5" style="background:rgba(8, 15, 31, 0.46);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06);box-shadow:0 14px 36px rgba(0,0,0,0.16)" aria-labelledby="landing-citable-heading-static">
-            <div class="max-w-2xl space-y-1">
-              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Citation Blocks</p>
-              <h2 id="landing-citable-heading-static" class="text-xl sm:text-2xl font-bold text-on-surface">
-                Self-contained answers for AI search
-              </h2>
-            </div>
-
-            <div class="mt-4 grid gap-3">
-              ${citableMarkup}
-            </div>
-            </section>
-          </div>
-        </div>
-      </div>
-
-      <div class="landing-credit-marquee">
-        <div class="landing-credit-inner">
-          <div class="landing-credit-track">
-            <div class="landing-credit-segment">
-              ${creditMarkup}
-            </div>
-            <div class="landing-credit-segment" aria-hidden="true">
-              ${creditMarkup}
             </div>
           </div>
+        </section>
+
+        <section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+          <div class="container" style="display:flex;align-items:center;gap:36px;padding:20px 24px;overflow:hidden">
+            <span class="lbl-mono" style="flex-shrink:0">Trusted by candidates at</span>
+            <div style="display:flex;gap:40px;color:var(--muted);font-weight:600;letter-spacing:-.02em;font-size:18px;flex-wrap:wrap;opacity:.85">
+              <span>Stripe</span><span>Linear</span><span>Notion</span><span>Vercel</span><span>Razorpay</span><span>Atlassian</span><span>Figma</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="container" style="padding-top:96px;padding-bottom:64px" aria-labelledby="features-heading">
+          <div style="max-width:720px;margin-bottom:56px">
+            <div class="lbl-mono" style="margin-bottom:12px">What you get</div>
+            <h2 id="features-heading" class="h-display" style="font-size:40px;letter-spacing:-0.025em;margin:0;line-height:1.1">Every step of the resume, sharpened.</h2>
+          </div>
+          <div class="landing-features-grid" style="background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+            ${featureMarkup}
+          </div>
+        </section>
+
+        <section class="container" style="padding-top:32px;padding-bottom:64px">
+          <div class="panel landing-metric-grid" style="padding:32px">
+            ${metricMarkup}
+          </div>
+        </section>
+
+        <section id="templates" class="container" style="padding-top:64px;padding-bottom:96px" aria-labelledby="templates-heading">
+          <div style="display:flex;align-items:end;gap:24px;margin-bottom:32px;flex-wrap:wrap">
+            <div style="flex:1">
+              <div class="lbl-mono" style="margin-bottom:12px">Templates</div>
+              <h2 id="templates-heading" class="h-display" style="font-size:36px;letter-spacing:-0.025em;margin:0">Pick a starting point. Switch any time.</h2>
+            </div>
+            <a href="/templates" class="btn btn-outline">Browse all</a>
+          </div>
+          <div class="landing-templates-grid">
+            ${templateMarkup}
+          </div>
+        </section>
+
+        <section class="sr-only" aria-label="ResuMe public search answers">
+          ${seoOnlyMarkup}
+        </section>
+
+        <section id="pricing" class="container" style="padding-bottom:96px">
+          <div style="border-radius:18px;padding:56px 48px;background:linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);border:1px solid var(--border);text-align:center">
+            <h2 class="h-display" style="font-size:clamp(36px, 5vw, 48px);letter-spacing:-0.03em;margin:0;line-height:1.05">Stop applying into a black hole. <br class="hidden sm:block" /><span class="serif italic font-normal text-[var(--accent)]">Start landing interviews.</span></h2>
+            <p style="color:var(--text-2);font-size:clamp(16px, 2vw, 18px);margin-top:18px;margin-bottom:32px;max-width:540px;margin-inline:auto">We built the ultimate engine to get you past the bots and in front of human gatekeepers. No paywalls, no BS. Just a resume that actually works.</p>
+            <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+              <a href="/signup" class="btn btn-accent btn-lg font-bold" style="padding:0 32px">Build your resume now</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer style="border-top:1px solid var(--border)">
+        <div class="container" style="display:flex;align-items:center;gap:16px;padding:28px 24px;flex-wrap:wrap">
+          ${buildBrandMarkup()}
+          <span class="flex-1"></span>
+          <span class="mono text-[12.5px] text-[var(--muted)]">ResuMe by Ayush · built with care · <a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="ulink text-[var(--text-2)]">Ayuslh.in</a></span>
         </div>
-      </div>
+      </footer>
+      <script>
+        (function() {
+          const btn = document.getElementById('static-theme-toggle');
+          const sun = document.getElementById('theme-icon-sun');
+          const moon = document.getElementById('theme-icon-moon');
+          
+          function applyTheme(isDark) {
+            if (isDark) {
+              document.documentElement.style.backgroundColor = '#0a0a0c';
+              document.body.setAttribute('data-theme', 'dark');
+              if (sun && moon) {
+                sun.style.display = 'block';
+                moon.style.display = 'none';
+              }
+              localStorage.setItem('app-theme', 'dark');
+            } else {
+              document.documentElement.style.backgroundColor = '#ffffff';
+              document.body.removeAttribute('data-theme');
+              if (sun && moon) {
+                sun.style.display = 'none';
+                moon.style.display = 'block';
+              }
+              localStorage.setItem('app-theme', 'light');
+            }
+          }
+
+          if (btn) {
+            btn.addEventListener('click', () => {
+              const isDark = document.body.getAttribute('data-theme') === 'dark';
+              applyTheme(!isDark);
+            });
+          }
+
+          // Handle initial state set by root index.html or localStorage
+          const savedTheme = localStorage.getItem('app-theme') || 'light';
+          applyTheme(savedTheme === 'dark');
+        })();
+      </script>
     </div>
   `.trim()
 }

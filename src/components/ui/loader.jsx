@@ -4,10 +4,6 @@
  * Usage:  import { LoaderOne } from "@/components/ui/loader";
  */
 
-/**
- * LoaderOne — Three concentric rings that counter-rotate with a pulsing
- * core dot. Uses the app's cyan primary color (#06b6d4).
- */
 export function LoaderOne({ size = "md", label = "Loading..." }) {
   const sizes = {
     sm: { dot: "w-2 h-2", gap: "gap-1.5", text: "text-[10px]" },
@@ -17,17 +13,17 @@ export function LoaderOne({ size = "md", label = "Loading..." }) {
   const s = sizes[size] ?? sizes.md;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 select-none mt-4">
+    <div className="flex flex-col items-center justify-center gap-4 select-none mt-4 text-[var(--loading-fg,#111111)]">
       {/* ── Bouncing Dots ── */}
       <div className={`flex items-center ${s.gap}`}>
-        <div className={`${s.dot} rounded-full bg-[#d1d5db] animate-bounce`} style={{ animationDelay: '-0.3s' }}></div>
-        <div className={`${s.dot} rounded-full bg-[#d1d5db] animate-bounce`} style={{ animationDelay: '-0.15s' }}></div>
-        <div className={`${s.dot} rounded-full bg-[#d1d5db] animate-bounce`}></div>
+        <div className={`${s.dot} rounded-full bg-current animate-bounce`} style={{ animationDelay: "-0.3s", opacity: 0.95 }} />
+        <div className={`${s.dot} rounded-full bg-current animate-bounce`} style={{ animationDelay: "-0.15s", opacity: 0.7 }} />
+        <div className={`${s.dot} rounded-full bg-current animate-bounce`} style={{ opacity: 0.45 }} />
       </div>
 
       {/* ── Label ── */}
       {label && (
-        <p className={`${s.text} font-semibold tracking-widest uppercase text-[#9ca3af] animate-pulse`}>
+        <p className={`${s.text} font-semibold tracking-widest uppercase animate-pulse`} style={{ color: "color-mix(in oklch, var(--loading-fg,#111111) 62%, transparent)" }}>
           {label}
         </p>
       )}

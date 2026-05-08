@@ -185,6 +185,30 @@
     })();
   </script>
   <style>
+    html[data-route="/"],
+    html[data-route="/"] body {
+      background: #ffffff;
+      background-image: none;
+      background-attachment: scroll;
+    }
+
+    html[data-route="/"]:has(body[data-theme="dark"]),
+    html[data-route="/"] body[data-theme="dark"] {
+      background: #000000;
+    }
+
+    html[data-route]:not([data-route="/"]),
+    html[data-route]:not([data-route="/"]) body {
+      background: #ffffff;
+      background-image: none;
+      background-attachment: scroll;
+    }
+
+    html[data-route]:not([data-route="/"]):has(body[data-theme="dark"]),
+    html[data-route]:not([data-route="/"]) body[data-theme="dark"] {
+      background: #000000;
+    }
+
     html[data-route="/"] #root {
       display: none;
     }
@@ -197,9 +221,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+    rel="stylesheet">
 </head>
 
 <body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem("app-theme");
+        var accent = localStorage.getItem("app-accent");
+        if (theme === "dark") document.body.setAttribute("data-theme", "dark");
+        if (accent) document.body.setAttribute("data-accent", accent);
+      } catch(e) {}
+    })();
+  </script>
   <!-- HOMEPAGE_SEO_SHELL -->
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>

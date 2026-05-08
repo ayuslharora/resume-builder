@@ -1,4 +1,4 @@
-import { FileText, Copy, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
+import { FileText, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
@@ -67,7 +67,7 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
     const observer = new ResizeObserver(entries => {
       for (let entry of entries) {
         const { width } = entry.contentRect;
-        setScale(width / 794);
+        setScale(Math.max((width - 36) / 794, 0.1));
       }
     });
     observer.observe(previewContainerRef.current);
@@ -128,47 +128,36 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
     : "Just now";
 
   const statusColors = {
-    draft: "bg-white/5 text-on-surface-variant border border-white/10",
-    generated: "bg-primary/10 text-primary border border-primary/20",
-    complete: "bg-green-500/10 text-green-400 border border-green-500/20"
+    draft: "pill-warn",
+    generated: "pill-accent",
+    complete: "pill-good"
   };
+  const statusLabel = {
+    draft: "Draft",
+    generated: "Generated",
+    complete: "Complete"
+  }[resume.status] || "Draft";
 
   return (
     <div
-      className="group relative flex flex-col cursor-pointer overflow-hidden rounded-xl transition-all duration-200"
-      style={{
-        background: "rgba(25,31,49,0.5)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(255,255,255,0.06)",
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = "rgba(6,182,212,0.2)";
-        e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(6,182,212,0.12)";
-        e.currentTarget.style.transform = "translateY(-2px)";
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
+      className="panel lift group relative cursor-pointer overflow-visible"
+      style={{ padding: 0 }}
     >
       {/* Preview area */}
       <div
         ref={previewContainerRef}
-        className="relative flex justify-center items-start overflow-visible transition-colors w-full"
-        style={{ aspectRatio: "210/148", background: "rgba(7,13,31,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ aspectRatio: "1.7", padding: "14px 14px 0", background: "var(--surface)", borderBottom: "1px solid var(--border)", overflow: "hidden", position: "relative", borderRadius: "12px 12px 0 0" }}
         onClick={() => navigate(`/builder/${resume.id}`)}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div
+          style={{ background: "white", width: "100%", aspectRatio: "0.78", borderRadius: "4px 4px 0 0", padding: "16px 18px 0", color: "#1a1a1a", boxShadow: "0 1px 2px rgba(0,0,0,.04)", overflow: "hidden" }}
+        >
           {resume.templateId && resume.resumeData ? (
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none transition-transform duration-300 group-hover:scale-105">
-              <div
-                style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
-                className="bg-white"
-              >
-                <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
-              </div>
+            <div
+              className="pointer-events-none transition-transform duration-300 group-hover:scale-[1.025]"
+              style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
+            >
+              <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
             </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -179,163 +168,130 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
               )}
             </div>
           )}
-
-          {/* Subtle gradient overlay on preview */}
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(7,13,31,0.3) 100%)" }} />
         </div>
 
-        <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2 max-w-[70%]">
-          <div className={`status-pill ${statusColors[resume.status] || "bg-surface-container-highest"}`}>
-            {resume.status}
-          </div>
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 12, background: "linear-gradient(to bottom, transparent, color-mix(in oklch, var(--surface) 70%, transparent))", pointerEvents: "none" }} />
 
-          {resume.isShared && (
-            <div className="status-pill bg-[rgba(6,182,212,0.15)] text-primary border border-primary/20 flex items-center gap-1">
-              <Globe size={10} /> Published
-            </div>
-          )}
-        </div>
-
-        <div className="absolute top-3 right-3 z-10" ref={menuRef}>
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-            className="p-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors"
-            style={{
-              background: "rgba(10,15,30,0.8)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.08)"
-            }}
-          >
-            <MoreHorizontal size={14} />
-          </button>
-
-          {showMenu && (
-            <div className="absolute right-0 mt-1 w-36 rounded-lg shadow-xl z-20 py-1"
-              style={{
-                background: "rgba(10,15,30,0.92)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
-              }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); navigate(`/export/${resume.id}`); setShowMenu(false); }}
-                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
-              >
-                <Download size={14} className="text-on-surface-variant" /> Download
-              </button>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); navigate(`/cover-letter/${resume.id}`); setShowMenu(false); }}
-                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
-              >
-                <Mail size={14} className="text-on-surface-variant" /> Write Cover Letter
-              </button>
-
-              <div className="h-px w-full my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-              <button
-                onClick={handleTogglePublic}
-                className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-[rgba(6,182,212,0.1)] flex items-center gap-2 transition-colors"
-              >
-                {copied ? <Check size={14} className="text-green-400" /> : resume.isShared ? <EyeOff size={14} className="text-on-surface-variant" /> : <Globe size={14} className="text-primary" />}
-                {copied ? <span className="text-green-400">Copied Link!</span> : resume.isShared ? "Unpublish Resume" : "Publish Resume"}
-              </button>
-              {resume.isShared && resume.shareToken && (
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const url = buildSharedResumeUrl(window.location.origin, resume.shareToken);
-                    await navigator.clipboard.writeText(url);
-                    setCopied(true);
-                    setTimeout(() => { setCopied(false); setShowMenu(false); }, 2000);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-white/5 flex items-center gap-2 transition-colors"
-                >
-                  <LinkIcon size={14} className="text-on-surface-variant" /> Copy Link
-                </button>
-              )}
-              <div className="h-px w-full my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
-              >
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
-          )}
-        </div>
+        {resume.isShared && (
+          <span className="pill pill-accent" style={{ position: "absolute", top: 22, left: 22 }}>
+            <Globe size={11} /> Published
+          </span>
+        )}
       </div>
 
-      {/* Card body */}
-      <div className="px-4 py-4 flex flex-col" onClick={() => navigate(`/builder/${resume.id}`)}>
-        {isEditingTitle ? (
-          <form className="space-y-2" onSubmit={handleSaveTitle} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
-              <input
-                autoFocus
-                value={draftTitle}
-                disabled={isSavingTitle}
-                aria-label="Resume title"
-                onChange={(e) => setDraftTitle(e.target.value)}
-                onKeyDown={handleTitleKeyDown}
-                className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[13px] font-semibold text-on-surface outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-70"
-              />
-              <button
-                type="submit"
-                aria-label="Save resume title"
-                title="Save resume title"
-                disabled={isSavingTitle}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Check size={14} />
-              </button>
-              <button
-                type="button"
-                aria-label="Cancel title edit"
-                title="Cancel title edit"
-                disabled={isSavingTitle}
-                onClick={handleCancelTitleEdit}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-on-surface-variant transition hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <X size={14} />
-              </button>
-            </div>
-            {titleError && (
-              <p className="text-[11px] font-medium text-red-400">{titleError}</p>
-            )}
-          </form>
-        ) : (
-          <div className="flex items-start gap-2">
-            <h3 className="min-w-0 flex-1 font-bold text-[15px] text-on-surface line-clamp-1 group-hover:text-primary transition-colors" title={displayTitle}>
-              {displayTitle}
-            </h3>
+      <div style={{ position: "absolute", top: 12, right: 12, zIndex: 20 }} ref={menuRef}>
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+          className="btn btn-ghost btn-sm"
+          style={{ width: 28, padding: 0, background: "color-mix(in oklch, var(--bg) 86%, transparent)", boxShadow: "var(--shadow-sm)" }}
+        >
+          <MoreHorizontal size={15} />
+        </button>
+
+        {showMenu && (
+          <div className="panel" style={{ position: "absolute", right: 0, top: 32, width: 200, padding: 4, zIndex: 20, boxShadow: "var(--shadow-lg)" }} onClick={(e) => e.stopPropagation()}>
             <button
-              type="button"
-              aria-label="Rename resume title"
-              title="Rename resume title"
-              onClick={handleStartTitleEdit}
-              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-on-surface-variant transition hover:bg-white/5 hover:text-on-surface"
+              onClick={(e) => handleStartTitleEdit(e)}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
             >
-              <Pencil size={13} />
+              <Pencil size={14} className="text-[var(--muted)]" /> Rename resume title
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate(`/export/${resume.id}`); setShowMenu(false); }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
+            >
+              <Download size={14} className="text-[var(--muted)]" /> Download PDF
+            </button>
+
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate(`/cover-letter/${resume.id}`); setShowMenu(false); }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
+            >
+              <Mail size={14} className="text-[var(--muted)]" /> Write cover letter
+            </button>
+
+            <button
+              onClick={handleTogglePublic}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
+            >
+              {copied ? <Check size={14} className="text-[var(--good)]" /> : resume.isShared ? <EyeOff size={14} className="text-[var(--muted)]" /> : <Globe size={14} className="text-[var(--accent)]" />}
+              {copied ? <span className="text-[var(--good)]">Copied link</span> : resume.isShared ? "Unpublish" : "Publish"}
+            </button>
+            {resume.isShared && resume.shareToken && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  const url = buildSharedResumeUrl(window.location.origin, resume.shareToken);
+                  await navigator.clipboard.writeText(url);
+                  setCopied(true);
+                  setTimeout(() => { setCopied(false); setShowMenu(false); }, 2000);
+                }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
+              >
+                <LinkIcon size={14} className="text-[var(--muted)]" /> Copy link
+              </button>
+            )}
+            <hr className="hr my-1" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+                setShowMenu(false);
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--bad)] transition-colors hover:bg-[var(--bad-soft)]"
+            >
+              <Trash2 size={14} /> Delete
             </button>
           </div>
         )}
-        <p className="text-[13px] text-on-surface-variant mt-1 flex items-center gap-1.5 truncate">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/50"></span>
-          {resume.targetRole || "No role specified"}
-        </p>
+      </div>
 
-        <div className="mt-4 pt-3 flex justify-between items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-[10px] text-on-surface-variant/70 font-semibold tracking-wider uppercase">
-            Edited {dateStr}
+      {/* Card body */}
+      <div style={{ padding: 14 }} onClick={() => navigate(`/builder/${resume.id}`)}>
+        <div style={{ display: "flex", alignItems: "start", gap: 10 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {isEditingTitle ? (
+              <form onSubmit={handleSaveTitle} onClick={(e) => e.stopPropagation()}>
+                <input
+                  autoFocus
+                  value={draftTitle}
+                  disabled={isSavingTitle}
+                  aria-label="Resume title"
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  onKeyDown={handleTitleKeyDown}
+                  className="field"
+                  style={{ height: 26, minHeight: 26, padding: "2px 6px", fontSize: 14, fontWeight: 500 }}
+                />
+                <button type="submit" aria-label="Save resume title" title="Save resume title" className="sr-only" disabled={isSavingTitle}>
+                  <Check size={14} />
+                </button>
+                <button type="button" aria-label="Cancel title edit" title="Cancel title edit" className="sr-only" disabled={isSavingTitle} onClick={handleCancelTitleEdit}>
+                  <X size={14} />
+                </button>
+                {titleError && (
+                  <p className="mt-1 text-[11px] font-medium text-[var(--bad)]">{titleError}</p>
+                )}
+              </form>
+            ) : (
+              <div
+                onDoubleClick={handleStartTitleEdit}
+                style={{ fontWeight: 500, fontSize: 14, letterSpacing: "-.01em" }}
+                className="truncate"
+                title={displayTitle}
+              >
+                {displayTitle}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+          <span className={`pill ${statusColors[resume.status] || "pill-warn"}`}>
+            <span className="dot" style={{ background: "currentColor" }} />
+            {statusLabel}
           </span>
-          <span className="text-primary text-[11px] font-bold tracking-wide flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0 -translate-x-2">
-            EDIT <span className="text-[13px] leading-none">&rarr;</span>
+          <span style={{ color: "var(--faint)", fontSize: 11.5, marginLeft: "auto" }} className="mono">
+            Edited {dateStr}
           </span>
         </div>
       </div>

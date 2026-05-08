@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { AlertCircle, ChevronLeft, FileText } from "lucide-react";
+import { AlertCircle, ChevronLeft } from "lucide-react";
 import Loading from "./Loading";
 
 export default function PublicResume() {
@@ -57,10 +57,10 @@ export default function PublicResume() {
         style={{ background: "rgba(7,13,31,0.8)", borderColor: "rgba(255,255,255,0.06)" }}>
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]"
-            style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)" }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
+            style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.24)" }}
           >
-            <FileText size={16} className="text-surface" />
+            <img src="/favicon.svg" alt="" aria-hidden="true" className="h-full w-full" />
           </div>
           <span className="font-bold tracking-tight text-white hidden sm:block">ResuMe</span>
         </div>

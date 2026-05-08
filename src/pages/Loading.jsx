@@ -11,13 +11,14 @@ export function LoaderOneDemo() {
  */
 export default function Loading() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-10 fade-in relative overflow-hidden">
-      <div className="orb w-96 h-96 bg-cyan-500/8 -top-32 -left-32 animate-float-slow" />
-      <div className="orb w-80 h-80 bg-purple-600/6 -bottom-32 -right-32 animate-float-medium" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center gap-10 fade-in relative overflow-hidden"
+      style={{ background: "var(--loading-bg,#ffffff)", color: "var(--loading-fg,#111111)" }}
+    >
       {/* ── Brand mark ── */}
       <div className="flex items-center gap-2.5 select-none relative z-10">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg,#06b6d4,#0891b2)", boxShadow: "0 0 16px rgba(6,182,212,0.4)" }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center border"
+          style={{ borderColor: "color-mix(in oklch, var(--loading-fg,#111111) 35%, transparent)", color: "var(--loading-fg,#111111)" }}>
           <svg
             width="16" height="16"
             viewBox="0 0 24 24"
@@ -26,7 +27,6 @@ export default function Loading() {
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-surface"
           >
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14 2 14 8 20 8" />
@@ -35,8 +35,8 @@ export default function Loading() {
             <polyline points="10 9 9 9 8 9" />
           </svg>
         </div>
-        <span className="font-bold text-lg text-on-surface tracking-tight">
-          Resu<span className="text-primary">Me</span>
+        <span className="font-bold text-lg tracking-tight" style={{ color: "var(--loading-fg,#111111)" }}>
+          ResuMe
         </span>
       </div>
 

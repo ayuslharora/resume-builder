@@ -32,7 +32,7 @@ function BuilderContent() {
 
   return (
     <div className="flex flex-col relative">
-      <div className="glass-card border-b ghost-border border-x-0 border-t-0 py-4 px-4 sm:py-5 sm:px-6 sticky top-0 z-10">
+      <div className="app-design builder-topbar sticky top-0 z-10">
         <div className="w-full max-w-5xl mx-auto flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
           {currentStep >= 4 && (
             <button onClick={prevStep} className="btn-ghost shrink-0 self-start lg:self-auto">
@@ -44,7 +44,7 @@ function BuilderContent() {
           </div>
         </div>
       </div>
-      <main className={`flex-1 w-full px-3 py-4 sm:p-6 ${currentStep === 4 ? "pb-4 overflow-hidden" : "pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-20"}`}>
+      <main className={`builder-form-theme flex-1 w-full px-3 py-4 sm:p-6 ${currentStep === 4 ? "pb-4 overflow-hidden" : "pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-20"}`}>
         {currentStep === 1 && <InterviewStep />}
         {currentStep === 2 && <UploadStep />}
         {currentStep === 3 && <TemplateStep />}

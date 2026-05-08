@@ -46,6 +46,14 @@ export default function UploadStep() {
   };
 
   const hasContent = builderData.bragSheetText && builderData.bragSheetText.length > 0;
+  const tabStyle = (isActive) => (
+    isActive
+      ? {
+        background: "var(--accent-soft)",
+        boxShadow: "inset 0 0 0 1px var(--builder-form-accent-border)"
+      }
+      : undefined
+  );
 
   const handleNext = async () => {
     await saveNow({
@@ -72,15 +80,17 @@ export default function UploadStep() {
 
       {!hasContent ? (
         <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap p-1 rounded-lg mx-auto w-full sm:w-fit" style={{ background: "rgba(25,31,49,0.4)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex flex-wrap p-1 rounded-lg mx-auto w-full sm:w-fit" style={{ background: "var(--builder-form-surface-muted)", border: "1px solid var(--builder-form-border-soft)" }}>
             <button
-              className={`flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "upload" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
+              className={`builder-upload-tab flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "upload" ? "text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+              style={tabStyle(activeTab === "upload")}
               onClick={() => { setActiveTab("upload"); setError(null); }}
             >
               <UploadCloud size={16} /> Upload File
             </button>
             <button
-              className={`flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "text" ? "bg-[rgba(6,182,212,0.15)] text-primary shadow-[inset_0_0_0_1px_rgba(6,182,212,0.3)]" : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"}`}
+              className={`builder-upload-tab flex flex-1 items-center justify-center gap-2 px-5 py-2 text-sm font-medium rounded-md transition-all duration-200 sm:flex-none ${activeTab === "text" ? "text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+              style={tabStyle(activeTab === "text")}
               onClick={() => { setActiveTab("text"); setError(null); }}
             >
               <Type size={16} /> Paste Text
@@ -92,26 +102,26 @@ export default function UploadStep() {
               onClick={() => fileInputRef.current?.click()}
               className="h-48 sm:h-56 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 group"
               style={{
-                background: "rgba(25,31,49,0.4)",
+                background: "var(--builder-form-surface)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
-                border: "2px dashed rgba(255,255,255,0.1)"
+                border: "2px dashed var(--builder-form-border)"
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(6,182,212,0.35)"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--builder-form-border)"; }}
             >
               {loading ? (
                 <div className="flex flex-col items-center">
                   <div className="relative w-8 h-8 mb-4">
-                    <div className="absolute inset-0 rounded-full" style={{ border: "2px solid rgba(6,182,212,0.15)" }} />
-                    <div className="absolute inset-0 rounded-full animate-spin" style={{ border: "2px solid transparent", borderTopColor: "#06b6d4" }} />
+                    <div className="absolute inset-0 rounded-full" style={{ border: "2px solid var(--builder-form-accent-border)" }} />
+                    <div className="absolute inset-0 rounded-full animate-spin" style={{ border: "2px solid transparent", borderTopColor: "var(--accent)" }} />
                   </div>
                   <p className="text-on-surface-variant text-sm font-medium">Parsing file...</p>
                 </div>
               ) : (
                 <>
                   <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
-                    style={{ background: "rgba(25,31,49,0.8)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "var(--accent-soft)", border: "1px solid var(--builder-form-accent-border)" }}>
                     <UploadCloud className="w-6 h-6 text-on-surface-variant group-hover:text-primary transition-colors" />
                   </div>
                   <p className="font-semibold text-on-surface mb-1">Click to browse files</p>
@@ -130,17 +140,17 @@ export default function UploadStep() {
                   placeholder="Paste your resume, notes, or achievements here..."
                   className="w-full h-56 p-4 rounded-xl resize-none outline-none custom-scrollbar transition-all duration-200"
                   style={{
-                    background: "rgba(25,31,49,0.4)",
+                    background: "var(--builder-form-surface)",
                     backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "var(--on-surface)",
+                    border: "1px solid var(--builder-form-border)",
+                    color: "var(--builder-form-text)",
                   }}
                   onFocus={e => {
-                    e.currentTarget.style.borderColor = "rgba(6,182,212,0.35)";
-                    e.currentTarget.style.boxShadow = "0 0 12px rgba(6,182,212,0.1)";
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px var(--builder-form-focus-ring)";
                   }}
                   onBlur={e => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                    e.currentTarget.style.borderColor = "var(--builder-form-border)";
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 />
@@ -160,13 +170,13 @@ export default function UploadStep() {
         </div>
       ) : (
         <div className="rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-300"
-          style={{ background: "rgba(7,13,31,0.5)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          style={{ background: "var(--builder-form-surface)", border: "1px solid var(--builder-form-border-soft)" }}>
           <div className="px-4 py-3 flex justify-between items-center"
-            style={{ background: "rgba(25,31,49,0.5)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            style={{ background: "var(--builder-form-surface-muted)", borderBottom: "1px solid var(--builder-form-border-soft)" }}>
             <div className="flex items-center gap-2.5 text-sm font-semibold text-on-surface">
               <File size={16} className="text-primary" /> {builderData.bragSheetFileName}
             </div>
-            <button onClick={handleClear} className="text-on-surface-variant hover:text-red-400 p-1 transition-colors rounded-md hover:bg-white/5">
+            <button onClick={handleClear} className="builder-upload-clear text-on-surface-variant hover:text-red-500 p-1 transition-colors rounded-md">
               <X size={16} />
             </button>
           </div>
@@ -174,11 +184,11 @@ export default function UploadStep() {
             <div className="h-40 overflow-y-auto w-full text-xs text-on-surface-variant font-mono whitespace-pre-wrap custom-scrollbar">
               {builderData.bragSheetText}
             </div>
-            <div className="mt-3 pt-3 flex justify-between items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="mt-3 pt-3 flex justify-between items-center" style={{ borderTop: "1px solid var(--builder-form-border-soft)" }}>
               <div className="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">
                 Successfully Extracted
               </div>
-              <div className="text-xs font-mono text-primary/80">
+              <div className="builder-upload-count text-xs font-mono">
                 {builderData.bragSheetText.length.toLocaleString()} chars
               </div>
             </div>
@@ -186,7 +196,7 @@ export default function UploadStep() {
         </div>
       )}
 
-      <div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center" style={{ borderTop: "1px solid var(--builder-form-border-soft)" }}>
         <button onClick={prevStep} className="btn-ghost w-full sm:w-auto" disabled={loading}>
           <ChevronLeft size={16} /> Back
         </button>

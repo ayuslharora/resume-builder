@@ -63,18 +63,11 @@ export default function GenerateStep() {
         className="w-full max-w-lg mx-auto text-center p-5 sm:p-12 rounded-2xl relative overflow-y-auto custom-scrollbar fade-in"
         style={{
           maxHeight: "100%",
-          background: "rgba(25,31,49,0.55)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
+          background: "var(--builder-form-surface)",
+          border: "1px solid var(--builder-form-border-soft)",
+          boxShadow: "0 18px 40px -28px rgba(15,15,20,0.22), 0 1px 2px rgba(15,15,20,0.04)"
         }}
       >
-
-        {/* Ambient orb */}
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none -z-10"
-          style={{ background: "rgba(6,182,212,0.07)", filter: "blur(60px)" }} />
-
         <h2 className="text-2xl font-bold text-on-surface mb-3">Generating Your Resume</h2>
         <p className="text-on-surface-variant mb-8 text-sm leading-relaxed">
           Our AI is crafting your personalized resume. This may take a moment.
@@ -90,9 +83,9 @@ export default function GenerateStep() {
           <div className="h-48 flex flex-col items-center justify-center">
             <div className="relative w-16 h-16 mb-8">
               <div className="absolute inset-0 rounded-full"
-                style={{ border: "4px solid rgba(6,182,212,0.12)" }} />
+                style={{ border: "4px solid var(--builder-form-accent-border)" }} />
               <div className="absolute inset-0 rounded-full animate-spin"
-                style={{ border: "4px solid transparent", borderTopColor: "#06b6d4", filter: "drop-shadow(0 0 6px rgba(6,182,212,0.5))" }} />
+                style={{ border: "4px solid transparent", borderTopColor: "var(--accent)", filter: "drop-shadow(0 0 6px color-mix(in oklch, var(--accent) 45%, transparent))" }} />
             </div>
             <p className="font-bold tracking-widest uppercase text-sm text-primary animate-pulse">
               {GENERATION_MESSAGES[msgIdx]}
@@ -101,7 +94,7 @@ export default function GenerateStep() {
         )}
 
         <div className="mt-8 pt-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          style={{ borderTop: "1px solid var(--builder-form-border-soft)" }}>
           <button onClick={prevStep} className="btn-ghost w-full sm:w-auto">
             <ChevronLeft size={16} /> Back
           </button>

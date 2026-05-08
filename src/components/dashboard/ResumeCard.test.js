@@ -45,12 +45,23 @@ test("ResumeCard applies publish changes before Firestore resolves and rolls bac
   assert.match(handlerSource, /catch \(err\) \{[\s\S]*onPublishChange\?\.\(resume\.id,\s*previousPublishState\)/);
 });
 
-test("ResumeCard keeps the published dropdown visible while clipping only the preview artwork", async () => {
+test("ResumeCard matches the card dashboard card anatomy", async () => {
   const source = await readFile(new URL("./ResumeCard.jsx", import.meta.url), "utf8");
 
-  assert.match(source, /className="relative flex justify-center items-start overflow-visible transition-colors w-full"/);
-  assert.match(source, /className="absolute inset-0 overflow-hidden pointer-events-none z-0"/);
+  assert.match(source, /className="panel lift group relative cursor-pointer overflow-visible"/);
+  assert.match(source, /aspectRatio: "1\.7",\s*padding: "14px 14px 0",\s*background: "var\(--surface\)",\s*borderBottom: "1px solid var\(--border\)",\s*overflow: "hidden",\s*position: "relative",\s*borderRadius: "12px 12px 0 0"/s);
+  assert.match(source, /background: "white",\s*width: "100%",\s*aspectRatio: "0\.78",\s*borderRadius: "4px 4px 0 0",\s*padding: "16px 18px 0",\s*color: "#1a1a1a",\s*boxShadow: "0 1px 2px rgba\(0,0,0,\.04\)"/s);
+  assert.match(source, /height: 12,\s*background: "linear-gradient\(to bottom, transparent, color-mix\(in oklch, var\(--surface\) 70%, transparent\)\)"/s);
+  assert.match(source, /style=\{\{ position: "absolute", top: 12, right: 12, zIndex: 20 \}\}/);
+  assert.match(source, /style=\{\{ position: "absolute", top: 22, left: 22 \}\}/);
+  assert.match(source, /<div style=\{\{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 \}\}>/);
   assert.match(source, /<Trash2 size=\{14\} \/> Delete/);
+});
+
+test("Dashboard resume grid uses card auto-fill card sizing", async () => {
+  const css = await readFile(new URL("../../index.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.resume-grid\s*\{\s*display: grid;\s*grid-template-columns: repeat\(auto-fill, minmax\(260px, 1fr\)\);\s*gap: 16px;\s*align-items: start;\s*\}/);
 });
 
 test("successful resume deletes notify the sidebar list immediately", async () => {

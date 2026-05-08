@@ -9,10 +9,11 @@ test("PublicResume resolves resumes by share token", async () => {
   assert.match(source, /getResumeByShareToken/);
 });
 
-test("PublicResume uses the shared app brand icon instead of a letter badge", async () => {
+test("PublicResume uses the favicon for the shared app brand mark", async () => {
   const source = await readFile(new URL("./PublicResume.jsx", import.meta.url), "utf8");
 
-  assert.match(source, /FileText/);
+  assert.match(source, /src="\/favicon\.svg"/);
+  assert.doesNotMatch(source, /FileText size=\{16\}/);
   assert.doesNotMatch(source, />\s*R\s*</);
 });
 

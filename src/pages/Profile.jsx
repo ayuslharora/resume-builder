@@ -35,39 +35,24 @@ export default function Profile() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Profile Settings</h1>
-        <p className="page-subtitle">Manage your display name and profile picture.</p>
+    <div className="app-page app-page-narrow profile-page fade-in">
+      <div className="profile-header">
+        <div>
+          <p className="lbl-mono">Account</p>
+          <h1 className="h-display">Profile Settings</h1>
+        </div>
+        <p>Manage your display name and profile picture.</p>
       </div>
 
-      <div className="space-y-6">
-
-        {/* Avatar section */}
-        <div
-          className="p-6 rounded-xl"
-          style={{
-            background: "rgba(25,31,49,0.5)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(255,255,255,0.06)"
-          }}
-        >
-          <h2 className="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+      <div className="profile-grid">
+        <section className="panel profile-section">
+          <h2 className="profile-section-title">
             <Camera size={15} className="text-primary" />
             Profile Photo
           </h2>
 
-          <div className="flex items-center gap-6">
-            {/* Avatar preview */}
-            <div
-              className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center text-2xl font-bold text-on-surface flex-shrink-0"
-              style={{
-                background: "rgba(6,182,212,0.1)",
-                border: "2px solid rgba(6,182,212,0.25)",
-                boxShadow: "0 0 20px rgba(6,182,212,0.15)"
-              }}
-            >
+          <div className="profile-photo-row">
+            <div className="avatar profile-avatar">
               {userDoc?.photoURL ? (
                 <img src={userDoc.photoURL} alt="Profile" className="w-full h-full object-cover" />
               ) : (
@@ -78,46 +63,37 @@ export default function Profile() {
             <div className="flex-1 space-y-3">
               {isGoogleUser && googlePhotoURL ? (
                 <div className="space-y-2">
-                  <p className="text-xs text-on-surface-variant">
+                  <p className="profile-helper">
                     Your Google account has a profile photo. Use it as your avatar.
                   </p>
                   <div className="flex items-center gap-3">
-                    <img src={googlePhotoURL} alt="Google" className="w-8 h-8 rounded-full border border-white/10" />
+                    <img src={googlePhotoURL} alt="Google" className="profile-google-photo" />
                     <button
                       onClick={handleUseGooglePhoto}
                       disabled={userDoc?.photoURL === googlePhotoURL}
-                      className="btn-ghost text-xs py-1.5 px-3"
+                      className="btn btn-outline btn-sm"
                     >
                       {userDoc?.photoURL === googlePhotoURL ? "Currently Active" : "Use Google Photo"}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-on-surface-variant">
+                <p className="profile-helper">
                   Sign in with Google to use your Google profile photo, or your initials will be shown.
                 </p>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Display name section */}
-        <div
-          className="p-6 rounded-xl"
-          style={{
-            background: "rgba(25,31,49,0.5)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(255,255,255,0.06)"
-          }}
-        >
-          <h2 className="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+        <section className="panel profile-section">
+          <h2 className="profile-section-title">
             <User size={15} className="text-primary" />
             Display Name
           </h2>
 
           {error && (
-            <div className="bg-red-500/10 text-red-400 p-3 rounded-lg mb-4 text-sm border border-red-500/20">
+            <div className="profile-error">
               {error}
             </div>
           )}
@@ -127,13 +103,13 @@ export default function Profile() {
               <label className="field-label">Your Name</label>
               <input
                 type="text"
-                className="input-field"
+                className="field"
                 value={displayName}
                 onChange={e => setDisplayName(e.target.value)}
                 placeholder="e.g. Jane Doe"
                 required
               />
-              <p className="text-xs text-on-surface-variant mt-1.5">
+              <p className="profile-helper mt-1.5">
                 This is how your name appears in the sidebar and on your account.
               </p>
             </div>
@@ -142,72 +118,56 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={!displayName.trim()}
-                className="btn-primary py-2"
+                className="btn btn-accent"
               >
                 <Save size={14} />
                 Save Name
               </button>
 
               {saved && (
-                <span className="flex items-center gap-1.5 text-xs text-green-400 font-medium fade-in">
+                <span className="profile-saved fade-in">
                   <CheckCircle size={13} />
                   Saved!
                 </span>
               )}
             </div>
           </form>
-        </div>
+        </section>
 
-        {/* Account info (read-only) */}
-        <div
-          className="p-6 rounded-xl"
-          style={{
-            background: "rgba(25,31,49,0.3)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.04)"
-          }}
-        >
-          <h2 className="text-sm font-bold text-on-surface mb-4">Account Info</h2>
-          <div className="space-y-3">
-            <div>
+        <section className="panel profile-section profile-section-wide">
+          <h2 className="profile-section-title">Account Info</h2>
+          <div className="profile-account-grid">
+            <div className="profile-account-row">
               <p className="field-label">Email</p>
-              <p className="text-sm text-on-surface-variant">{currentUser?.email}</p>
+              <p>{currentUser?.email}</p>
             </div>
-            <div>
+            <div className="profile-account-row">
               <p className="field-label">Sign-in Method</p>
-              <p className="text-sm text-on-surface-variant capitalize">
+              <p className="capitalize">
                 {currentUser?.providerData?.map(p =>
                   p.providerId === "google.com" ? "Google" : "Email/Password"
                 ).join(", ")}
               </p>
             </div>
-            <div>
+            <div className="profile-account-row profile-account-row-full">
               <p className="field-label">Creator</p>
-              <div
-                className="mt-2 rounded-xl p-4 space-y-2"
-                style={{
-                  background: "rgba(6,182,212,0.08)",
-                  border: "1px solid rgba(6,182,212,0.18)"
-                }}
-              >
-                <p className="text-sm font-medium text-on-surface">Built and designed by Ayush</p>
-                <p className="text-sm text-on-surface-variant">
-                  Visit portfolio: Ayuslh.in
-                </p>
+              <div className="profile-creator-card">
+                <div>
+                  <p>Built and designed by Ayush</p>
+                  <span>Visit portfolio: Ayuslh.in</span>
+                </div>
                 <a
                   href="https://Ayuslh.in"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex text-sm text-primary transition-colors hover:text-cyan-300"
+                  className="btn btn-outline btn-sm"
                 >
                   Open Ayuslh.in
                 </a>
               </div>
             </div>
           </div>
-        </div>
-
+        </section>
       </div>
     </div>
   );

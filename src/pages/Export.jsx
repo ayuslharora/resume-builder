@@ -71,25 +71,25 @@ export default function Export() {
 
   if (loading) return <Spinner />;
   if (!resumeData) return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-8">
-      <div className="glass-card ghost-border rounded-2xl p-10 max-w-md text-center">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-          <FileText size={28} className="text-primary" />
+    <div className="app-design flex min-h-screen flex-col items-center justify-center bg-[var(--surface)] p-8">
+      <div className="panel max-w-md p-10 text-center">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent)]">
+          <FileText size={26} />
         </div>
-        <h2 className="text-2xl font-bold text-on-surface mb-3">No Resume Selected</h2>
-        <p className="text-on-surface-variant mb-8 leading-relaxed">
-          To download a resume, complete the builder flow and click <strong className="text-primary">"Export Resume"</strong> from the editor — or open an existing resume from your dashboard.
+        <h2 className="h-display mb-3 text-2xl">No Resume Selected</h2>
+        <p className="mb-8 leading-relaxed text-[var(--muted)]">
+          To download a resume, complete the builder flow and click <strong className="text-[var(--accent)]">"Export Resume"</strong> from the editor, or open an existing resume from your dashboard.
         </p>
         <div className="flex flex-col gap-3">
           <button 
             onClick={() => navigate('/dashboard')} 
-            className="flex items-center justify-center gap-2 bg-primary text-surface px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition shadow-ambient"
+            className="btn btn-accent"
           >
             Go to Dashboard
           </button>
           <button 
             onClick={() => navigate(-1)} 
-            className="flex items-center justify-center gap-2 text-on-surface-variant border border-surface-container-high px-6 py-3 rounded-xl font-medium hover:bg-surface-container transition"
+            className="btn btn-outline"
           >
             <ArrowLeft size={18} /> Go Back
           </button>
@@ -161,69 +161,80 @@ export default function Export() {
   };
 
   return (
-    <div className="min-h-screen bg-surface/50 flex flex-col">
+    <div className="app-design flex min-h-screen flex-col bg-[var(--surface)]">
       {/* ── Sticky header bar ── */}
-      <header className="glass-card shadow-sm border-b border-surface-container-high py-4 px-4 sm:px-6 sticky top-0 z-10 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center print-hide">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition font-medium">
-            <Home size={18} /> Dashboard
+      <header className="print-hide sticky top-0 z-10 flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => navigate('/dashboard')} className="btn btn-ghost btn-sm">
+            <Home size={13} /> Dashboard
           </button>
-          <div className="w-px h-5 bg-white/10 hidden sm:block"></div>
-          <button onClick={() => navigate(`/builder/${resumeId}`)} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition font-medium">
-            <ArrowLeft size={18} /> Back to Editor
+          <button onClick={() => navigate(`/builder/${resumeId}`)} className="btn btn-ghost btn-sm">
+            <ArrowLeft size={13} /> Back to editor
           </button>
+          <span className="v-hr hidden sm:block" style={{ height: 18 }} />
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">
+              {resumeData.personalInfo?.fullName || "Resume"}
+            </div>
+            <div className="mono text-[11.5px] text-[var(--muted)]">
+              Ready to export
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3 min-h-[40px] items-center flex-wrap justify-end">
+        <span className="hidden flex-1 lg:block" />
+        <div className="flex min-h-[40px] flex-wrap items-center gap-2 lg:justify-end">
             <>
               <button
                 onClick={handleTogglePublish}
                 disabled={shareBusy || resumeId === "new"}
-                className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition disabled:opacity-50"
+                className="btn btn-outline btn-sm disabled:opacity-50"
               >
-                {isShared ? <EyeOff size={16} /> : <Globe size={16} />}
+                {isShared ? <EyeOff size={13} /> : <Globe size={13} />}
                 {isShared ? "Unpublish" : "Publish"}
               </button>
               {isShared && shareToken && (
                 <button
                   onClick={handleCopyShareLink}
-                  className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition"
+                  className="btn btn-outline btn-sm"
                 >
-                  {copiedShareLink ? <Check size={16} className="text-green-400" /> : <LinkIcon size={16} />}
+                  {copiedShareLink ? <Check size={13} className="text-[var(--good)]" /> : <LinkIcon size={13} />}
                   {copiedShareLink ? "Copied" : "Copy Link"}
                 </button>
               )}
               <button 
                  onClick={handleDownloadDOCX} 
                  disabled={exportingType || shareBusy}
-                 className="flex items-center gap-2 bg-surface-lowest text-on-surface border border-surface-container-high px-4 py-2 rounded-lg font-medium hover:bg-surface-container transition disabled:opacity-50 fade-in"
+                 className="btn btn-outline btn-sm disabled:opacity-50"
               >
-                <FileText size={18} /> {exportingType === 'docx' ? 'Exporting...' : 'DOCX'}
+                <FileText size={13} /> {exportingType === 'docx' ? 'Preparing...' : 'DOCX'}
               </button>
               <button 
                  onClick={handleDownloadPDF} 
                  disabled={exportingType || shareBusy}
-                 className="flex items-center gap-2 bg-primary text-surface px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition disabled:opacity-50 shadow-ambient fade-in"
+                 className="btn btn-accent btn-sm disabled:opacity-50"
               >
-                <Download size={18} /> {exportingType === 'pdf' ? 'Exporting...' : 'PDF'}
+                <Download size={13} /> {exportingType === 'pdf' ? 'Preparing...' : 'Download PDF'}
               </button>
             </>
         </div>
       </header>
 
       {/* ── Resume preview ── */}
-      <main className="flex-1 flex items-start justify-center p-6 sm:p-10 print-resume-wrapper">
-        <div className="w-full max-w-[920px] overflow-x-auto custom-scrollbar border border-surface-container-high rounded-xl bg-surface-lowest p-4 sm:p-8 flex justify-center print-resume-wrapper">
-          <div
-            ref={resumeRef}
-            className="bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] print-resume-document"
-            style={{ width: '850px', flexShrink: 0 }}
-          >
-            <ResumePreview
-              resumeData={resumeData}
-              templateId={templateId}
-              isEditing={false}
-              scale={1}
-            />
+      <main className="scroll flex-1 overflow-y-auto px-4 py-8 print-resume-wrapper sm:px-6">
+        <div className="mx-auto w-full max-w-[1120px]">
+          <div className="flex justify-center overflow-x-auto print-resume-wrapper">
+            <div
+              ref={resumeRef}
+              className="paper print-resume-document mx-auto"
+              style={{ width: '850px', flexShrink: 0 }}
+            >
+              <ResumePreview
+                resumeData={resumeData}
+                templateId={templateId}
+                isEditing={false}
+                scale={1}
+              />
+            </div>
           </div>
         </div>
       </main>

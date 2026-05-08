@@ -100,7 +100,7 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(robots, /User-agent: GPTBot\s+Allow: \//);
   assert.match(robots, /User-agent: OAI-SearchBot\s+Allow: \//);
   assert.match(robots, /User-agent: ChatGPT-User\s+Allow: \//);
-  assert.match(robots, /User-agent: ClaudeBot\s+Allow: \//);
+  assert.match(robots, /User-agent: AnthropicBot\s+Allow: \//);
   assert.match(robots, /User-agent: PerplexityBot\s+Allow: \//);
   assert.match(robots, /User-agent: Google-Extended\s+Disallow: \//);
   assert.match(robots, /Sitemap: https:\/\/resume\.ayuslh\.in\/sitemap\.xml/);
@@ -133,5 +133,7 @@ test("homepage static shell contains the public answer blocks used for AI search
   assert.match(shell, /How does the ATS grader work\?/);
   assert.match(shell, /Start Building Free/);
   assert.match(shell, /Grade My Resume/);
-  assert.match(shell, /Built and designed by Ayush/);
+  assert.match(shell, /ResuMe by Ayush/);
+  assert.match(shell, /built with care/);
+  assert.match(shell, /Ayuslh\.in/);
 });

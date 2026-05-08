@@ -9,6 +9,7 @@ export default defineConfig([
     'dist',
     '**/dist/**',
     '**/.worktrees/**',
+    'design-reference/**',
   ]),
   {
     files: ['**/*.{js,jsx}'],

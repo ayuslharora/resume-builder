@@ -17,3 +17,18 @@ test("/resumes is not exposed as a duplicate resume-list surface", async () => {
     /ENOENT/
   );
 });
+
+test("app shell uses a single current sidebar implementation", async () => {
+  const appLayoutSource = await readFile(new URL("./components/layout/AppLayout.jsx", import.meta.url), "utf8");
+  const sidebarSource = await readFile(new URL("./components/layout/Sidebar.jsx", import.meta.url), "utf8");
+  const cssSource = await readFile(new URL("./index.css", import.meta.url), "utf8");
+
+  assert.doesNotMatch(sidebarSource, /variant\s*=/);
+  assert.doesNotMatch(sidebarSource, /variant\s*===\s*["']workspace["']/);
+  assert.doesNotMatch(sidebarSource, /renderSidebarContent/);
+  assert.match(sidebarSource, /app-sidebar-desktop/);
+  assert.match(sidebarSource, /app-sidebar-mobile/);
+  assert.match(cssSource, /body\.ats-panel-open \.app-sidebar-desktop/);
+  assert.match(cssSource, /body\.ats-panel-open \.app-sidebar-mobile/);
+  assert.doesNotMatch(appLayoutSource, /<Sidebar\s+variant=/);
+});

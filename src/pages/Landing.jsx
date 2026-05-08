@@ -1,5 +1,21 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FileText, ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Download,
+  FileText,
+  LayoutTemplate,
+  PencilLine,
+  Shield,
+  Sparkles,
+  Target,
+  Zap,
+  Sun,
+  Moon,
+  Eye,
+  Layers,
+  Key,
+} from "lucide-react";
 import {
   HOME_JSON_LD,
   HOME_DESCRIPTION,
@@ -7,14 +23,87 @@ import {
   useRouteSeo,
 } from "../seo/routeSeo";
 import {
+  HOME_LANDING_FEATURES,
+  HOME_LANDING_METRICS,
   HOME_SEO_BADGE,
-  HOME_SEO_CITABLE_BLOCKS,
-  HOME_CREDIT_ITEMS,
   HOME_SEO_DESCRIPTION,
-  HOME_SEO_SECTIONS,
+  HOME_SEO_CITABLE_BLOCKS,
+  HOME_SEO_FAQ,
   HOME_SEO_TITLE,
   HOME_SEO_TRUST,
+  HOME_TEMPLATE_PREVIEWS,
 } from "../seo/homepageSeoContent";
+
+const FEATURE_ICON_MAP = {
+  "AI builder": Sparkles,
+  "ATS grader": Target,
+  "Four templates": LayoutTemplate,
+  "Inline editor": PencilLine,
+  "Targeted rewrites": Zap,
+  "PDF and DOCX": Download,
+};
+
+const HERO_SCORE_ITEMS = [
+  ["Formatting", 92],
+  ["Keywords", 78],
+  ["Impact", 88],
+  ["Clarity", 91],
+];
+
+const HERO_BULLETS = [
+  "Owned onboarding redesign, raising activation by 18%.",
+  "Built component kit used by 9 product teams.",
+  "Trimmed dashboard TTI from 4.2s to 1.3s.",
+];
+
+const HERO_SKILLS = ["TypeScript", "React", "Next.js", "GraphQL", "Tailwind", "Vite"];
+
+const LANDING_HEADER_STYLE = {
+  position: "sticky",
+  top: 0,
+  zIndex: 30,
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  background: "color-mix(in oklch, var(--bg) 78%, transparent)",
+};
+
+const LANDING_LAYOUT_CSS = `
+  .landing-hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  @media (max-width: 1024px) {
+    .landing-hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .landing-hero-grid .landing-hero-visual-wrap { max-width: 560px; margin-left: 0; }
+  }
+  .landing-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
+  @media (max-width: 900px) { .landing-features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .landing-features-grid { grid-template-columns: 1fr; } }
+  .landing-templates-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .landing-templates-grid { grid-template-columns: repeat(2, 1fr); } }
+  .landing-metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  @media (max-width: 700px) { .landing-metric-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
+`;
+
+function BrandLogo() {
+  return (
+    <>
+      <div
+        className="flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]"
+        style={{
+          boxShadow: "0 1px 2px rgba(15,23,42,.16)",
+        }}
+      >
+        <img
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full"
+        />
+      </div>
+      <span className="text-[15px] font-semibold tracking-[-0.01em]">
+        Resu<span className="serif italic font-normal">Me</span>
+      </span>
+    </>
+  );
+}
 
 export default function Landing() {
   useRouteSeo({
@@ -24,108 +113,120 @@ export default function Landing() {
     jsonLd: HOME_JSON_LD,
   });
 
-  const seoSections = HOME_SEO_SECTIONS.map((section) => ({
-    ...section,
-    icon:
-      section.title === "Audience fit"
-        ? FileText
-        : section.title === "ATS methodology"
-          ? Shield
-          : section.title === "Differentiation"
-            ? Sparkles
-            : Zap,
-  }));
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("app-theme") || "light";
+    }
+    return "light";
+  });
 
-  const renderCreditItems = (segmentKey) => (
-    HOME_CREDIT_ITEMS.map((item, index) => (
-      <span key={`${segmentKey}-${index}`} className="landing-credit-item">
-        {item === "Ayuslh.in" ? (
-          <a
-            href="https://Ayuslh.in"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-primary"
-          >
-            {item}
-          </a>
-        ) : (
-          <span>{item}</span>
-        )}
-        <span className="landing-credit-separator">•</span>
-      </span>
-    ))
-  );
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("app-theme", newTheme);
+    if (newTheme === "dark") {
+      document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.removeAttribute("data-theme");
+    }
+  };
+
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.removeAttribute("data-theme");
+    }
+
+    const bgColor = isDark ? "#0a0a0b" : "#ffffff";
+    document.documentElement.style.backgroundColor = bgColor;
+    document.body.style.backgroundColor = bgColor;
+    return () => {
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+    };
+  }, [isDark]);
+
+  const themeStyles = isDark
+    ? {
+      "--bg": "#0a0a0b",
+      "--surface": "#18181b",
+      "--surface-2": "#27272a",
+      "--border": "#27272a",
+      "--border-strong": "#3f3f46",
+      "--text": "#ffffff",
+      "--text-2": "#a1a1aa",
+      "--muted": "#71717a",
+      "--faint": "#52525b",
+    }
+    : {};
 
   return (
-    <div className="landing-desktop-shell min-h-screen fade-in relative overflow-x-hidden">
+    <div
+      className={`app-design min-h-screen bg-[var(--bg)] ${isDark ? "dark" : ""}`}
+      style={{
+        ...themeStyles,
+        background: "var(--bg)",
+        minHeight: "100%",
+        color: "var(--text)"
+      }}
+    >
+      <header className="border-b border-[var(--border)]" style={LANDING_HEADER_STYLE}>
+        <div className="container" style={{ display: "flex", alignItems: "center", height: 64, gap: 24 }}>
+          <Link to="/" className="flex items-center gap-2">
+            <BrandLogo />
+          </Link>
+          <nav className="hidden md:flex" style={{ gap: 22, marginLeft: 32 }}>
+            <Link to="/" className="ulink text-[13.5px] text-[var(--text-2)]">Product</Link>
+            <Link to="/templates" className="ulink text-[13.5px] text-[var(--text-2)]">Templates</Link>
+            <Link to="/grader-info" className="ulink text-[13.5px] text-[var(--text-2)]">Grader</Link>
+            <Link to="/pricing" className="ulink text-[13.5px] text-[var(--text-2)]">Pricing</Link>
+          </nav>
+          <span className="flex-1" />
 
-      {/* ── Decorative background orbs ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="orb w-[600px] h-[600px] bg-cyan-500/10 -top-64 -left-48 animate-float-slow" />
-        <div className="orb w-[500px] h-[500px] bg-blue-600/8 -bottom-48 -right-48 animate-float-medium" style={{ animationDelay: "-3s" }} />
-        <div className="orb w-[300px] h-[300px] bg-cyan-400/6 top-1/3 right-1/4 animate-pulse-glow" style={{ animationDelay: "-1.5s" }} />
-        <div className="orb w-[200px] h-[200px] bg-blue-500/8 bottom-1/3 left-1/4 animate-float-fast" style={{ animationDelay: "-2s" }} />
-      </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
 
-      <div className="landing-page-content">
-        <div className="w-full max-w-7xl relative z-10 flex flex-col gap-6 px-6 pt-6 pb-8 xl:gap-8">
-          <div className="landing-hero-grid w-full">
-            {/* ── Hero section ── */}
-            <section className="landing-hero-panel w-full max-w-3xl space-y-5 text-center flex flex-col items-center">
-              {/* Badge */}
-              <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest"
-                style={{
-                  background: "rgba(6, 182, 212, 0.08)",
-                  borderColor: "rgba(6, 182, 212, 0.2)",
-                  color: "#06b6d4",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: "0 0 16px rgba(6,182,212,0.15)",
-                }}
+            <div className="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block" />
+
+            <Link to="/login" className="btn btn-outline btn-sm">Log in</Link>
+            <Link to="/signup" className="btn btn-primary btn-sm">Get started</Link>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section id="product" className="container" style={{ paddingTop: 88, paddingBottom: 96 }}>
+          <style>{LANDING_LAYOUT_CSS}</style>
+          <div className="landing-hero-grid">
+            <div>
+              <h1
+                className="h-display"
+                style={{ fontSize: "clamp(40px, 5.6vw, 72px)", lineHeight: 1.02, margin: 0, letterSpacing: "-0.035em" }}
               >
-                <Sparkles size={12} />
-                {HOME_SEO_BADGE}
-              </div>
-
-              <div className="space-y-4 w-full">
-                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.02]">
-                  {HOME_SEO_TITLE}{" "}
-                  <span
-                    style={{
-                      background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: "drop-shadow(0 0 20px rgba(6,182,212,0.4))",
-                    }}
-                  >
-                    with ATS grading
-                  </span>
-                </h1>
-
-                <p className="text-base sm:text-lg xl:text-[1.08rem] text-on-surface-variant max-w-xl leading-relaxed mx-auto">
-                  {HOME_SEO_DESCRIPTION}
-                </p>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                <Link
-                  to="/signup"
-                  className="w-full sm:w-auto btn-primary px-8 py-3.5 text-base"
-                >
-                  Start Building Free <ArrowRight size={18} />
+                {HOME_SEO_TITLE}{" "}
+                <span className="serif italic font-normal text-[var(--accent)]">with ATS grading.</span>
+              </h1>
+              <p style={{ fontSize: 17.5, lineHeight: 1.55, color: "var(--text-2)", marginTop: 22, maxWidth: 540 }}>
+                {HOME_SEO_DESCRIPTION}
+              </p>
+              <div style={{ display: "flex", gap: 10, marginTop: 32, flexWrap: "wrap" }}>
+                <Link to="/signup" className="btn btn-accent btn-lg">
+                  Start building now <ArrowRight size={15} />
                 </Link>
-                <Link
-                  to="/login"
-                  className="w-full sm:w-auto btn-ghost px-8 py-3.5 text-base text-on-surface"
-                >
-                  Log In
+                <Link to="/grader" className="btn btn-outline btn-lg">
+                  Grade my resume
                 </Link>
               </div>
-
-              {/* Trust indicators */}
-              <div className="flex items-center justify-center gap-5 pt-1 flex-wrap">
+              <div style={{ marginTop: 28, display: "flex", gap: 22, color: "var(--muted)", fontSize: 12.5, flexWrap: "wrap" }}>
                 {HOME_SEO_TRUST.map((label) => {
                   const iconMap = {
                     "ATS Compliant": Shield,
@@ -133,228 +234,287 @@ export default function Landing() {
                     "Pro Templates": FileText,
                   };
                   const IconComponent = iconMap[label];
-
                   return (
-                    <div key={label} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-                      <IconComponent size={13} className="text-primary" />
-                      <span>{label}</span>
-                    </div>
+                    <span key={label} className="inline-flex items-center gap-1.5">
+                      <IconComponent size={13} className="text-[var(--accent)]" />
+                      {label}
+                    </span>
                   );
                 })}
               </div>
-            </section>
+            </div>
 
-            {/* ── Feature card ── */}
-            <aside
-              className="landing-feature-panel w-full max-w-[440px] lg:justify-self-end lg:mt-6 rounded-[1.5rem] p-5.5 xl:p-6 relative"
-              style={{
-                background: "rgba(19, 29, 48, 0.62)",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 18px 48px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.05)",
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{ background: "linear-gradient(145deg, rgba(6,182,212,0.08) 0%, transparent 58%, rgba(59,130,246,0.08) 100%)" }}
-              />
-
-              <div className="relative space-y-3.5">
-                <div
-                  className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-bold"
-                  style={{ background: "rgba(6,182,212,0.1)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.15)" }}
-                >
-                  FREE TOOL
-                </div>
-                <div className="space-y-2.5">
-                  <h3 className="text-2xl xl:text-[1.7rem] font-bold text-on-surface flex items-center gap-2">
-                    <FileText className="text-primary" size={24} />
-                    Resume Grader
-                  </h3>
-                  <p className="text-on-surface-variant text-[0.95rem] leading-relaxed max-w-md">
-                    Turn any uploaded resume into a scored, ATS-aware report with clear fixes you can act on in minutes.
-                  </p>
-                </div>
-
-                <div
-                  className="landing-feature-preview rounded-2xl p-3 space-y-2.5"
-                  style={{
-                    background: "rgba(8, 15, 31, 0.72)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-on-surface-variant">
-                    <span>Live Analysis Preview</span>
-                    <span className="text-primary">Illustrative score</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-white/6 overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: "78%", background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%)" }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-on-surface-variant">
-                    Sample only, not a guaranteed result.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2.5 text-sm">
-                    <div className="rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
-                      <p className="text-on-surface font-semibold">Keywords</p>
-                      <p className="text-on-surface-variant text-xs mt-1">Strong role alignment</p>
-                    </div>
-                    <div className="rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
-                      <p className="text-on-surface font-semibold">Formatting</p>
-                      <p className="text-on-surface-variant text-xs mt-1">ATS-safe structure</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {[
-                    "Tailored rewrite suggestions",
-                    "Keyword match signals",
-                    "Layout and ATS checks",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]"
-                    >
-                      <span
-                        className="h-2.5 w-2.5 rounded-full shrink-0"
-                        style={{ background: "linear-gradient(180deg, #22d3ee 0%, #3b82f6 100%)", boxShadow: "0 0 12px rgba(34,211,238,0.5)" }}
-                      />
-                      <span className="text-sm text-on-surface">{item}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-on-surface-variant">
-                  <span>PDF/DOCX</span>
-                  <span>•</span>
-                  <span>Instant Feedback</span>
-                  <span>•</span>
-                  <span>ATS Checks</span>
-                </div>
-
-                <Link
-                  to="/grader"
-                  className="inline-flex w-full items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-on-surface transition-all duration-200"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(6,182,212,0.35)";
-                    e.currentTarget.style.boxShadow = "0 0 16px rgba(6,182,212,0.15)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  Grade My Resume <ArrowRight size={15} />
-                </Link>
-              </div>
-            </aside>
+            <div className="landing-hero-visual-wrap"><HeroVisual /></div>
           </div>
+        </section>
 
-          <div className="grid gap-6 xl:grid-cols-12">
-            <section
-              className="landing-seo-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-7"
-              style={{
-                background: "rgba(8, 15, 31, 0.52)",
-                backdropFilter: "blur(18px)",
-                WebkitBackdropFilter: "blur(18px)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                boxShadow: "0 14px 36px rgba(0,0,0,0.18)",
-              }}
-              aria-labelledby="landing-seo-heading"
-            >
-              <div className="flex flex-col gap-3">
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Public SEO
-                  </p>
-                  <h2 id="landing-seo-heading" className="text-xl sm:text-2xl font-bold text-on-surface">
-                    Built for people searching for resume help
-                  </h2>
-                </div>
-                <p className="max-w-2xl text-sm text-on-surface-variant leading-relaxed">
-                  These sections explain who ResuMe is for, how the ATS workflow works, where it differs, and what it does not promise.
-                </p>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {seoSections.map((section) => {
-                  const IconComponent = section.icon;
-
-                  return (
-                    <article
-                      key={section.title}
-                      className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                    >
-                      <div className="flex items-center gap-2 text-primary">
-                        <IconComponent size={15} />
-                        <h3 className="text-sm font-semibold text-on-surface">{section.title}</h3>
-                      </div>
-
-                      <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{section.body}</p>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section
-              className="landing-citable-grid relative z-10 w-full rounded-[1.5rem] p-4 sm:p-5 xl:col-span-5"
-              style={{
-                background: "rgba(8, 15, 31, 0.46)",
-                backdropFilter: "blur(18px)",
-                WebkitBackdropFilter: "blur(18px)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
-              }}
-              aria-labelledby="landing-citable-heading"
-            >
-              <div className="max-w-2xl space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                  Citation Blocks
-                </p>
-                <h2 id="landing-citable-heading" className="text-xl sm:text-2xl font-bold text-on-surface">
-                  Self-contained answers for AI search
-                </h2>
-              </div>
-
-              <div className="mt-4 grid gap-3">
-                {HOME_SEO_CITABLE_BLOCKS.map((block) => (
-                  <article
-                    key={block.heading}
-                    className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:p-5"
-                  >
-                    <h3 className="text-base font-semibold text-on-surface">{block.heading}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{block.body}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
+        <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+          <div className="container" style={{ display: "flex", alignItems: "center", gap: 36, padding: "20px 24px", overflow: "hidden" }}>
+            <span className="lbl-mono" style={{ flexShrink: 0 }}>Trusted by candidates at</span>
+            <div style={{ display: "flex", gap: 40, color: "var(--muted)", fontWeight: 600, letterSpacing: "-.02em", fontSize: 18, flexWrap: "wrap", opacity: .85 }}>
+              <span>Stripe</span><span>Linear</span><span>Notion</span><span>Vercel</span><span>Razorpay</span><span>Atlassian</span><span>Figma</span>
+            </div>
           </div>
+        </section>
+
+        <section className="container" style={{ paddingTop: 96, paddingBottom: 64 }} aria-labelledby="features-heading">
+          <div style={{ maxWidth: 720, marginBottom: 56 }}>
+            <div className="lbl-mono" style={{ marginBottom: 12 }}>What you get</div>
+            <h2 id="features-heading" className="h-display" style={{ fontSize: 40, letterSpacing: "-0.025em", margin: 0, lineHeight: 1.1 }}>Every step of the resume, sharpened.</h2>
+          </div>
+          <div className="landing-features-grid" style={{ background: "var(--border)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+            {HOME_LANDING_FEATURES.map((section) => (
+              <FeatureCard key={section.title} section={section} />
+            ))}
+          </div>
+        </section>
+
+        <section className="container" style={{ paddingTop: 32, paddingBottom: 64 }}>
+          <div className="panel landing-metric-grid" style={{ padding: 32 }}>
+            {HOME_LANDING_METRICS.map((metric) => (
+              <MetricCard key={metric.label} metric={metric} />
+            ))}
+          </div>
+        </section>
+
+        <section id="templates" className="container" style={{ paddingTop: 64, paddingBottom: 96 }} aria-labelledby="templates-heading">
+          <div style={{ display: "flex", alignItems: "end", gap: 24, marginBottom: 32, flexWrap: "wrap" }}>
+            <div style={{ flex: 1 }}>
+              <div className="lbl-mono" style={{ marginBottom: 12 }}>Templates</div>
+              <h2 id="templates-heading" className="h-display" style={{ fontSize: 36, letterSpacing: "-0.025em", margin: 0 }}>Pick a starting point. Switch any time.</h2>
+            </div>
+            <Link to="/templates" className="btn btn-outline">Browse all</Link>
+          </div>
+          <div className="landing-templates-grid">
+            {HOME_TEMPLATE_PREVIEWS.map((template, index) => (
+              <TemplateCard key={template.id} template={template} index={index} />
+            ))}
+          </div>
+        </section>
+
+        <SeoOnlyContent />
+
+        <section id="pricing" className="container" style={{ paddingBottom: 96 }}>
+          <div
+            style={{
+              borderRadius: 18,
+              padding: "56px 48px",
+              background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
+              border: "1px solid var(--border)",
+              textAlign: "center",
+            }}
+          >
+            <h2 className="h-display" style={{ fontSize: "clamp(36px, 5vw, 48px)", letterSpacing: "-0.03em", margin: 0, lineHeight: 1.05 }}>
+              Stop applying into a black hole. <br className="hidden sm:block" />
+              <span className="serif italic font-normal text-[var(--accent)]">Start landing interviews.</span>
+            </h2>
+            <p style={{ color: "var(--text-2)", fontSize: "clamp(16px, 2vw, 18px)", marginTop: 18, marginBottom: 32, maxWidth: 540, marginInline: "auto" }}>
+              We built the ultimate engine to get you past the bots and in front of human gatekeepers. No paywalls, no BS. Just a resume that actually works.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+              <Link to="/signup" className="btn btn-accent btn-lg font-bold" style={{ padding: "0 32px" }}>Build your resume now <ArrowRight size={15} className="ml-1.5" /></Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="container" style={{ display: "flex", alignItems: "center", gap: 16, padding: "28px 24px", flexWrap: "wrap" }}>
+          <Link to="/" className="flex items-center gap-2">
+            <BrandLogo />
+          </Link>
+          <span className="flex-1" />
+          <span className="mono text-[12.5px] text-[var(--muted)]">
+            ResuMe by Ayush · built with care ·{" "}
+            <a
+              href="https://Ayuslh.in"
+              target="_blank"
+              rel="noreferrer"
+              className="ulink text-[var(--text-2)]"
+            >
+              Ayuslh.in
+            </a>
+          </span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function HeroVisual() {
+  return (
+    <div style={{ position: "relative", aspectRatio: "1.05", maxWidth: 560, marginLeft: "auto", minWidth: 0 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 18,
+          backgroundImage: "radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--border-strong) 60%, transparent) 1px, transparent 0)",
+          backgroundSize: "20px 20px",
+        }}
+      />
+      <div
+        className="paper"
+        style={{
+          position: "absolute",
+          left: "8%",
+          top: "8%",
+          width: "62%",
+          aspectRatio: "0.78",
+          borderRadius: 8,
+          padding: "24px 22px",
+          fontSize: 11,
+          lineHeight: 1.45,
+          transform: "rotate(-2.5deg)",
+        }}
+      >
+        <div style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, letterSpacing: "-.01em" }}>Aarav Mehta</div>
+        <div style={{ color: "#71717a", fontSize: 10, marginTop: 2 }}>Senior Frontend · aarav@mehta.dev · Bengaluru</div>
+        <div style={{ height: 1, background: "#ececef", margin: "12px 0 10px" }} />
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 4 }}>Experience</div>
+        <div style={{ fontWeight: 600, fontSize: 11 }}>Razorpay · Senior Frontend</div>
+        <div style={{ color: "#71717a", fontSize: 9, marginBottom: 4 }}>Aug 2022 - Present</div>
+        <ul style={{ margin: 0, paddingLeft: 16, fontSize: 10, lineHeight: 1.45, color: "#27272a" }}>
+          {HERO_BULLETS.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--accent)", marginTop: 10, marginBottom: 4 }}>Skills</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {HERO_SKILLS.map((skill) => (
+            <span key={skill} style={{ fontSize: 9, padding: "2px 6px", background: "#f4f4f5", borderRadius: 3 }}>{skill}</span>
+          ))}
         </div>
       </div>
-
-      <div className="landing-credit-marquee">
-        <div className="landing-credit-inner">
-          <div className="landing-credit-track">
-            <div className="landing-credit-segment">
-              {renderCreditItems("credit-a")}
+      <div
+        className="grader-hero-widget"
+        style={{
+          position: "absolute",
+          right: "4%",
+          top: "32%",
+          width: "52%",
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
+          borderRadius: 14,
+          padding: 18,
+          boxShadow: "var(--shadow-lg)",
+          transform: "rotate(2deg)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <span className="lbl-mono">ATS Grade</span>
+          <span className="pill pill-good"><span className="dot" style={{ background: "currentColor" }} />Strong</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+          <span className="h-display" style={{ fontSize: 56, letterSpacing: "-0.04em", lineHeight: 1 }}>87</span>
+          <span style={{ color: "var(--muted)", fontSize: 16 }}>/100</span>
+        </div>
+        <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          {HERO_SCORE_ITEMS.map(([label, value]) => (
+            <div key={label}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+                <span style={{ color: "var(--text-2)" }}>{label}</span>
+                <span className="mono" style={{ color: "var(--muted)" }}>{value}</span>
+              </div>
+              <div className="scorebar"><i style={{ width: `${value}%` }} /></div>
             </div>
-            <div className="landing-credit-segment" aria-hidden="true">
-              {renderCreditItems("credit-b")}
-            </div>
-          </div>
+          ))}
+        </div>
+        <div
+          className="hidden sm:flex"
+          style={{
+            position: "absolute",
+            left: "-20px",
+            bottom: "-20px",
+            background: "var(--bg)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            padding: "10px 14px",
+            boxShadow: "var(--shadow-md)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            transform: "rotate(-2deg)"
+          }}
+        >
+          <span style={{ width: 28, height: 28, borderRadius: 7, background: "var(--accent-soft)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Sparkles size={14} />
+          </span>
+          <span>
+            <span style={{ display: "block", fontSize: 12, fontWeight: 500 }}>Rewrote 3 bullets</span>
+            <span style={{ display: "block", fontSize: 10.5, color: "var(--muted)" }}>+12 impact score</span>
+          </span>
         </div>
       </div>
     </div>
   );
 }
+
+function FeatureCard({ section }) {
+  const IconComponent = FEATURE_ICON_MAP[section.title] || Sparkles;
+
+  return (
+    <article className="bg-[var(--bg)] p-7">
+      <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
+        <IconComponent size={16} />
+      </div>
+      <h3 className="m-0 text-base font-semibold">{section.title}</h3>
+      <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--muted)]">{section.body}</p>
+    </article>
+  );
+}
+
+function MetricCard({ metric }) {
+  return (
+    <div>
+      <div className="h-display text-[40px] leading-none">
+        {metric.value}
+        {metric.suffix ? <span className="text-[22px] text-[var(--muted)]">{metric.suffix}</span> : null}
+      </div>
+      <div className="mt-1.5 text-[12.5px] text-[var(--muted)]">{metric.label}</div>
+    </div>
+  );
+}
+
+function TemplateCard({ template, index }) {
+  return (
+    <article className="panel lift bg-[var(--surface)] p-3.5">
+      <div className="mb-3 aspect-[0.75] overflow-hidden rounded-md border border-[var(--border)] bg-white p-3.5">
+        <img
+          src={template.image}
+          alt={`${template.name} resume template preview`}
+          className="h-full w-full rounded-sm object-contain"
+          loading="lazy"
+        />
+      </div>
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="m-0 text-sm font-semibold">{template.name}</h3>
+        <span className="lbl-mono text-[10px]">0{index + 1}</span>
+      </div>
+      <p className="mt-1 text-xs text-[var(--muted)]">{template.desc}</p>
+    </article>
+  );
+}
+
+function SeoOnlyContent() {
+  return (
+    <section className="sr-only" aria-label="ResuMe public search answers">
+      {HOME_SEO_CITABLE_BLOCKS.map((block) => (
+        <article key={block.heading}>
+          <h2>{block.heading}</h2>
+          <p>{block.body}</p>
+        </article>
+      ))}
+      {HOME_SEO_FAQ.map((item) => (
+        <article key={item.question}>
+          <h2>{item.question}</h2>
+          <p>{item.answer}</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+// );
+// }

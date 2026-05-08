@@ -32,46 +32,46 @@ export default function AppErrorScreen({ error, onRetry, onReset }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 relative overflow-hidden fade-in">
-      <div className="orb w-[28rem] h-[28rem] bg-cyan-500/10 -top-24 -left-20 animate-float-slow" />
-      <div className="orb w-[24rem] h-[24rem] bg-purple-600/10 -bottom-24 -right-16 animate-float-medium" />
-
-      <div className="glass-strong relative z-10 w-full max-w-2xl rounded-[2rem] p-6 sm:p-8 shadow-glass">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/20 bg-red-500/10 text-red-300 shadow-[0_0_24px_rgba(248,113,113,0.12)]">
+    <div className="app-design flex min-h-screen items-center justify-center bg-[var(--surface)] px-4 py-10 text-[var(--text)] fade-in">
+      <div className="panel w-full max-w-2xl p-6 sm:p-8">
+        <div className="flex items-start gap-4">
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-[var(--bad)]"
+            style={{ background: "var(--bad-soft)", borderColor: "color-mix(in oklch, var(--bad), transparent 78%)" }}
+          >
             <AlertTriangle size={22} />
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-200/80">
+          <div className="min-w-0">
+            <p className="lbl-mono mb-2 text-[var(--bad)]">
               Application issue
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">
+            <h1 className="h-display m-0 text-[26px] leading-tight sm:text-[30px]">
               {state.title}
             </h1>
           </div>
         </div>
 
-        <p className="mt-5 max-w-xl text-sm sm:text-base leading-7 text-on-surface-variant">
+        <p className="mt-5 max-w-xl text-sm leading-6 text-[var(--muted)] sm:text-[15px]">
           {state.message}
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <button type="button" onClick={handleRetry} className="btn-primary w-full">
+          <button type="button" onClick={handleRetry} className="btn btn-accent w-full">
             <RefreshCw size={16} />
             {state.kind === "chunk-load" ? "Refresh app" : "Try again"}
           </button>
 
-          <button type="button" onClick={handleReset} className="btn-ghost w-full">
+          <button type="button" onClick={handleReset} className="btn btn-outline w-full">
             {onReset ? <RotateCcw size={16} /> : <Home size={16} />}
             {onReset ? "Reset screen" : "Go to safety"}
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-white/8 bg-black/20 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/80">
+        <div className="mt-6 rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <p className="lbl-mono">
             Technical details
           </p>
-          <p className="mt-2 break-words font-mono text-xs leading-6 text-on-surface-variant">
+          <p className="mono mt-2 break-words text-xs leading-6 text-[var(--muted)]">
             {state.detail}
           </p>
         </div>
