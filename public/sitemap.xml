@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://resume.ayuslh.in/</loc>
-    <lastmod>2026-05-03</lastmod>
+    <lastmod>2026-05-09</lastmod>
+  </url>
+  <url>
+    <loc>https://resume.ayuslh.in/templates</loc>
+    <lastmod>2026-05-09</lastmod>
+  </url>
+  <url>
+    <loc>https://resume.ayuslh.in/grader-info</loc>
+    <lastmod>2026-05-09</lastmod>
+  </url>
+  <url>
+    <loc>https://resume.ayuslh.in/pricing</loc>
+    <lastmod>2026-05-09</lastmod>
   </url>
 </urlset>
