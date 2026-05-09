@@ -131,9 +131,11 @@ test("homepage static shell contains the public answer blocks used for AI search
   assert.match(shell, /id="homepage-static-shell"/);
   assert.match(shell, /What is ResuMe\?/);
   assert.match(shell, /How does the ATS grader work\?/);
-  assert.match(shell, /Start Building Free/);
+  assert.match(shell, /Start Building Now/);
   assert.match(shell, /Grade My Resume/);
+  assert.match(shell, /Trusted by candidates targeting roles at/);
+  assert.match(shell, /landing-company-ticker/);
   assert.match(shell, /ResuMe by Ayush/);
-  assert.match(shell, /built with care/);
+  assert.doesNotMatch(shell, /built with care/);
   assert.match(shell, /Ayuslh\.in/);
 });

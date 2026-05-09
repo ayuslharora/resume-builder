@@ -137,7 +137,7 @@ export default function Pricing() {
       <main style={{ flex: 1, padding: "64px 0" }}>
         <section className="container">
           <div className="text-center mb-16">
-            <h1 className="h-display" style={{ fontSize: "clamp(48px, 6vw, 72px)", letterSpacing: "-0.04em", margin: 0, lineHeight: 1.05 }}>
+            <h1 className="h-display" style={{ fontSize: "clamp(64px, 8vw, 104px)", letterSpacing: "-0.055em", margin: 0, lineHeight: 0.94 }}>
               Fu*k pricing. <br className="hidden sm:block" />
               <span className="serif italic font-normal text-[var(--accent)]">This tool is on us.</span>
             </h1>

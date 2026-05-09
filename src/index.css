@@ -251,6 +251,58 @@
     justify-self: center;
   }
 
+  .landing-company-ticker {
+    position: relative;
+    flex: 1 1 20rem;
+    min-width: 0;
+    overflow: hidden;
+    padding-block: 0.15rem;
+    color: var(--muted);
+    font-size: 1.125rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    opacity: 0.9;
+    mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+  }
+
+  .landing-company-track {
+    display: flex;
+    width: max-content;
+    min-width: max-content;
+    animation: landingCompanyTicker 24s linear infinite;
+    will-change: transform;
+  }
+
+  .landing-company-ticker:hover .landing-company-track,
+  .landing-company-ticker:focus-within .landing-company-track {
+    animation-play-state: paused;
+  }
+
+  .landing-company-segment {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2.5rem;
+    padding-right: 2.5rem;
+    white-space: nowrap;
+  }
+
+  .landing-company-segment span {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  @keyframes landingCompanyTicker {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
   .landing-credit-marquee {
     z-index: 10;
     width: 100%;
@@ -406,6 +458,28 @@
       overflow-wrap: anywhere;
     }
 
+    .landing-company-ticker {
+      flex-basis: 100%;
+      font-size: 1rem;
+      mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+    }
+
+    .landing-company-row {
+      align-items: flex-start !important;
+      flex-wrap: wrap;
+      gap: 0.75rem !important;
+    }
+
+    .landing-company-row .lbl-mono {
+      width: 100%;
+    }
+
+    .landing-company-segment {
+      gap: 1.6rem;
+      padding-right: 1.6rem;
+    }
+
     .landing-credit-track {
       width: max-content;
       min-width: max-content;
@@ -425,6 +499,13 @@
 
     .landing-credit-separator {
       margin: 0 0 0 1.25rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-company-track {
+      animation: none;
+      transform: none;
     }
   }
 

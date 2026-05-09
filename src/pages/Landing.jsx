@@ -31,6 +31,7 @@ import {
   HOME_SEO_FAQ,
   HOME_SEO_TITLE,
   HOME_SEO_TRUST,
+  HOME_TARGET_COMPANIES,
   HOME_TEMPLATE_PREVIEWS,
 } from "../seo/homepageSeoContent";
 
@@ -249,10 +250,21 @@ export default function Landing() {
         </section>
 
         <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-          <div className="container" style={{ display: "flex", alignItems: "center", gap: 36, padding: "20px 24px", overflow: "hidden" }}>
-            <span className="lbl-mono" style={{ flexShrink: 0 }}>Trusted by candidates at</span>
-            <div style={{ display: "flex", gap: 40, color: "var(--muted)", fontWeight: 600, letterSpacing: "-.02em", fontSize: 18, flexWrap: "wrap", opacity: .85 }}>
-              <span>Stripe</span><span>Linear</span><span>Notion</span><span>Vercel</span><span>Razorpay</span><span>Atlassian</span><span>Figma</span>
+          <div className="container landing-company-row" style={{ display: "flex", alignItems: "center", gap: 36, padding: "20px 24px", overflow: "hidden" }}>
+            <span className="lbl-mono" style={{ flexShrink: 0 }}>Trusted by candidates targeting roles at</span>
+            <div
+              className="landing-company-ticker"
+              aria-label={`Companies candidates target: ${HOME_TARGET_COMPANIES.join(", ")}`}
+            >
+              <div className="landing-company-track" aria-hidden="true">
+                {[0, 1].map((segmentIndex) => (
+                  <div className="landing-company-segment" key={segmentIndex}>
+                    {HOME_TARGET_COMPANIES.map((company) => (
+                      <span key={`${segmentIndex}-${company}`}>{company}</span>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -325,7 +337,7 @@ export default function Landing() {
           </Link>
           <span className="flex-1" />
           <span className="mono text-[12.5px] text-[var(--muted)]">
-            ResuMe by Ayush · built with care ·{" "}
+            ResuMe by Ayush ·{" "}
             <a
               href="https://Ayuslh.in"
               target="_blank"

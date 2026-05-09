@@ -14,6 +14,16 @@ export const HOME_SEO_TRUST = [
   'Pro Templates',
 ]
 
+export const HOME_TARGET_COMPANIES = [
+  'Stripe',
+  'Linear',
+  'Notion',
+  'Vercel',
+  'Razorpay',
+  'Atlassian',
+  'Figma',
+]
+
 export const HOME_LANDING_FEATURES = [
   {
     title: 'AI builder',
@@ -185,11 +195,17 @@ function buildBrandMarkup() {
   `.trim()
 }
 
+function buildCompanyTickerSegment() {
+  return HOME_TARGET_COMPANIES.map((company) => `<span>${escapeHtml(company)}</span>`).join('')
+}
+
 export function buildHomepageStaticHtml() {
   const trustItems = HOME_SEO_TRUST.map(
     (item) =>
       `<span class="inline-flex items-center gap-1.5 text-[12.5px] text-[var(--muted)]"><span class="text-[var(--accent)]">✓</span><span>${escapeHtml(item)}</span></span>`,
   ).join('')
+
+  const companyTickerSegment = buildCompanyTickerSegment()
 
   const featureMarkup = HOME_LANDING_FEATURES.map(
     (section) => `
@@ -345,10 +361,13 @@ export function buildHomepageStaticHtml() {
         </section>
 
         <section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-          <div class="container" style="display:flex;align-items:center;gap:36px;padding:20px 24px;overflow:hidden">
-            <span class="lbl-mono" style="flex-shrink:0">Trusted by candidates at</span>
-            <div style="display:flex;gap:40px;color:var(--muted);font-weight:600;letter-spacing:-.02em;font-size:18px;flex-wrap:wrap;opacity:.85">
-              <span>Stripe</span><span>Linear</span><span>Notion</span><span>Vercel</span><span>Razorpay</span><span>Atlassian</span><span>Figma</span>
+          <div class="container landing-company-row" style="display:flex;align-items:center;gap:36px;padding:20px 24px;overflow:hidden">
+            <span class="lbl-mono" style="flex-shrink:0">Trusted by candidates targeting roles at</span>
+            <div class="landing-company-ticker" aria-label="Companies candidates target: ${HOME_TARGET_COMPANIES.map(escapeHtml).join(', ')}">
+              <div class="landing-company-track" aria-hidden="true">
+                <div class="landing-company-segment">${companyTickerSegment}</div>
+                <div class="landing-company-segment">${companyTickerSegment}</div>
+              </div>
             </div>
           </div>
         </section>
@@ -401,7 +420,7 @@ export function buildHomepageStaticHtml() {
         <div class="container" style="display:flex;align-items:center;gap:16px;padding:28px 24px;flex-wrap:wrap">
           ${buildBrandMarkup()}
           <span class="flex-1"></span>
-          <span class="mono text-[12.5px] text-[var(--muted)]">ResuMe by Ayush · built with care · <a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="ulink text-[var(--text-2)]">Ayuslh.in</a></span>
+          <span class="mono text-[12.5px] text-[var(--muted)]">ResuMe by Ayush · <a href="https://Ayuslh.in" target="_blank" rel="noreferrer" class="ulink text-[var(--text-2)]">Ayuslh.in</a></span>
         </div>
       </footer>
       <script>
