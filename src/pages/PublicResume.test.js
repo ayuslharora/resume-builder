@@ -31,7 +31,7 @@ test("PublicResume records one distinct viewer id for published resume views", a
 test("PublicResume uses the favicon for the shared app brand mark", async () => {
   const source = await readFile(new URL("./PublicResume.jsx", import.meta.url), "utf8");
 
-  assert.match(source, /className="app-design min-h-screen pb-16"/);
+  assert.match(source, /className=\{`app-design min-h-screen pb-16 \$\{isDark \? "dark" : ""\}`\}/);
   assert.match(source, /src="\/favicon\.svg"/);
   assert.doesNotMatch(source, /FileText size=\{16\}/);
   assert.doesNotMatch(source, />\s*R\s*</);
@@ -43,18 +43,30 @@ test("PublicResume navbar follows the current app design tokens", async () => {
   assert.match(source, /shared-resume-navbar border-b border-\[var\(--border\)\]/);
   assert.match(source, /className="container shared-resume-nav-inner"/);
   assert.match(source, /Resu<span className="serif italic font-normal">Me<\/span>/);
-  assert.match(source, /ResuMe by Ayush · built with care ·/);
+  assert.match(source, /ResuMe by Ayush ·/);
+  assert.doesNotMatch(source, /built with care/);
   assert.match(source, /Ayuslh\.in/);
   assert.match(source, /className="btn btn-accent btn-sm"/);
   assert.doesNotMatch(source, /rgba\(7,13,31,0\.8\)/);
   assert.doesNotMatch(source, /btn-primary py-1\.5 px-4 text-xs/);
 });
 
+test("PublicResume navbar includes the shared theme toggle", async () => {
+  const source = await readFile(new URL("./PublicResume.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /Sun,\s*Moon/);
+  assert.match(source, /const \[theme, setTheme\]/);
+  assert.match(source, /localStorage\.getItem\("app-theme"\)/);
+  assert.match(source, /localStorage\.setItem\("app-theme", newTheme\)/);
+  assert.match(source, /aria-label="Toggle theme"/);
+  assert.match(source, /isDark \? <Sun size=\{16\} \/> : <Moon size=\{16\} \/>/);
+});
+
 test("PublicResume unavailable state follows the current app design tokens", async () => {
   const source = await readFile(new URL("./PublicResume.jsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../index.css", import.meta.url), "utf8");
 
-  assert.match(source, /className="app-design shared-resume-error-shell"/);
+  assert.match(source, /className=\{`app-design shared-resume-error-shell \$\{isDark \? "dark" : ""\}`\}/);
   assert.match(source, /className="shared-resume-error-card panel"/);
   assert.match(source, /Resume unavailable/);
   assert.match(source, /className="btn btn-accent btn-sm"/);

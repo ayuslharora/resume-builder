@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sun, Moon, Eye, Layers, Key, PencilLine } from "lucide-react";
 import { useRouteSeo } from "../seo/routeSeo";
+import PublicFooter from "../components/layout/PublicFooter";
 
 const LANDING_HEADER_STYLE = {
   position: "sticky",
@@ -207,25 +208,7 @@ export default function GraderInfo() {
         </section>
       </main>
 
-      <footer style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="container" style={{ display: "flex", alignItems: "center", gap: 16, padding: "28px 24px", flexWrap: "wrap" }}>
-          <Link to="/" className="flex items-center gap-2">
-            <BrandLogo />
-          </Link>
-          <span className="flex-1" />
-          <span className="mono text-[12.5px] text-[var(--muted)]">
-            ResuMe by Ayush · built with care ·{" "}
-            <a
-              href="https://Ayuslh.in"
-              target="_blank"
-              rel="noreferrer"
-              className="ulink text-[var(--text-2)]"
-            >
-              Ayuslh.in
-            </a>
-          </span>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

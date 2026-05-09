@@ -34,6 +34,7 @@ import {
   HOME_TARGET_COMPANIES,
   HOME_TEMPLATE_PREVIEWS,
 } from "../seo/homepageSeoContent";
+import PublicFooter from "../components/layout/PublicFooter";
 
 const FEATURE_ICON_MAP = {
   "AI builder": Sparkles,
@@ -330,25 +331,7 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="container" style={{ display: "flex", alignItems: "center", gap: 16, padding: "28px 24px", flexWrap: "wrap" }}>
-          <Link to="/" className="flex items-center gap-2">
-            <BrandLogo />
-          </Link>
-          <span className="flex-1" />
-          <span className="mono text-[12.5px] text-[var(--muted)]">
-            ResuMe by Ayush ·{" "}
-            <a
-              href="https://Ayuslh.in"
-              target="_blank"
-              rel="noreferrer"
-              className="ulink text-[var(--text-2)]"
-            >
-              Ayuslh.in
-            </a>
-          </span>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

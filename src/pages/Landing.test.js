@@ -8,8 +8,9 @@ test("Landing uses the product design shell without the old orb/glass hero", asy
   const cssSource = await readFile(new URL("../index.css", import.meta.url), "utf8");
   const seoSource = await readFile(new URL("../seo/homepageSeoContent.js", import.meta.url), "utf8");
   const sidebarSource = await readFile(new URL("../components/layout/Sidebar.jsx", import.meta.url), "utf8");
+  const publicFooterSource = await readFile(new URL("../components/layout/PublicFooter.jsx", import.meta.url), "utf8");
   const indexSource = await readFile(new URL("../../index.html", import.meta.url), "utf8");
-  const source = landingSource + cssSource + seoSource + sidebarSource + indexSource;
+  const source = landingSource + cssSource + seoSource + sidebarSource + publicFooterSource + indexSource;
   const staticShell = buildHomepageStaticHtml();
 
   assert.match(source, /ResuMe by Ayush/);
@@ -36,7 +37,7 @@ test("Landing uses the product design shell without the old orb/glass hero", asy
   assert.match(landingSource, /paddingTop:\s*32,\s*paddingBottom:\s*64/);
   assert.match(landingSource, /paddingTop:\s*64,\s*paddingBottom:\s*96/);
   assert.match(landingSource, /padding:\s*"56px 48px"/);
-  assert.match(landingSource, /padding:\s*"28px 24px"/);
+  assert.match(publicFooterSource, /padding:\s*"28px 24px"/);
   assert.match(staticShell, /style="padding-top:88px;padding-bottom:96px"/);
   assert.match(staticShell, /grid-template-columns:1\.05fr \.95fr;gap:56px/);
   assert.match(staticShell, /style="display:flex;align-items:center;gap:36px;padding:20px 24px;overflow:hidden"/);
@@ -60,7 +61,7 @@ test("Landing uses the product design shell without the old orb/glass hero", asy
   assert.match(landingSource, /Start building now/);
   assert.match(landingSource, /Grade my resume/);
   assert.match(landingSource, /with ATS grading/);
-  assert.match(landingSource, /ResuMe by Ayush/);
+  assert.match(source, /ResuMe by Ayush/);
   assert.doesNotMatch(landingSource, /built with care/);
   assert.doesNotMatch(staticShell, /built with care/);
   assert.match(staticShell, /ResuMe by Ayush · <a href="https:\/\/Ayuslh\.in"/);
@@ -81,8 +82,8 @@ test("Landing uses the product design shell without the old orb/glass hero", asy
   assert.match(staticShell, /<img src="\/templates\/creative\.png"/);
   assert.doesNotMatch(staticShell, /id="seo" class="container pb-20"/);
   assert.match(staticShell, /class="sr-only" aria-label="ResuMe public search answers"/);
-  assert.match(landingSource, /href="https:\/\/Ayuslh\.in"/);
-  assert.match(landingSource, /target="_blank"/);
+  assert.match(publicFooterSource, /href="https:\/\/Ayuslh\.in"/);
+  assert.match(publicFooterSource, /target="_blank"/);
   assert.doesNotMatch(landingSource, /orb w-\[/);
   assert.doesNotMatch(landingSource, /landing-feature-panel/);
   assert.doesNotMatch(landingSource, /landing-credit-marquee/);

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { AlertCircle, ChevronLeft } from "lucide-react";
+import { AlertCircle, ChevronLeft, Sun, Moon } from "lucide-react";
 import Loading from "./Loading";
 import { getOrCreateResumeViewerId } from "../services/resumeViewTracking";
 
@@ -12,6 +12,55 @@ export default function PublicResume() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("app-theme") || "light";
+    }
+    return "light";
+  });
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("app-theme", newTheme);
+    if (newTheme === "dark") {
+      document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.removeAttribute("data-theme");
+    }
+  };
+
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.removeAttribute("data-theme");
+    }
+
+    const bgColor = isDark ? "#0a0a0b" : "#ffffff";
+    document.documentElement.style.backgroundColor = bgColor;
+    document.body.style.backgroundColor = bgColor;
+    return () => {
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+    };
+  }, [isDark]);
+
+  const themeStyles = isDark
+    ? {
+      "--bg": "#0a0a0b",
+      "--surface": "#18181b",
+      "--surface-2": "#27272a",
+      "--border": "#27272a",
+      "--border-strong": "#3f3f46",
+      "--text": "#ffffff",
+      "--text-2": "#a1a1aa",
+      "--muted": "#71717a",
+      "--faint": "#52525b",
+    }
+    : {};
 
   useEffect(() => {
     async function loadResume() {
@@ -45,7 +94,7 @@ export default function PublicResume() {
 
   if (error) {
     return (
-      <div className="app-design shared-resume-error-shell">
+      <div className={`app-design shared-resume-error-shell ${isDark ? "dark" : ""}`} style={themeStyles}>
         <div className="shared-resume-error-card panel">
           <Link to="/" className="shared-resume-error-brand">
             <span className="shared-resume-brand-mark">
@@ -70,7 +119,7 @@ export default function PublicResume() {
   }
 
   return (
-    <div className="app-design min-h-screen pb-16" style={{ background: "var(--surface)" }}>
+    <div className={`app-design min-h-screen pb-16 ${isDark ? "dark" : ""}`} style={{ ...themeStyles, background: "var(--surface)" }}>
       <header
         className="shared-resume-navbar border-b border-[var(--border)]"
       >
@@ -86,7 +135,7 @@ export default function PublicResume() {
           <span className="flex-1" />
           <div className="flex min-w-0 items-center gap-3">
             <span className="shared-resume-credit mono hidden text-[12.5px] text-[var(--muted)] md:inline-flex">
-              ResuMe by Ayush · built with care ·{" "}
+              ResuMe by Ayush ·{" "}
             </span>
             <a
               href="https://Ayuslh.in"
@@ -96,6 +145,13 @@ export default function PublicResume() {
             >
               Ayuslh.in
             </a>
+            <button
+              onClick={toggleTheme}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] text-[var(--text-2)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <Link to="/" className="btn btn-accent btn-sm">
               Build yours
             </Link>
