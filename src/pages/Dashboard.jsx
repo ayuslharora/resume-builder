@@ -6,11 +6,11 @@ import ResumeCard from "../components/dashboard/ResumeCard";
 import EmptyState from "../components/dashboard/EmptyState";
 import Spinner from "../components/ui/Spinner";
 import { getGraderHistory } from "../services/graderHistory";
-import { CheckSquare, Grid2X2, LayoutList, Plus, Search } from "lucide-react";
+import { CheckSquare, Eye, Grid2X2, LayoutList, Plus, Search } from "lucide-react";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
-  const { deleteResume, duplicateResume, getUserResumes } = useFirestore();
+  const { deleteResume, duplicateResume, getResumeViewCounts, getUserResumes } = useFirestore();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState(null);
@@ -35,8 +35,18 @@ export default function Dashboard() {
     async function loadResumes() {
       try {
         const data = await getUserResumes(currentUser.uid);
+        const publishedIds = data.filter((resume) => resume.isShared).map((resume) => resume.id);
+        let viewCounts = {};
+        try {
+          viewCounts = await getResumeViewCounts(publishedIds, currentUser.uid);
+        } catch (countError) {
+          console.warn("Could not load resume view counts:", countError);
+        }
         if (cancelled) return;
-        setResumes(data);
+        setResumes(data.map((resume) => ({
+          ...resume,
+          distinctViewCount: viewCounts[resume.id] || 0,
+        })));
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching resumes:", error);
@@ -50,7 +60,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [currentUser, getUserResumes]);
+  }, [currentUser, getResumeViewCounts, getUserResumes]);
 
   function handleCreate() {
     navigate(`/builder/new`);
@@ -274,7 +284,7 @@ function ResumeRow({ resume, isLast, onOpen }) {
   return (
     <button
       onClick={onOpen}
-      className="grid w-full grid-cols-[40px_1fr_auto_auto] items-center gap-4 px-4 py-3 text-left"
+      className="grid w-full grid-cols-[40px_1fr_auto_auto_auto] items-center gap-4 px-4 py-3 text-left"
       style={{ borderBottom: isLast ? "none" : "1px solid var(--border)" }}
     >
       <div className="h-10 w-8 rounded border border-[var(--border)] bg-[var(--surface)]" />
@@ -284,6 +294,16 @@ function ResumeRow({ resume, isLast, onOpen }) {
       </div>
       <span className={`pill pill-${statusColor}`}>{resume.status || "draft"}</span>
       {resume.isShared && <span className="pill pill-accent hidden sm:inline-flex">Public</span>}
+      {resume.isShared && (
+        <span className="pill hidden sm:inline-flex">
+          <Eye size={11} /> {formatViewCount(resume.distinctViewCount)}
+        </span>
+      )}
     </button>
   );
+}
+
+function formatViewCount(value) {
+  const count = Number(value) || 0;
+  return `${count} ${count === 1 ? "view" : "views"}`;
 }

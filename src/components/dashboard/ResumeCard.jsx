@@ -1,4 +1,4 @@
-import { FileText, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
+import { FileText, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, Eye, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
@@ -290,6 +290,15 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
             <span className="dot" style={{ background: "currentColor" }} />
             {statusLabel}
           </span>
+          {resume.isShared && (
+            <span
+              className="resume-view-chip"
+              title="Distinct public viewers"
+              aria-label={formatViewCount(resume.distinctViewCount)}
+            >
+              <Eye size={12} /> {formatCompactViewCount(resume.distinctViewCount)}
+            </span>
+          )}
           <span style={{ color: "var(--faint)", fontSize: 11.5, marginLeft: "auto" }} className="mono">
             Edited {dateStr}
           </span>
@@ -297,4 +306,16 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
       </div>
     </div>
   );
+}
+
+function formatViewCount(value) {
+  const count = Number(value) || 0;
+  return `${count} ${count === 1 ? "view" : "views"}`;
+}
+
+function formatCompactViewCount(value) {
+  const count = Number(value) || 0;
+  if (count >= 1_000_000) return `${Math.floor(count / 100_000) / 10}m`;
+  if (count >= 1000) return `${Math.floor(count / 100) / 10}k`;
+  return String(count);
 }

@@ -58,6 +58,20 @@ test("ResumeCard matches the card dashboard card anatomy", async () => {
   assert.match(source, /<Trash2 size=\{14\} \/> Delete/);
 });
 
+test("ResumeCard shows distinct public view count as a compact meta chip", async () => {
+  const source = await readFile(new URL("./ResumeCard.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../../index.css", import.meta.url), "utf8");
+
+  assert.match(source, /Distinct public viewers/);
+  assert.match(source, /className="resume-view-chip"/);
+  assert.match(source, /aria-label=\{formatViewCount\(resume\.distinctViewCount\)\}/);
+  assert.match(source, /formatCompactViewCount\(resume\.distinctViewCount\)/);
+  assert.match(source, /<Eye size=\{12\} \/>/);
+  assert.match(css, /\.app-design \.resume-view-chip\s*\{/);
+  assert.match(css, /height:\s*22px/);
+  assert.match(css, /max-width:\s*58px/);
+});
+
 test("Dashboard resume grid uses card auto-fill card sizing", async () => {
   const css = await readFile(new URL("../../index.css", import.meta.url), "utf8");
 

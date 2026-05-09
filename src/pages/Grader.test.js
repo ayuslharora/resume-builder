@@ -72,3 +72,38 @@ test("Grader bullet rewrite mode keeps a visible fallback when live rewrites are
   assert.match(graderSource, /Failed to generate live bullet rewrites/);
   assert.match(graderSource, /Grader suggestion/);
 });
+
+test("Grader history Open button opens the saved report snapshot in a new tab", async () => {
+  const graderSource = await readFile(new URL("./Grader.jsx", import.meta.url), "utf8");
+
+  assert.match(graderSource, /report: nextResult/);
+  assert.match(graderSource, /handleOpenHistoryReport/);
+  assert.match(graderSource, /window\.open\(reportUrl\.toString\(\), "_blank", "noopener,noreferrer"\)/);
+  assert.match(graderSource, /new URLSearchParams\(window\.location\.search\)\.get\("report"\)/);
+  assert.match(graderSource, /onClick=\{\(\) => onOpenHistoryReport\(entry\)\}/);
+});
+
+test("Grader report can create and copy a public share link", async () => {
+  const graderSource = await readFile(new URL("./Grader.jsx", import.meta.url), "utf8");
+
+  assert.match(graderSource, /createGraderReport/);
+  assert.match(graderSource, /handleCopyReportLink/);
+  assert.match(graderSource, /Copy report link/);
+  assert.match(graderSource, /navigator\.clipboard\.writeText\(buildSharedGraderReportUrl/);
+  assert.match(graderSource, /\/grader\/report\//);
+});
+
+test("Shared grader report view uses app shell styling and hides private controls", async () => {
+  const graderSource = await readFile(new URL("./Grader.jsx", import.meta.url), "utf8");
+
+  assert.match(graderSource, /isSharedReportView/);
+  assert.match(graderSource, /className="app-design min-h-screen bg-\[var\(--surface\)\]"/);
+  assert.match(graderSource, /REPORT_TABS\.filter\(\(\[id\]\) => id !== "history"\)/);
+  assert.match(graderSource, /!\s*isSharedReportView && \(/);
+});
+
+test("Grader shared report route is public", async () => {
+  const appSource = await readFile(new URL("../App.jsx", import.meta.url), "utf8");
+
+  assert.match(appSource, /path: "\/grader\/report\/:reportToken", element: <Grader \/>/);
+});

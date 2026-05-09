@@ -34,6 +34,8 @@ const router = createBrowserRouter([
       { path: "/", element: <Landing /> },
       { path: "/templates", element: <Templates /> },
       { path: "/grader-info", element: <GraderInfo /> },
+      { path: "/grader/report/:reportToken", element: <Grader /> },
+      { path: "/shared/:token", element: <PublicResume /> },
       { path: "/pricing", element: <Pricing /> },
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
@@ -55,7 +57,6 @@ const router = createBrowserRouter([
         children: [
           { path: "/export/:resumeId", element: <Export /> },
           { path: "/cover-letter/:resumeId", element: <CoverLetter /> },
-          { path: "/shared/:token", element: <PublicResume /> },
         ]
       },
       { path: "*", element: <NotFound /> }

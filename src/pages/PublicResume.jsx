@@ -4,10 +4,11 @@ import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
 import { AlertCircle, ChevronLeft } from "lucide-react";
 import Loading from "./Loading";
+import { getOrCreateResumeViewerId } from "../services/resumeViewTracking";
 
 export default function PublicResume() {
   const { token } = useParams();
-  const { getResumeByShareToken } = useFirestore();
+  const { getResumeByShareToken, recordResumeView } = useFirestore();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,6 +23,13 @@ export default function PublicResume() {
           setError("This resume is not published.");
         } else {
           setResume(data);
+          recordResumeView({
+            resumeId: data.id,
+            ownerId: data.userId,
+            viewerId: getOrCreateResumeViewerId(),
+          }).catch((viewError) => {
+            console.warn("Failed to record resume view:", viewError);
+          });
         }
       } catch (err) {
         setError("Failed to load resume.");
@@ -31,19 +39,30 @@ export default function PublicResume() {
       }
     }
     loadResume();
-  }, [token, getResumeByShareToken]);
+  }, [token, getResumeByShareToken, recordResumeView]);
 
   if (loading) return <Loading />;
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--surface)", color: "var(--on-surface)" }}>
-        <div className="max-w-md w-full text-center p-8 rounded-2xl" style={{ background: "rgba(25,31,49,0.5)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h1 className="text-xl font-bold mb-2">Access Denied</h1>
-          <p className="text-on-surface-variant mb-6">{error}</p>
-          <Link to="/" className="btn-primary inline-flex items-center gap-2">
-            <ChevronLeft size={16} /> Return Home
+      <div className="app-design shared-resume-error-shell">
+        <div className="shared-resume-error-card panel">
+          <Link to="/" className="shared-resume-error-brand">
+            <span className="shared-resume-brand-mark">
+              <img src="/favicon.svg" alt="" aria-hidden="true" className="h-full w-full" />
+            </span>
+            <span>
+              Resu<span className="serif italic font-normal">Me</span>
+            </span>
+          </Link>
+          <div className="shared-resume-error-icon">
+            <AlertCircle size={18} />
+          </div>
+          <p className="lbl-mono">Shared resume</p>
+          <h1 className="h-display">Resume unavailable</h1>
+          <p className="shared-resume-error-copy">{error}</p>
+          <Link to="/" className="btn btn-accent btn-sm">
+            <ChevronLeft size={14} /> Return home
           </Link>
         </div>
       </div>
@@ -51,33 +70,39 @@ export default function PublicResume() {
   }
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: "var(--surface)" }}>
-      {/* Simple Header */}
-      <header className="h-14 border-b px-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md"
-        style={{ background: "rgba(7,13,31,0.8)", borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
-            style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.24)" }}
-          >
-            <img src="/favicon.svg" alt="" aria-hidden="true" className="h-full w-full" />
+    <div className="app-design min-h-screen pb-16" style={{ background: "var(--surface)" }}>
+      <header
+        className="shared-resume-navbar border-b border-[var(--border)]"
+      >
+        <div className="container shared-resume-nav-inner">
+          <Link to="/" className="flex min-w-0 items-center gap-2 text-[var(--text)]">
+            <span className="shared-resume-brand-mark">
+              <img src="/favicon.svg" alt="" aria-hidden="true" className="h-full w-full" />
+            </span>
+            <span className="hidden truncate text-[15px] font-semibold tracking-[-0.01em] sm:block">
+              Resu<span className="serif italic font-normal">Me</span>
+            </span>
+          </Link>
+          <span className="flex-1" />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="shared-resume-credit mono hidden text-[12.5px] text-[var(--muted)] md:inline-flex">
+              ResuMe by Ayush · built with care ·{" "}
+            </span>
+            <a
+              href="https://Ayuslh.in"
+              target="_blank"
+              rel="noreferrer"
+              className="ulink hidden text-[13px] text-[var(--text-2)] sm:inline-flex"
+            >
+              Ayuslh.in
+            </a>
+            <Link to="/" className="btn btn-accent btn-sm">
+              Build yours
+            </Link>
           </div>
-          <span className="font-bold tracking-tight text-white hidden sm:block">ResuMe</span>
-        </div>
-        <div className="text-sm font-medium text-on-surface-variant flex items-center gap-4">
-          <a
-            href="https://Ayuslh.in"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-white"
-          >
-            ResuMe by Ayush
-          </a>
-          <Link to="/" className="btn-primary py-1.5 px-4 text-xs">Build Yours</Link>
         </div>
       </header>
 
-      {/* Resume Container */}
       <div className="mt-8 mx-auto w-full max-w-[850px] px-4 sm:px-6">
         <div className="bg-white shadow-2xl rounded-sm overflow-hidden">
           <ResumePreview

@@ -13,3 +13,13 @@ test("Dashboard widgets match the design stats row", async () => {
   assert.match(source, /suffix="\/100"/);
   assert.match(source, /trend=\{scoreTrend\}/);
 });
+
+test("Dashboard loads and displays distinct published resume view counts", async () => {
+  const source = await readFile(new URL("./Dashboard.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /getResumeViewCounts/);
+  assert.match(source, /getResumeViewCounts\(publishedIds, currentUser\.uid\)/);
+  assert.match(source, /distinctViewCount/);
+  assert.match(source, /formatViewCount\(resume\.distinctViewCount\)/);
+  assert.match(source, /<Eye size=\{11\} \/>/);
+});

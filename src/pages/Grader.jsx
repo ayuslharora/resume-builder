@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { addGraderHistoryEntry, getGraderHistory } from "../services/graderHistory";
+import { createShareToken } from "../services/shareResume";
 import {
   buildSharedResumeGradeSource,
   extractShareTokenFromResumeLink,
@@ -70,14 +71,71 @@ export default function Grader() {
   const [appliedRewrites, setAppliedRewrites] = useState({});
   const [rewritingBullet, setRewritingBullet] = useState(false);
   const [improvingResume, setImprovingResume] = useState(false);
+  const [sharingReport, setSharingReport] = useState(false);
+  const [copiedReportLink, setCopiedReportLink] = useState(false);
+  const [sharedReportToken, setSharedReportToken] = useState("");
   const [sourceMode, setSourceMode] = useState("link");
   const [activeReportTab, setActiveReportTab] = useState("overview");
 
-  const { createResume, getResumeByShareToken } = useFirestore();
+  const { createResume, createGraderReport, getGraderReportByShareToken, getResumeByShareToken } = useFirestore();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { reportToken } = useParams();
+  const isSharedReportView = Boolean(reportToken);
 
   const alternateRoles = useMemo(() => parseRoleList(compareRoles), [compareRoles]);
+
+  useEffect(() => {
+    if (reportToken) return;
+
+    const reportId = new URLSearchParams(window.location.search).get("report");
+    if (!reportId) return;
+
+    const entry = getGraderHistory().find((item) => item.id === reportId);
+    if (!entry?.report) {
+      setError("That saved grader report is not available on this device.");
+      return;
+    }
+
+    setHistory(getGraderHistory());
+    setResult(entry.report);
+    setSelectedBullet("");
+    setBulletRewrites([]);
+    setAppliedRewrites({});
+    setActiveReportTab("overview");
+  }, [reportToken]);
+
+  useEffect(() => {
+    if (!reportToken) return;
+
+    async function loadSharedReport() {
+      setLoading(true);
+      setError(null);
+      setResult(null);
+
+      try {
+        const sharedReport = await getGraderReportByShareToken(reportToken);
+        if (!sharedReport?.report) {
+          setError("That shared grader report is not available.");
+          return;
+        }
+
+        setResult(sharedReport.report);
+        setSharedReportToken(reportToken);
+        setSelectedBullet("");
+        setBulletRewrites([]);
+        setAppliedRewrites({});
+        setActiveReportTab("overview");
+      } catch (err) {
+        console.error("Failed to load shared grader report:", err);
+        setError("Failed to load the shared grader report.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSharedReport();
+  }, [reportToken, getGraderReportByShareToken]);
 
   const ensureTargetRole = (action) => {
     if (!targetRole.trim()) {
@@ -94,6 +152,8 @@ export default function Grader() {
     setSelectedBullet("");
     setBulletRewrites([]);
     setAppliedRewrites({});
+    setSharedReportToken("");
+    setCopiedReportLink(false);
     setActiveReportTab("overview");
   };
 
@@ -154,6 +214,7 @@ export default function Grader() {
       targetRole: primaryContext.targetRole,
       reviewTone,
       score: primaryGrade.score,
+      report: nextResult,
       comparisonScores: comparisonGrades.map((item) => ({
         role: item.role,
         score: item.grade.score,
@@ -310,8 +371,49 @@ export default function Grader() {
     }));
   };
 
+  const handleOpenHistoryReport = (entry) => {
+    if (!entry?.id || !entry.report || typeof window === "undefined") return;
+
+    const reportUrl = new URL("/grader", window.location.origin);
+    reportUrl.searchParams.set("report", entry.id);
+    window.open(reportUrl.toString(), "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyReportLink = async () => {
+    if (!result || typeof window === "undefined") return;
+
+    setSharingReport(true);
+    setError(null);
+
+    try {
+      const token = sharedReportToken || createShareToken();
+
+      if (!sharedReportToken) {
+        await createGraderReport({
+          shareToken: token,
+          ownerId: currentUser?.uid || null,
+          targetRole: result.targetRole,
+          fileName: result.fileName,
+          reviewTone: result.reviewTone,
+          score: result.primaryGrade?.score ?? null,
+          report: result,
+        });
+        setSharedReportToken(token);
+      }
+
+      await navigator.clipboard.writeText(buildSharedGraderReportUrl(window.location.origin, token));
+      setCopiedReportLink(true);
+      setTimeout(() => setCopiedReportLink(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy grader report link:", err);
+      setError("Failed to create a shareable report link.");
+    } finally {
+      setSharingReport(false);
+    }
+  };
+
   if (result) {
-    return (
+    const report = (
       <div className="grader-page fade-in">
         <GraderReport
           result={result}
@@ -323,6 +425,7 @@ export default function Grader() {
           appliedRewrites={appliedRewrites}
           rewritingBullet={rewritingBullet}
           improvingResume={improvingResume}
+          isSharedReportView={isSharedReportView}
           onAgain={() => {
             setResult(null);
             setActiveReportTab("overview");
@@ -330,7 +433,38 @@ export default function Grader() {
           onImprove={handleImproveResume}
           onBulletRewrite={handleBulletRewrite}
           onApplyRewrite={handleApplyRewrite}
+          onOpenHistoryReport={handleOpenHistoryReport}
+          onCopyReportLink={handleCopyReportLink}
+          copiedReportLink={copiedReportLink}
+          sharingReport={sharingReport}
         />
+      </div>
+    );
+
+    return isSharedReportView ? (
+      <div className="app-design min-h-screen bg-[var(--surface)]">
+        {report}
+      </div>
+    ) : report;
+  }
+
+  if (isSharedReportView) {
+    return (
+      <div className="app-design flex min-h-screen items-center justify-center bg-[var(--surface)] px-4 py-10 text-[var(--text)]">
+        <div className="panel max-w-md p-6 text-center">
+          {loading ? (
+            <>
+              <Loader2 size={22} className="mx-auto mb-3 animate-spin text-[var(--accent)]" />
+              <p className="text-sm text-[var(--muted)]">Loading shared grader report...</p>
+            </>
+          ) : (
+            <>
+              <AlertCircle size={24} className="mx-auto mb-3 text-[var(--bad)]" />
+              <h1 className="h-display mb-2 text-[20px]">Report unavailable</h1>
+              <p className="text-sm text-[var(--muted)]">{error || "This shared grader report could not be loaded."}</p>
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -839,6 +973,11 @@ function GraderReport({
   onImprove,
   onBulletRewrite,
   onApplyRewrite,
+  onOpenHistoryReport,
+  onCopyReportLink,
+  copiedReportLink,
+  sharingReport,
+  isSharedReportView,
 }) {
   const grade = result.primaryGrade || {};
   const sectionScores = grade.sectionScores || [];
@@ -855,16 +994,31 @@ function GraderReport({
       >
         <div className="px-5 py-5 lg:px-10">
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
-            <button type="button" onClick={onAgain} className="btn btn-ghost btn-sm self-start">
-              <RefreshCw size={13} /> Grade another
-            </button>
-            <span className="v-hr hidden h-[18px] lg:block" />
+            {!isSharedReportView && (
+              <>
+                <button type="button" onClick={onAgain} className="btn btn-ghost btn-sm self-start">
+                  <RefreshCw size={13} /> Grade another
+                </button>
+                <span className="v-hr hidden h-[18px] lg:block" />
+              </>
+            )}
             <div className="min-w-0 flex-1">
               <div className="mono truncate text-[13px] text-[var(--muted)]">
                 {result.fileName} | {result.reviewTone} | vs. {result.targetRole}
               </div>
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
+              {!isSharedReportView && (
+                <button
+                  type="button"
+                  onClick={onCopyReportLink}
+                  disabled={sharingReport}
+                  className="btn btn-outline btn-sm disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {copiedReportLink ? <CheckCircle size={13} className="text-[var(--good)]" /> : <Link2 size={13} />}
+                  {sharingReport ? "Creating link" : copiedReportLink ? "Copied link" : "Copy report link"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => window.print()}
@@ -872,15 +1026,17 @@ function GraderReport({
               >
                 <Download size={13} /> Export report
               </button>
-              <button
-                type="button"
-                onClick={onImprove}
-                disabled={improvingResume}
-                className="btn btn-accent btn-sm disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {improvingResume ? <Loader2 size={13} className="animate-spin" /> : <Wand2 size={13} />}
-                Improve in builder
-              </button>
+              {!isSharedReportView && (
+                <button
+                  type="button"
+                  onClick={onImprove}
+                  disabled={improvingResume}
+                  className="btn btn-accent btn-sm disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {improvingResume ? <Loader2 size={13} className="animate-spin" /> : <Wand2 size={13} />}
+                  Improve in builder
+                </button>
+              )}
             </div>
           </div>
 
@@ -920,7 +1076,7 @@ function GraderReport({
           </div>
 
           <div className="mt-[18px] flex gap-1 overflow-x-auto">
-            {REPORT_TABS.map(([id, label]) => (
+            {(isSharedReportView ? REPORT_TABS.filter(([id]) => id !== "history") : REPORT_TABS).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
@@ -949,6 +1105,7 @@ function GraderReport({
           rewritingBullet,
           onBulletRewrite,
           onApplyRewrite,
+          onOpenHistoryReport,
         })}
       </div>
     </section>
@@ -1263,7 +1420,7 @@ function RewritesReportTab({
   );
 }
 
-function HistoryReportTab({ result, history }) {
+function HistoryReportTab({ result, history, onOpenHistoryReport }) {
   return (
     <ReportCard title="Report history">
       <div>
@@ -1274,21 +1431,32 @@ function HistoryReportTab({ result, history }) {
           reviewTone: result.reviewTone,
           score: result.primaryGrade?.score,
           createdAt: new Date().toISOString(),
-        }]).slice(0, 9).map((entry, index, rows) => (
-          <div
-            key={entry.id}
-            className="grid gap-3 border-b py-3 last:border-b-0 md:grid-cols-[120px_60px_1fr_1fr_auto] md:items-center"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <span className="mono text-xs text-[var(--muted)]">{formatHistoryDate(entry.createdAt)}</span>
-            <span className={`h-display text-[22px] leading-none ${getScoreClass(entry.score)}`}>{entry.score}</span>
-            <span className="text-sm text-[var(--text)]">{entry.reviewTone}</span>
-            <span className="truncate text-sm text-[var(--muted)]">{entry.targetRole}</span>
-            <button type="button" className="btn btn-ghost btn-sm" disabled={index === 0 && rows.length === 1}>
-              Open
-            </button>
-          </div>
-        ))}
+          report: result,
+        }]).slice(0, 9).map((entry) => {
+          const canOpenReport = Boolean(entry.report);
+
+          return (
+            <div
+              key={entry.id}
+              className="grid gap-3 border-b py-3 last:border-b-0 md:grid-cols-[120px_60px_1fr_1fr_auto] md:items-center"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <span className="mono text-xs text-[var(--muted)]">{formatHistoryDate(entry.createdAt)}</span>
+              <span className={`h-display text-[22px] leading-none ${getScoreClass(entry.score)}`}>{entry.score}</span>
+              <span className="text-sm text-[var(--text)]">{entry.reviewTone}</span>
+              <span className="truncate text-sm text-[var(--muted)]">{entry.targetRole}</span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={!canOpenReport}
+                title={canOpenReport ? `Open ${entry.targetRole} report` : "This older history item does not include a saved report."}
+                onClick={() => onOpenHistoryReport(entry)}
+              >
+                Open
+              </button>
+            </div>
+          );
+        })}
       </div>
     </ReportCard>
   );
@@ -1676,6 +1844,10 @@ function normalizeComparableText(value) {
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
+}
+
+function buildSharedGraderReportUrl(origin, token) {
+  return `${origin}/grader/report/${encodeURIComponent(token)}`;
 }
 
 function buildHeuristicAtsRisks(text, metadata) {

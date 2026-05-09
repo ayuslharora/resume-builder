@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import {
   collection, doc, setDoc, deleteDoc,
-  getDoc, getDocs, query, where, serverTimestamp
+  getCountFromServer, getDoc, getDocs, query, updateDoc, where, serverTimestamp
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
@@ -57,12 +57,74 @@ export function useFirestore() {
   const getResumeByShareToken = useCallback(async (shareToken) => {
     const q = query(
       collection(db, "resumes"),
-      where("shareToken", "==", shareToken)
+      where("shareToken", "==", shareToken),
+      where("isShared", "==", true)
     );
     const snap = await getDocs(q);
     if (snap.empty) return null;
     const first = snap.docs[0];
     return sanitizeResume({ id: first.id, ...first.data() });
+  }, []);
+
+  const createGraderReport = useCallback(async (data) => {
+    const docRef = doc(collection(db, "graderReports"));
+    const serverTime = serverTimestamp();
+    await setDoc(docRef, {
+      ...data,
+      createdAt: serverTime,
+      updatedAt: serverTime,
+      isShared: true,
+    });
+
+    return docRef.id;
+  }, []);
+
+  const getGraderReportByShareToken = useCallback(async (shareToken) => {
+    const q = query(
+      collection(db, "graderReports"),
+      where("shareToken", "==", shareToken),
+      where("isShared", "==", true)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const first = snap.docs[0];
+    return { id: first.id, ...first.data() };
+  }, []);
+
+  const recordResumeView = useCallback(async ({ resumeId, ownerId, viewerId }) => {
+    if (!resumeId || !ownerId || !viewerId) return;
+
+    const viewRef = doc(db, "resumeViews", `${resumeId}_${viewerId}`);
+    try {
+      await updateDoc(viewRef, {
+        lastViewedAt: serverTimestamp(),
+      });
+    } catch (err) {
+      await setDoc(viewRef, {
+        resumeId,
+        ownerId,
+        viewerId,
+        createdAt: serverTimestamp(),
+        lastViewedAt: serverTimestamp(),
+      });
+    }
+  }, []);
+
+  const getResumeViewCounts = useCallback(async (resumeIds = [], ownerId = "") => {
+    if (!ownerId) return {};
+
+    const uniqueIds = Array.from(new Set(resumeIds.filter(Boolean)));
+    const entries = await Promise.all(uniqueIds.map(async (resumeId) => {
+      const q = query(
+        collection(db, "resumeViews"),
+        where("resumeId", "==", resumeId),
+        where("ownerId", "==", ownerId)
+      );
+      const snapshot = await getCountFromServer(q);
+      return [resumeId, snapshot.data().count || 0];
+    }));
+
+    return Object.fromEntries(entries);
   }, []);
 
   // ─── Update ────────────────────────────────────────────────────────────────
@@ -93,11 +155,15 @@ export function useFirestore() {
 
   return {
     createResume,
+    createGraderReport,
     getResume,
+    getGraderReportByShareToken,
+    getResumeViewCounts,
     getResumeByShareToken,
     getUserResumes,
     updateResume,
     deleteResume,
     duplicateResume,
+    recordResumeView,
   };
 }
