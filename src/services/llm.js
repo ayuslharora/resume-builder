@@ -5,6 +5,31 @@ const NVIDIA_API_URL = `https://integrate.api.nvidia.com/v1/chat/completions`;
 
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
 
+function normalizeBulletRewrites(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+
+  const candidates = [
+    payload.rewrites,
+    payload.suggestions,
+    payload.options,
+    payload.variants,
+    payload.results,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+  }
+
+  // Some models return numbered rewrite fields instead of an array.
+  const numbered = Object.keys(payload)
+    .filter((key) => /^rewrite\d*$/i.test(key))
+    .sort((a, b) => a.localeCompare(b))
+    .map((key) => payload[key]);
+
+  return numbered.length ? numbered : [];
+}
+
 async function parseLLMResponse(response, provider) {
   const data = await response.json();
   const textContent = data.choices[0].message.content;
@@ -343,8 +368,28 @@ ${targetContext.resumeText || "Not provided"}
 ${targetContext.sourceDocumentText ? `\n\nRelevant source document context:\n${targetContext.sourceDocumentText}` : ""}`;
 
   const result = await callGemini(systemPrompt, userPrompt);
+  const rawRewrites = normalizeBulletRewrites(result);
+
   return {
-    rewrites: Array.isArray(result.rewrites) ? result.rewrites.map(sanitizeRewriteOption) : [],
+    rewrites: rawRewrites
+      .map((item) => {
+        if (typeof item === "string") {
+          return sanitizeRewriteOption({
+            version: item,
+            focus: "Rewrite",
+            whyItWorks: "",
+          });
+        }
+
+        if (!item || typeof item !== "object") return null;
+
+        return sanitizeRewriteOption({
+          version: item.version || item.rewrite || item.text || "",
+          focus: item.focus || item.angle || item.theme || "Rewrite",
+          whyItWorks: item.whyItWorks || item.reason || item.rationale || "",
+        });
+      })
+      .filter((item) => item && item.version),
   };
 }
 

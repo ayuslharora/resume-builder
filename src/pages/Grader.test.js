@@ -62,3 +62,13 @@ test("Grader report status badges have dark theme status color tokens", async ()
   assert.match(darkThemeBlock, /--warn-soft:/);
   assert.match(darkThemeBlock, /--warn:/);
 });
+
+test("Grader bullet rewrite mode keeps a visible fallback when live rewrites are empty", async () => {
+  const graderSource = await readFile(new URL("./Grader.jsx", import.meta.url), "utf8");
+
+  assert.match(graderSource, /buildFallbackBulletRewrites\(requestedBullet, result\)/);
+  assert.match(graderSource, /firstBulletCandidate/);
+  assert.match(graderSource, /displayedBulletRewrites/);
+  assert.match(graderSource, /Failed to generate live bullet rewrites/);
+  assert.match(graderSource, /Grader suggestion/);
+});

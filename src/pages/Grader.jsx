@@ -231,23 +231,28 @@ export default function Grader() {
   };
 
   const handleBulletRewrite = async (bullet) => {
-    if (!result) return;
+    const requestedBullet = typeof bullet === "string" ? bullet.trim() : "";
+    if (!result || !requestedBullet) return;
 
-    setSelectedBullet(bullet);
+    setSelectedBullet(requestedBullet);
     setRewritingBullet(true);
     setBulletRewrites([]);
 
     try {
       const { rewriteResumeBullet } = await loadGroq();
-      const rewriteResult = await rewriteResumeBullet(bullet, {
+      const rewriteResult = await rewriteResumeBullet(requestedBullet, {
         targetRole: result.targetRole,
         jobDescription: result.jobDescription,
         reviewTone: result.reviewTone,
         resumeText: result.resumeText,
       });
-      setBulletRewrites(rewriteResult.rewrites || []);
+      const rewrites = Array.isArray(rewriteResult.rewrites) ? rewriteResult.rewrites : [];
+      setBulletRewrites(
+        rewrites.length ? rewrites : buildFallbackBulletRewrites(requestedBullet, result)
+      );
     } catch (err) {
-      setError(err.message);
+      setBulletRewrites(buildFallbackBulletRewrites(requestedBullet, result));
+      console.warn("Failed to generate live bullet rewrites:", err);
     } finally {
       setRewritingBullet(false);
     }
@@ -1164,6 +1169,13 @@ function RewritesReportTab({
   onApplyRewrite,
 }) {
   const grade = result.primaryGrade || {};
+  const firstBulletCandidate = result.bulletCandidates?.[0]?.originalBullet || "";
+  const activeBullet = selectedBullet || firstBulletCandidate;
+  const displayedBulletRewrites = bulletRewrites.length
+    ? bulletRewrites
+    : activeBullet
+      ? buildFallbackBulletRewrites(activeBullet, result)
+      : [];
 
   return (
     <div className="space-y-5">
@@ -1192,8 +1204,8 @@ function RewritesReportTab({
                   onClick={() => onBulletRewrite(bullet.originalBullet)}
                   className="w-full rounded-xl border p-4 text-left transition hover:-translate-y-0.5"
                   style={{
-                    borderColor: selectedBullet === bullet.originalBullet ? "var(--accent)" : "var(--border)",
-                    background: selectedBullet === bullet.originalBullet ? "var(--accent-soft)" : "var(--surface)",
+                    borderColor: activeBullet === bullet.originalBullet ? "var(--accent)" : "var(--border)",
+                    background: activeBullet === bullet.originalBullet ? "var(--accent-soft)" : "var(--surface)",
                   }}
                 >
                   <div className="mb-2 flex items-start justify-between gap-3">
@@ -1223,18 +1235,18 @@ function RewritesReportTab({
               <Loader2 size={16} className="animate-spin text-[var(--accent)]" />
               Generating stronger bullet options...
             </div>
-          ) : bulletRewrites.length > 0 ? (
+          ) : displayedBulletRewrites.length > 0 ? (
             <div className="space-y-4">
               <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <p className="lbl-mono mb-2">Selected bullet</p>
-                <p className="text-sm text-[var(--text)]">{selectedBullet}</p>
+                <p className="text-sm text-[var(--text)]">{activeBullet}</p>
               </div>
-              {bulletRewrites.map((rewrite, index) => (
+              {displayedBulletRewrites.map((rewrite, index) => (
                 <div key={index} className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                   <p className="mb-2 text-sm leading-relaxed text-[var(--text)]">{rewrite.version}</p>
                   <p className="mb-1 text-xs text-[var(--accent)]">{rewrite.focus}</p>
                   <p className="mb-3 text-xs leading-relaxed text-[var(--muted)]">{rewrite.whyItWorks}</p>
-                  <button type="button" onClick={() => onApplyRewrite(selectedBullet, rewrite.version)} className="btn btn-outline">
+                  <button type="button" onClick={() => onApplyRewrite(activeBullet, rewrite.version)} className="btn btn-outline">
                     Apply to improved draft
                   </button>
                 </div>
@@ -1556,7 +1568,43 @@ function parseRoleList(value) {
 
 function deriveWeakBulletCandidates(weakBullets, text) {
   if (Array.isArray(weakBullets) && weakBullets.length > 0) {
-    return weakBullets.slice(0, 8);
+    const normalized = weakBullets
+      .map((item) => {
+        if (typeof item === "string") {
+          const value = item.trim();
+          if (!value) return null;
+          return {
+            originalBullet: value,
+            section: "General",
+            issue: "Flagged by the grader as a weak bullet.",
+            priority: "medium",
+          };
+        }
+
+        if (!item || typeof item !== "object") return null;
+
+        const originalBullet = (
+          item.originalBullet ||
+          item.bullet ||
+          item.text ||
+          item.original ||
+          ""
+        ).toString().trim();
+
+        if (!originalBullet) return null;
+
+        return {
+          originalBullet,
+          section: item.section || "General",
+          issue: item.issue || item.reason || "Flagged by the grader as a weak bullet.",
+          priority: item.priority || item.severity || "medium",
+        };
+      })
+      .filter(Boolean);
+
+    if (normalized.length > 0) {
+      return normalized.slice(0, 8);
+    }
   }
 
   const lines = text
@@ -1586,6 +1634,48 @@ function applySelectedRewrites(text, rewriteMap) {
       ? currentText.replace(original, replacement)
       : currentText;
   }, text);
+}
+
+function buildFallbackBulletRewrites(originalBullet, result) {
+  const rewriteSuggestions = result?.primaryGrade?.rewriteSuggestions || [];
+  const normalizedOriginal = normalizeComparableText(originalBullet);
+  const matchedSuggestion = rewriteSuggestions.find((suggestion) => (
+    normalizeComparableText(suggestion?.original || "") === normalizedOriginal
+  ));
+
+  if (matchedSuggestion?.improved) {
+    return [{
+      version: matchedSuggestion.improved,
+      focus: "Grader suggestion",
+      whyItWorks: matchedSuggestion.reason || "Uses the rewrite already identified during grading.",
+    }];
+  }
+
+  const firstWord = originalBullet.split(/\s+/)[0] || "Improved";
+  const hasActionVerb = /^(built|created|developed|designed|led|managed|implemented|optimized|improved|launched|delivered|analyzed|automated|collaborated|supported|increased|reduced|streamlined|coordinated)\b/i.test(firstWord);
+  const actionLead = hasActionVerb ? originalBullet : `Improved ${originalBullet.replace(/^[a-z]\w*\s+/i, "")}`;
+
+  return [
+    {
+      version: actionLead,
+      focus: "Action verb",
+      whyItWorks: "Keeps the original facts visible while making the bullet start with a stronger action.",
+    },
+    {
+      version: `${actionLead.replace(/[.!?]$/, "")} with clearer ownership and measurable context.`,
+      focus: "Impact",
+      whyItWorks: "Shows where a metric, scope, or result should be added without inventing unsupported facts.",
+    },
+  ];
+}
+
+function normalizeComparableText(value) {
+  return value
+    .toString()
+    .replace(/^[\s•*\-–—]+/, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function buildHeuristicAtsRisks(text, metadata) {
