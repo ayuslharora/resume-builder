@@ -1,9 +1,8 @@
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = `https://api.groq.com/openai/v1/chat/completions`;
-const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY;
-const NVIDIA_API_URL = `https://integrate.api.nvidia.com/v1/chat/completions`;
-
+import { getNextGroqKey, markKeyRateLimited, getGroqKeyCount, isRateLimitError } from "./apiKeyManager";
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
+
+const GROQ_API_URL = `https://api.groq.com/openai/v1/chat/completions`;
+const GROQ_MODEL = "llama-3.1-8b-instant";
 
 function normalizeBulletRewrites(payload) {
   if (Array.isArray(payload)) return payload;
@@ -43,15 +42,15 @@ async function parseLLMResponse(response, provider) {
   }
 }
 
-async function callGemini(systemPrompt, userPrompt, options = {}) {
+async function makeRequest(systemPrompt, userPrompt, options = {}, apiKey) {
   const response = await fetch(GROQ_API_URL, {
     method: "POST",
-    headers: { 
+    headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${GROQ_API_KEY}`
+      "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: "llama-3.1-8b-instant",
+      model: GROQ_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
@@ -62,10 +61,50 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
+    const error = new Error(`Groq API Error: ${response.status} ${response.statusText}`);
+    error.status = response.status;
+    error.headers = response.headers;
+    throw error;
   }
 
   return await parseLLMResponse(response, "Groq");
+}
+
+async function callGemini(systemPrompt, userPrompt, options = {}) {
+  const maxAttempts = getGroqKeyCount();
+  let lastError = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    let apiKey;
+    try {
+      apiKey = getNextGroqKey();
+    } catch (rateLimitError) {
+      throw rateLimitError;
+    }
+
+    try {
+      return await makeRequest(systemPrompt, userPrompt, options, apiKey);
+    } catch (error) {
+      lastError = error;
+
+      if (isRateLimitError(error.status)) {
+        const retryAfter = error.headers?.get?.("retry-after") 
+          ? parseInt(error.headers.get("retry-after"), 10) 
+          : 60;
+        markKeyRateLimited(retryAfter);
+        continue;
+      }
+
+      if (error.status === 401) {
+        markKeyRateLimited(60);
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError || new Error("All API keys exhausted");
 }
 
 export async function generateResume(bragSheetText, interviewAnswers) {
