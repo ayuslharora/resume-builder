@@ -15,6 +15,7 @@ import {
   ClipboardList,
   Download,
   FileSearch,
+  History,
   Link2,
   Loader2,
   RefreshCw,
@@ -372,11 +373,12 @@ export default function Grader() {
   };
 
   const handleOpenHistoryReport = (entry) => {
-    if (!entry?.id || !entry.report || typeof window === "undefined") return;
-
-    const reportUrl = new URL("/grader", window.location.origin);
-    reportUrl.searchParams.set("report", entry.id);
-    window.open(reportUrl.toString(), "_blank", "noopener,noreferrer");
+    if (!entry?.report) return;
+    setResult(entry.report);
+    setSelectedBullet("");
+    setBulletRewrites([]);
+    setAppliedRewrites({});
+    setActiveReportTab("overview");
   };
 
   const handleCopyReportLink = async () => {
@@ -653,6 +655,37 @@ export default function Grader() {
               </div>
             )}
           </div>
+
+          {history.length > 0 && (
+            <div className="panel p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <History size={15} className="text-[var(--muted)]" />
+                <span className="lbl-mono">Recent grades</span>
+              </div>
+              <div className="space-y-2">
+                {history.slice(0, 6).map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="grid gap-3 rounded-xl px-4 py-3 md:grid-cols-[80px_auto_1fr_1fr_auto] md:items-center"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                  >
+                    <span className={`h-display text-[22px] leading-none ${getScoreClass(entry.score)}`}>{entry.score}</span>
+                    <span className="mono text-xs text-[var(--muted)]">{formatHistoryDate(entry.createdAt)}</span>
+                    <span className="truncate text-sm text-[var(--text)]">{entry.targetRole}</span>
+                    <span className="truncate text-xs text-[var(--muted)]">{entry.reviewTone} · {entry.fileName}</span>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled={!entry.report}
+                      onClick={() => handleOpenHistoryReport(entry)}
+                    >
+                      Open
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
