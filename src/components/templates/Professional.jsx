@@ -1,10 +1,33 @@
+import React, { useState, useEffect, useRef } from 'react';
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
-import { Wand2 } from "lucide-react";
+import { Wand2, Palette } from "lucide-react";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
 export default function Professional({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const themeColors = ['#2B3A5A', '#222222', '#1B3B32', '#58202E', '#1F2937']; // Navy, Pure Dark Gray, Deep Pine, Rich Burgundy, Slate Gray
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowColorPicker(false);
+      }
+    }
+    
+    if (showColorPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showColorPicker]);
+
   if (!resumeData) return null;
 
   const isExpNotEmpty = (exp) => exp.role?.trim() || exp.company?.trim() || exp.duration?.trim() || exp.location?.trim() || exp.bullets?.some(b => b?.trim());
@@ -25,8 +48,67 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
       className="bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex"
       style={RESUME_PAGE_MIN_HEIGHT_STYLE}
     >
-      {/* Left Sidebar - Navy Blue */}
-      <div className="w-[30%] bg-[#2B3A5A] text-white p-8">
+      {/* Left Sidebar */}
+      <div 
+        className="w-[30%] text-white p-8 relative transition-colors duration-300"
+        style={{ backgroundColor: resumeData.theme?.sidebarColor || '#2B3A5A' }}
+      >
+        {isEditing && (
+          <div className="absolute top-4 left-4 z-50" ref={pickerRef}>
+            <button
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all shadow-sm backdrop-blur-sm border ${
+                showColorPicker 
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700' 
+                  : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+              }`}
+              title="Change Theme Color"
+            >
+              <Palette size={14} />
+              <span className="text-[10px] font-bold tracking-wider">THEME</span>
+            </button>
+            
+            {showColorPicker && (
+              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-[#1A1D21] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 p-2 flex items-center gap-1.5 transition-all duration-200 origin-top-left">
+                {themeColors.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => onUpdateSection('theme', { ...resumeData.theme, sidebarColor: color })}
+                    className={`w-6 h-6 rounded-full shadow-sm transition-all border-2 ${
+                      (resumeData.theme?.sidebarColor || '#2B3A5A') === color 
+                        ? 'border-blue-500 scale-110 ring-2 ring-blue-500/20' 
+                        : 'border-white dark:border-gray-700 hover:scale-110'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+                <div className="w-[1px] h-5 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                <div 
+                  className={`relative w-6 h-6 rounded-full shadow-sm transition-all border-2 flex items-center justify-center overflow-hidden ${
+                    !themeColors.includes(resumeData.theme?.sidebarColor || '#2B3A5A')
+                      ? 'border-blue-500 scale-110 ring-2 ring-blue-500/20'
+                      : 'border-white dark:border-gray-700 hover:scale-110'
+                  }`}
+                  style={{
+                    background: 'conic-gradient(from 180deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'
+                  }}
+                  title="Custom Color"
+                >
+                  <div className="w-full h-full bg-white/20 backdrop-blur-[1px] flex items-center justify-center">
+                    <input 
+                      type="color" 
+                      value={resumeData.theme?.sidebarColor || '#2B3A5A'}
+                      onChange={(e) => onUpdateSection('theme', { ...resumeData.theme, sidebarColor: e.target.value })}
+                      className="absolute inset-[-10px] w-[50px] h-[50px] opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-8">
             <h1 className="text-2xl font-bold uppercase tracking-wider mb-4 leading-tight">
@@ -68,23 +150,51 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                 <InlineEdit value={resumeData.labels?.skills ?? "Key Skills"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skills: v })} />
               </h2>
               <div className="text-xs text-gray-200 space-y-4">
-                {resumeData.skills.technical?.length > 0 && (
+                {(isEditing || resumeData.skills.technical?.length > 0) && (
                   <div>
                     <span className="block font-bold text-white mb-2">Technical</span>
                     <ul className="list-disc list-inside space-y-1">
-                      {resumeData.skills.technical.map((s, i) => (
+                      {(resumeData.skills.technical || []).map((s, i) => (
                         <li key={i}><InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} /></li>
                       ))}
+                      {isEditing && (
+                        <li>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const current = resumeData.skills.technical || [];
+                              onUpdateSection('skills', { ...resumeData.skills, technical: [...current, "New Skill"] });
+                            }}
+                            className="text-[10px] text-white/50 hover:text-white mt-1 uppercase font-bold tracking-wider transition-colors inline-block"
+                          >
+                            + Add
+                          </button>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}
-                {resumeData.skills.soft?.length > 0 && (
+                {(isEditing || resumeData.skills.soft?.length > 0) && (
                   <div>
                     <span className="block font-bold text-white mb-2">Interpersonal</span>
                     <ul className="list-disc list-inside space-y-1">
-                      {resumeData.skills.soft.map((s, i) => (
+                      {(resumeData.skills.soft || []).map((s, i) => (
                         <li key={i}><InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} /></li>
                       ))}
+                      {isEditing && (
+                        <li>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const current = resumeData.skills.soft || [];
+                              onUpdateSection('skills', { ...resumeData.skills, soft: [...current, "New Skill"] });
+                            }}
+                            className="text-[10px] text-white/50 hover:text-white mt-1 uppercase font-bold tracking-wider transition-colors inline-block"
+                          >
+                            + Add
+                          </button>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}

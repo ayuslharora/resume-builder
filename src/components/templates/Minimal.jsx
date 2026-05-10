@@ -173,33 +173,57 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
               <InlineEdit value={resumeData.labels?.skills ?? "Skills"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skills: v })} />
             </h2>
             <div className="text-sm">
-              {resumeData.skills.technical?.length > 0 && (
+              {(isEditing || resumeData.skills.technical?.length > 0) && (
                 <div className="mb-1">
                   <span className="font-bold mr-2">
                     <InlineEdit value={resumeData.labels?.technical ?? "Technical:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, technical: v })} />
                   </span>
-                  <div className="inline-flex flex-wrap gap-1">
-                    {resumeData.skills.technical.map((s, i) => (
+                  <div className="inline-flex flex-wrap gap-1 items-center">
+                    {(resumeData.skills.technical || []).map((s, i) => (
                       <span key={i}>
                         <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], { [i]: v }) })} />
-                        {i < resumeData.skills.technical.length - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
+                        {i < (resumeData.skills.technical?.length || 0) - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
                       </span>
                     ))}
+                    {isEditing && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const current = resumeData.skills.technical || [];
+                          onUpdateSection('skills', { ...resumeData.skills, technical: [...current, "New Skill"] });
+                        }}
+                        className="text-[10px] text-blue-500 hover:text-blue-600 ml-2 uppercase font-bold tracking-wider opacity-50 hover:opacity-100 transition-opacity"
+                      >
+                        + Add
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
-              {resumeData.skills.soft?.length > 0 && (
+              {(isEditing || resumeData.skills.soft?.length > 0) && (
                 <div>
                   <span className="font-bold mr-2">
                     <InlineEdit value={resumeData.labels?.soft ?? "Soft:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, soft: v })} />
                   </span>
-                  <div className="inline-flex flex-wrap gap-1">
-                    {resumeData.skills.soft.map((s, i) => (
+                  <div className="inline-flex flex-wrap gap-1 items-center">
+                    {(resumeData.skills.soft || []).map((s, i) => (
                       <span key={i}>
                         <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], { [i]: v }) })} />
-                        {i < resumeData.skills.soft.length - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
+                        {i < (resumeData.skills.soft?.length || 0) - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
                       </span>
                     ))}
+                    {isEditing && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const current = resumeData.skills.soft || [];
+                          onUpdateSection('skills', { ...resumeData.skills, soft: [...current, "New Skill"] });
+                        }}
+                        className="text-[10px] text-blue-500 hover:text-blue-600 ml-2 uppercase font-bold tracking-wider opacity-50 hover:opacity-100 transition-opacity"
+                      >
+                        + Add
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
