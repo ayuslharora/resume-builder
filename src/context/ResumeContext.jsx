@@ -17,7 +17,8 @@ const initialBuilderState = {
     careerObjective: "",
     technologiesToEmphasize: "",
     preferredLength: "1-page",
-    additionalContext: ""
+    additionalContext: "",
+    jobDescription: ""
   },
   templateId: null,
   resumeData: null,

@@ -40,6 +40,17 @@ export default function InterviewStep() {
           />
         </div>
 
+        <div>
+          <label className="field-label">Job Description <span className="text-on-surface-variant font-normal">(Recommended — paste the full JD for best results)</span></label>
+          <textarea
+            rows="5"
+            placeholder="Paste the job description here. The AI will use it to select only the most relevant skills and keywords for your resume."
+            value={answers.jobDescription}
+            onChange={e => handleChange('jobDescription', e.target.value)}
+            className="custom-scrollbar"
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="field-label">Company Type (Optional)</label>

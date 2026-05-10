@@ -108,20 +108,38 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
 }
 
 export async function generateResume(bragSheetText, interviewAnswers) {
+  const isOnePage = interviewAnswers.preferredLength !== "2-pages";
+  const hasJD = interviewAnswers.jobDescription && interviewAnswers.jobDescription.trim().length > 0;
+
   const systemPrompt = `You are an expert resume writer. You write resumes for students and freshers applying to tech roles.
+
 CRITICAL RULES:
-1. You MUST extract and use the information provided in the "raw achievements document" (Brag Sheet).
-2. DO NOT make up or hallucinate any work experience, education, projects, or skills that are not supported by the candidate's document or interview answers.
-3. If the document is missing certain sections, leave them empty rather than inventing fake data.
-4. Your output must be ONLY valid JSON matching the schema precisely. No markdown, no explanation.
-5. Write all experience bullets starting with strong action verbs (Led, Built, Developed, Designed, Implemented, Optimized, etc.).
-6. Keep bullets impact-driven and concise: under 20 words each.
-7. NEVER use em-dashes ("—"). If you must use a dash, use a regular hyphen ("-") or a colon instead.
-Tailor the tone and emphasis based on the target company type and role.`;
+1. Extract and use ONLY information from the candidate's Brag Sheet and interview answers. DO NOT invent experience, projects, education, or skills.
+2. If a section has no data, leave it as an empty array. Never fabricate.
+3. Output ONLY valid JSON matching the schema. No markdown, no explanation.
+4. All bullets start with strong action verbs (Led, Built, Developed, Designed, Implemented, Optimized, etc.).
+5. Keep every bullet impact-driven and under 20 words.
+6. NEVER use em-dashes ("—"). Use a hyphen ("-") or colon instead.
+
+${hasJD ? `KEYWORD SELECTION — CRITICAL:
+You have been given a Job Description (JD). You MUST:
+- Read the JD carefully and identify the skills, tools, and technologies that are EXPLICITLY mentioned or clearly implied.
+- In the "skills" section, include ONLY skills that (a) appear in the JD and (b) are genuinely present in the candidate's background. Do NOT dump every skill from the brag sheet.
+- In bullets, weave in JD-relevant keywords naturally where the candidate's experience supports it.
+- Omit skills and technologies that are not relevant to this specific role, even if the candidate has them.` : `KEYWORD SELECTION:
+Focus on skills and keywords that directly support the target role. Do not include every skill from the brag sheet — be selective and relevant.`}
+
+${isOnePage ? `ONE-PAGE GOAL:
+The candidate wants a single-page resume. Be ruthlessly concise — every word must earn its place.
+- Keep the summary tight and punchy.
+- Only include skills, projects, and experience entries that are directly relevant to this role. Omit anything that does not strengthen the application.
+- Prefer fewer, stronger bullets over many weak ones.
+- When two items are roughly equivalent in relevance, drop the weaker one.` : `TWO-PAGE GOAL:
+The candidate is comfortable with two pages. Be thorough but still concise and focused on the target role.`}`;
 
   const userPrompt = `Here is the candidate's raw achievements document (Brag Sheet):
 ---
-${bragSheetText ? bragSheetText : "(No document provided by the candidate. Base the resume strictly on the interview answers below.)"}
+${bragSheetText ? bragSheetText : "(No document provided. Base the resume strictly on the interview answers below.)"}
 ---
 
 Here are their interview answers:
@@ -133,6 +151,7 @@ Here are their interview answers:
 - Technologies to emphasize: ${interviewAnswers.technologiesToEmphasize}
 - Preferred length: ${interviewAnswers.preferredLength}
 - Additional context: ${interviewAnswers.additionalContext}
+${hasJD ? `\nJob Description to tailor this resume for:\n---\n${interviewAnswers.jobDescription}\n---` : ""}
 
 Generate a complete resume as JSON following this exact schema:
 {
