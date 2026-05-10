@@ -150,11 +150,11 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                 <InlineEdit value={resumeData.labels?.skills ?? "Key Skills"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skills: v })} />
               </h2>
               <div className="text-xs text-gray-200 space-y-4">
-                {(isEditing || resumeData.skills.technical?.length > 0) && (
+                {(isEditing || resumeData.skills.technical?.some(s => s?.trim())) && (
                   <div>
                     <span className="block font-bold text-white mb-2">Technical</span>
                     <ul className="list-disc list-inside space-y-1">
-                      {(resumeData.skills.technical || []).map((s, i) => (
+                      {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.trim()) && (
                         <li key={i}><InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} /></li>
                       ))}
                       {isEditing && (
@@ -174,11 +174,11 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                     </ul>
                   </div>
                 )}
-                {(isEditing || resumeData.skills.soft?.length > 0) && (
+                {(isEditing || resumeData.skills.soft?.some(s => s?.trim())) && (
                   <div>
                     <span className="block font-bold text-white mb-2">Interpersonal</span>
                     <ul className="list-disc list-inside space-y-1">
-                      {(resumeData.skills.soft || []).map((s, i) => (
+                      {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.trim()) && (
                         <li key={i}><InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} /></li>
                       ))}
                       {isEditing && (

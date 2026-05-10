@@ -173,58 +173,52 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
               <InlineEdit value={resumeData.labels?.skills ?? "Skills"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skills: v })} />
             </h2>
             <div className="text-sm">
-              {(isEditing || resumeData.skills.technical?.length > 0) && (
-                <div className="mb-1">
-                  <span className="font-bold mr-2">
+              {(isEditing || resumeData.skills.technical?.some(s => s?.trim())) && (
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className="font-bold mr-1">
                     <InlineEdit value={resumeData.labels?.technical ?? "Technical:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, technical: v })} />
                   </span>
-                  <div className="inline-flex flex-wrap gap-1 items-center">
-                    {(resumeData.skills.technical || []).map((s, i) => (
-                      <span key={i}>
-                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], { [i]: v }) })} />
-                        {i < (resumeData.skills.technical?.length || 0) - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
-                      </span>
-                    ))}
-                    {isEditing && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const current = resumeData.skills.technical || [];
-                          onUpdateSection('skills', { ...resumeData.skills, technical: [...current, "New Skill"] });
-                        }}
-                        className="text-[10px] text-blue-500 hover:text-blue-600 ml-2 uppercase font-bold tracking-wider opacity-50 hover:opacity-100 transition-opacity"
-                      >
-                        + Add
-                      </button>
-                    )}
-                  </div>
+                  {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.trim()) && (
+                    <span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                      <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], { [i]: v }) })} />
+                    </span>
+                  ))}
+                  {isEditing && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const current = resumeData.skills.technical || [];
+                        onUpdateSection('skills', { ...resumeData.skills, technical: [...current, "New Skill"] });
+                      }}
+                      className="text-[10px] text-gray-500 hover:text-gray-800 bg-gray-50 hover:bg-gray-200 px-3 py-1 rounded-full uppercase font-bold tracking-wider transition-colors"
+                    >
+                      + Add
+                    </button>
+                  )}
                 </div>
               )}
-              {(isEditing || resumeData.skills.soft?.length > 0) && (
-                <div>
-                  <span className="font-bold mr-2">
+              {(isEditing || resumeData.skills.soft?.some(s => s?.trim())) && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold mr-1">
                     <InlineEdit value={resumeData.labels?.soft ?? "Soft:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, soft: v })} />
                   </span>
-                  <div className="inline-flex flex-wrap gap-1 items-center">
-                    {(resumeData.skills.soft || []).map((s, i) => (
-                      <span key={i}>
-                        <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], { [i]: v }) })} />
-                        {i < (resumeData.skills.soft?.length || 0) - 1 ? <InlineEdit value={resumeData.labels?.skillSeparator ?? ", "} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skillSeparator: v })} /> : ""}
-                      </span>
-                    ))}
-                    {isEditing && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const current = resumeData.skills.soft || [];
-                          onUpdateSection('skills', { ...resumeData.skills, soft: [...current, "New Skill"] });
-                        }}
-                        className="text-[10px] text-blue-500 hover:text-blue-600 ml-2 uppercase font-bold tracking-wider opacity-50 hover:opacity-100 transition-opacity"
-                      >
-                        + Add
-                      </button>
-                    )}
-                  </div>
+                  {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.trim()) && (
+                    <span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                      <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], { [i]: v }) })} />
+                    </span>
+                  ))}
+                  {isEditing && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const current = resumeData.skills.soft || [];
+                        onUpdateSection('skills', { ...resumeData.skills, soft: [...current, "New Skill"] });
+                      }}
+                      className="text-[10px] text-gray-500 hover:text-gray-800 bg-gray-50 hover:bg-gray-200 px-3 py-1 rounded-full uppercase font-bold tracking-wider transition-colors"
+                    >
+                      + Add
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -68,13 +68,13 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                 <InlineEdit value={resumeData.labels?.skills ?? "Skills"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, skills: v })} />
               </h2>
               <div className="text-sm space-y-4">
-                {(isEditing || resumeData.skills.technical?.length > 0) && (
+                {(isEditing || resumeData.skills.technical?.some(s => s?.trim())) && (
                   <div>
                     <span className="block font-bold text-white mb-2">
                       <InlineEdit value={resumeData.labels?.technical ?? "Technical"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, technical: v })} />
                     </span>
                     <div className="flex flex-wrap gap-2 items-center">
-                      {(resumeData.skills.technical || []).map((s, i) => (
+                      {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.trim()) && (
                         <span key={i} className="bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
                           <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} />
                         </span>
@@ -94,13 +94,13 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                     </div>
                   </div>
                 )}
-                {(isEditing || resumeData.skills.soft?.length > 0) && (
+                {(isEditing || resumeData.skills.soft?.some(s => s?.trim())) && (
                   <div>
                     <span className="block font-bold text-white mb-2">
                       <InlineEdit value={resumeData.labels?.soft ?? "Interpersonal"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, soft: v })} />
                     </span>
                     <div className="flex flex-wrap gap-2 items-center">
-                      {(resumeData.skills.soft || []).map((s, i) => (
+                      {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.trim()) && (
                         <span key={i} className="bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
                           <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} />
                         </span>
