@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { addGraderHistoryEntry, getGraderHistory } from "../services/graderHistory";
 import { createShareToken } from "../services/shareResume";
@@ -8,6 +8,7 @@ import {
 } from "../services/sharedResumeGraderSource";
 import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "../context/useAuth";
+import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
 import {
   AlertCircle,
   Briefcase,
@@ -380,6 +381,20 @@ export default function Grader() {
     setAppliedRewrites({});
     setActiveReportTab("overview");
   };
+
+  const handleGradeShortcut = useCallback(() => {
+    if (loading || result) return;
+    if (sourceMode === "link" && resumeLink.trim()) handleSharedResumeLinkGrade();
+    else if (sourceMode === "text" && pastedResumeText.trim()) handlePastedTextGrade();
+    else if (sourceMode === "upload") document.getElementById("grader-upload")?.click();
+  }, [loading, result, sourceMode, resumeLink, pastedResumeText]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRewriteShortcut = useCallback(() => {
+    if (result && selectedBullet) handleBulletRewrite(selectedBullet);
+  }, [result, selectedBullet]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useKeyboardShortcut("g", handleGradeShortcut);
+  useKeyboardShortcut("r", handleRewriteShortcut);
 
   const handleCopyReportLink = async () => {
     if (!result || typeof window === "undefined") return;

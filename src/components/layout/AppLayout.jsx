@@ -9,8 +9,8 @@ export default function AppLayout() {
   const isBuilderRoute = location.pathname.startsWith("/builder");
   const [paletteOpen, setPaletteOpen] = useState(false);
 
-  useKeyboardShortcut("k", () => setPaletteOpen(true), { global: false });
-  useKeyboardShortcut("f", () => setPaletteOpen(true), { global: false });
+  useKeyboardShortcut("k", () => setPaletteOpen(true));
+  useKeyboardShortcut("f", () => setPaletteOpen(true));
 
   if (isBuilderRoute) {
     return (
