@@ -1,8 +1,5 @@
-import { getNextGroqKey, markKeyRateLimited, getGroqKeyCount, isRateLimitError } from "./apiKeyManager";
+import { auth } from "./firebase";
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
-
-const GROQ_API_URL = `https://api.groq.com/openai/v1/chat/completions`;
-const GROQ_MODEL = "llama-3.1-8b-instant";
 
 function normalizeBulletRewrites(payload) {
   if (Array.isArray(payload)) return payload;
@@ -29,77 +26,32 @@ function normalizeBulletRewrites(payload) {
   return numbered.length ? numbered : [];
 }
 
-async function parseLLMResponse(response, provider) {
-  const data = await response.json();
-  const textContent = data.choices[0].message.content;
-  const cleanedText = textContent.replace(/```json/gi, '').replace(/```/g, '').trim();
-
-  try {
-    return JSON.parse(cleanedText);
-  } catch {
-    console.error(`Raw ${provider} response:`, textContent);
-    throw new Error(`Failed to parse ${provider} JSON output.`);
-  }
-}
-
-async function makeRequest(systemPrompt, userPrompt, options = {}, apiKey) {
-  const response = await fetch(GROQ_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" },
-      ...options,
-    })
-  });
-
-  if (!response.ok) {
-    const error = new Error(`Groq API Error: ${response.status} ${response.statusText}`);
-    error.status = response.status;
-    error.headers = response.headers;
-    throw error;
-  }
-
-  return await parseLLMResponse(response, "Groq");
-}
-
 async function callGemini(systemPrompt, userPrompt, options = {}) {
-  const maxAttempts = getGroqKeyCount();
-  let lastError = null;
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("User must be logged in to use AI features.");
+    
+    const token = await user.getIdToken();
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const apiKey = getNextGroqKey();
+    const response = await fetch('/api/groq', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ systemPrompt, userPrompt, options })
+    });
 
-    try {
-      return await makeRequest(systemPrompt, userPrompt, options, apiKey);
-    } catch (error) {
-      lastError = error;
-
-      if (isRateLimitError(error.status)) {
-        const retryAfter = error.headers?.get?.("retry-after")
-          ? parseInt(error.headers.get("retry-after"), 10)
-          : 60;
-        markKeyRateLimited(retryAfter);
-        continue;
-      }
-
-      if (error.status === 401) {
-        markKeyRateLimited(60);
-        continue;
-      }
-
-      throw error;
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to communicate with the AI service");
     }
-  }
 
-  throw lastError || new Error("All API keys exhausted");
+    return result.data;
+  } catch (error) {
+    console.error("Vercel Function Error:", error);
+    throw new Error(error.message || "Failed to communicate with the AI service");
+  }
 }
 
 export async function generateResume(bragSheetText, interviewAnswers) {

@@ -38,3 +38,5 @@ RESUME_OVERVIEW.md
 ResuMe.zip
 claude designe/
 design-reference/
+.vercel
+.env*.local
