@@ -8,18 +8,18 @@ import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 export default function Creative({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
   if (!resumeData) return null;
 
-  const isExpNotEmpty = (exp) => exp.role?.trim() || exp.company?.trim() || exp.duration?.trim() || exp.location?.trim() || exp.bullets?.some(b => b?.trim());
+  const isExpNotEmpty = (exp) => exp.role?.toString()?.trim() || exp.company?.toString()?.trim() || exp.duration?.toString()?.trim() || exp.location?.toString()?.trim() || exp.bullets?.some(b => b?.toString()?.trim());
   const hasVisibleExperience = isEditing || resumeData.experience?.some(isExpNotEmpty);
 
-  const isProjNotEmpty = (proj) => proj.name?.trim() || proj.link?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.trim());
+  const isProjNotEmpty = (proj) => proj.name?.toString()?.trim() || proj.link?.toString()?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.toString()?.trim());
   const hasVisibleProjects = isEditing || resumeData.projects?.some(isProjNotEmpty);
 
-  const isEduNotEmpty = (edu) => edu.degree?.trim() || edu.field?.trim() || edu.institution?.trim() || edu.duration?.trim() || edu.cgpa?.trim();
+  const isEduNotEmpty = (edu) => edu.degree?.toString()?.trim() || edu.field?.toString()?.trim() || edu.institution?.toString()?.trim() || edu.duration?.toString()?.trim() || edu.cgpa?.toString()?.trim();
   const hasVisibleEducation = isEditing || resumeData.education?.some(isEduNotEmpty);
 
-  const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.trim()) || resumeData.skills?.soft?.some(s => s?.trim());
+  const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.toString()?.trim()) || resumeData.skills?.soft?.some(s => s?.toString()?.trim());
 
-  const hasVisibleSummary = isEditing || resumeData.summary?.trim();
+  const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
 
   // Color Palette Tokens
   const bg = "bg-[#EAEBE5]";
@@ -31,7 +31,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
 
   return (
     <div
-      className={`${bg} flex flex-col max-w-[850px] mx-auto font-sans overflow-hidden shadow-2xl p-12 relative`}
+      className={`${bg} flex flex-col max-w-[850px] mx-auto font-sans shadow-2xl p-12 relative`}
       style={RESUME_PAGE_MIN_HEIGHT_STYLE}
     >
       {/* Editorial Name Header */}
@@ -215,11 +215,11 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                     <div className={`h-1 flex-1 ${accentBg}`}></div>
                   </h2>
                   <div className="pl-0 md:pl-2">
-                    {(isEditing || resumeData.skills.technical?.some(s => s?.trim())) && (
+                    {(isEditing || resumeData.skills.technical?.some(s => s?.toString()?.trim())) && (
                       <div className="mb-6">
                         <div className={`text-[10px] font-black ${textMuted} uppercase tracking-[0.2em] mb-2`}><InlineEdit value={resumeData.labels?.technical ?? "TECHNICAL"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, technical: v })} /></div>
                         <div className="flex flex-wrap gap-2">
-                          {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.trim()) && (
+                          {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
                             <span key={`tech-${i}`} className={`px-3.5 py-1.5 bg-transparent border-2 border-[#121212] rounded-full ${darkText} text-[11px] font-bold uppercase tracking-widest`}>
                               <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} />
                             </span>
@@ -239,11 +239,11 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         </div>
                       </div>
                     )}
-                    {(isEditing || resumeData.skills.soft?.some(s => s?.trim())) && (
+                    {(isEditing || resumeData.skills.soft?.some(s => s?.toString()?.trim())) && (
                       <div>
                         <div className={`text-[10px] font-black ${textMuted} uppercase tracking-[0.2em] mb-2`}><InlineEdit value={resumeData.labels?.soft ?? "PROFESSIONAL"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, soft: v })} /></div>
                         <div className="flex flex-wrap gap-2">
-                          {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.trim()) && (
+                          {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
                             <span key={`soft-${i}`} className={`px-3.5 py-1.5 ${accentBg} rounded-full text-[#EAEBE5] text-[11px] font-bold uppercase tracking-widest`}>
                               <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} />
                             </span>

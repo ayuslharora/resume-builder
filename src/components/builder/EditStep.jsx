@@ -4,6 +4,7 @@ import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
 import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import AiRewriteModal from "./AiRewriteModal";
+import SectionAiRewriteModal from "./SectionAiRewriteModal";
 import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
 import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
@@ -25,6 +26,7 @@ export default function EditStep() {
   const [previewScale, setPreviewScale] = useState(1);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [rewriteBulletData, setRewriteBulletData] = useState(null);
+  const [sectionRewriteData, setSectionRewriteData] = useState(null);
   const [isAtsPanelOpen, setIsAtsPanelOpen] = useState(false);
   const [isScanningAts, setIsScanningAts] = useState(false);
   const [atsResult, setAtsResult] = useState(null);
@@ -140,23 +142,22 @@ export default function EditStep() {
 
   if (!resumeData) return <div className="p-8 text-center text-gray-500">No resume data found</div>;
 
-  const handleRegenerate = async (sectionToRegenerate) => {
-    setIsRegenerating(true);
-    try {
-      const { regenerateSection } = await import("../../services/llm");
-      const dataToRegenerate = resumeData?.[sectionToRegenerate];
-      const newData = await regenerateSection(sectionToRegenerate, dataToRegenerate, interviewAnswers, bragSheetText);
-      updateSection(sectionToRegenerate, newData);
-      setPendingAIChange({
-        sectionName: sectionToRegenerate,
-        originalData: dataToRegenerate,
-        newData
-      });
-    } catch (err) {
-      alert("Failed to regenerate: " + err.message);
-    } finally {
-      setIsRegenerating(false);
-    }
+  const handleRegenerate = (sectionToRegenerate) => {
+    setSectionRewriteData(sectionToRegenerate);
+  };
+
+  const handleSectionGenerated = (newData) => {
+    if (!sectionRewriteData) return;
+    const sectionName = sectionRewriteData;
+    const originalData = resumeData[sectionName];
+    
+    updateSection(sectionName, newData);
+    setPendingAIChange({
+      sectionName,
+      originalData,
+      newData
+    });
+    setSectionRewriteData(null);
   };
 
   const handleRegenerateItem = async (sectionName, itemIndex) => {
@@ -288,7 +289,7 @@ export default function EditStep() {
       const resumeText = buildResumeTextForAts(resumeData);
       const scanContext = {
         targetRole: interviewAnswers.targetRole,
-        jobDescription: interviewAnswers.additionalContext || "",
+        jobDescription: interviewAnswers.jobDescription || "",
         reviewTone: "ATS strict",
       };
       const scanKey = JSON.stringify({ resumeText, ...scanContext });
@@ -599,12 +600,23 @@ export default function EditStep() {
               data={rewriteBulletData}
               context={{
                 targetRole: interviewAnswers.targetRole,
-                jobDescription: interviewAnswers.additionalContext,
+                jobDescription: interviewAnswers.jobDescription || "",
                 resumeText: buildResumeTextForAts(resumeData),
                 sourceDocumentText: bragSheetText,
               }}
               onClose={() => setRewriteBulletData(null)}
               onSelect={handleApplyBulletRewrite}
+            />
+          )}
+
+          {sectionRewriteData && (
+            <SectionAiRewriteModal
+              sectionName={sectionRewriteData}
+              currentData={resumeData[sectionRewriteData]}
+              context={interviewAnswers}
+              bragSheetText={bragSheetText}
+              onClose={() => setSectionRewriteData(null)}
+              onGenerated={handleSectionGenerated}
             />
           )}
 

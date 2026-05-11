@@ -7,8 +7,13 @@ function stripDecoration(line) {
 
 function looksLikeHeading(line, focus) {
   if (!line) return false;
-  if (focus && line.trim().toLowerCase() === focus.trim().toLowerCase()) return true;
-  return /^(technical focus|ats keywords|impact focus|leadership focus|option)\b/i.test(line.trim());
+  const cleanedLine = line.trim().toLowerCase().replace(/[:\s]+$/, "");
+  const cleanedFocus = focus ? focus.trim().toLowerCase().replace(/[:\s]+$/, "") : "";
+  
+  if (cleanedFocus && cleanedLine === cleanedFocus) return true;
+  
+  // Common heading patterns the AI might use
+  return /^(technical focus|ats keywords|impact focus|leadership focus|option|variation|rewrite)\b/i.test(cleanedLine);
 }
 
 export function sanitizeRewriteOption(option = {}) {

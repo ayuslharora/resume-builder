@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import FullscreenProtectedRoute from "./components/auth/FullscreenProtectedRoute";
@@ -26,9 +27,31 @@ const HelpDocs = lazy(() => import("./pages/HelpDocs"));
 
 const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
+function AppRoot() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const publicRoutes = ["/", "/templates", "/pricing", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
+    const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
+    
+    if (isPublic) {
+      document.body.removeAttribute("data-accent");
+    } else {
+      const savedAccent = localStorage.getItem("app-accent");
+      if (savedAccent === "mono") {
+        document.body.setAttribute("data-accent", "mono");
+      } else {
+        document.body.removeAttribute("data-accent");
+      }
+    }
+  }, [location.pathname]);
+
+  return <Outlet />;
+}
+
 const router = createBrowserRouter([
   {
-    element: <Outlet />,
+    element: <AppRoot />,
     errorElement: <RouteErrorScreen />,
     children: [
       { path: "/", element: <Landing /> },

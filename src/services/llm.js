@@ -33,7 +33,7 @@ async function parseLLMResponse(response, provider) {
   const data = await response.json();
   const textContent = data.choices[0].message.content;
   const cleanedText = textContent.replace(/```json/gi, '').replace(/```/g, '').trim();
-  
+
   try {
     return JSON.parse(cleanedText);
   } catch {
@@ -75,12 +75,7 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
   let lastError = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    let apiKey;
-    try {
-      apiKey = getNextGroqKey();
-    } catch (rateLimitError) {
-      throw rateLimitError;
-    }
+    const apiKey = getNextGroqKey();
 
     try {
       return await makeRequest(systemPrompt, userPrompt, options, apiKey);
@@ -88,8 +83,8 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
       lastError = error;
 
       if (isRateLimitError(error.status)) {
-        const retryAfter = error.headers?.get?.("retry-after") 
-          ? parseInt(error.headers.get("retry-after"), 10) 
+        const retryAfter = error.headers?.get?.("retry-after")
+          ? parseInt(error.headers.get("retry-after"), 10)
           : 60;
         markKeyRateLimited(retryAfter);
         continue;
@@ -175,7 +170,7 @@ Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
     temperature: 0,
     top_p: 1,
   });
-  
+
   if (!result.personalInfo) result.personalInfo = { fullName: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "" };
   if (!result.summary) result.summary = "";
   if (!result.experience) result.experience = [];
@@ -184,26 +179,38 @@ Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
   if (!result.skills) result.skills = { technical: [], soft: [] };
   if (!result.certifications) result.certifications = [];
   if (!result.achievements) result.achievements = [];
-  
+
   return result;
 }
 
-export async function regenerateSection(sectionName, currentSectionData, context, bragSheetText = "") {
+export async function regenerateSection(sectionName, currentSectionData, context, bragSheetText = "", customInstruction = "") {
   const systemPrompt = `You are an expert resume writer.
-Rewrite ONLY the "${sectionName}" section of this resume.
-Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
-${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}
-CRITICAL RULE: NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
-Output ONLY valid JSON in the exact following format:
+Rewrite the "${sectionName}" section of this resume.
+
+CRITICAL INSTRUCTIONS:
+1. SEMANTIC CONTINUITY: You MUST preserve the core facts and value of the original content.
+2. If the user provides a "USER INSTRUCTION", you MUST prioritize it (e.g., "add more detail", "focus on leadership", "add more bullets").
+3. When asked to "add more bullets" or "provide more info", use the provided Brag Sheet (if any) to find REAL additional facts. DO NOT invent fake experiences.
+4. Output ONLY valid JSON in the exact following format:
 {
   "${sectionName}": <updated data>
 }
-CRITICAL: The <updated data> MUST strictly match the data type and exact schema/structure of the original data. For example, if the original data is an array of objects, output an array of objects. If it's an object with "technical" and "soft" arrays, output exactly that structure.
+5. The <updated data> MUST strictly match the exact schema and structure of the original data.
+6. NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons.
 No explanation.`;
 
-  const userPrompt = `Current section data: ${JSON.stringify(currentSectionData)}`;
+  const userPrompt = `Current section data: ${JSON.stringify(currentSectionData)}
+
+${bragSheetText ? `Candidate's Raw Background (Brag Sheet):
+${bragSheetText}` : ""}
+
+Context: ${context.targetRole || 'general role'} at ${context.targetCompanyType || 'general'} company.
+
+${customInstruction ? `USER INSTRUCTION (PRIORITY):
+${customInstruction}` : "Improve this section for better impact and clarity while maintaining all facts."}`;
+
   let result = await callGemini(systemPrompt, userPrompt);
-  
+
   if (result && result[sectionName] !== undefined) {
     result = result[sectionName];
   } else if (result && typeof result === 'object' && !Array.isArray(result)) {
@@ -219,7 +226,7 @@ No explanation.`;
     if (result.skills && !result.technical && !result.soft) {
       result = result.skills;
     }
-    
+
     // If AI returned a flat array instead of categorized object
     if (Array.isArray(result)) {
       result = { technical: result, soft: currentSectionData?.soft || [] };
@@ -228,14 +235,14 @@ No explanation.`;
     // Normalize strings to arrays if AI returned comma-separated strings
     if (typeof result.technical === 'string') result.technical = result.technical.split(',').map(s => s.trim());
     if (typeof result.soft === 'string') result.soft = result.soft.split(',').map(s => s.trim());
-    
+
     // Ensure final output has arrays; if not, fallback to original data to prevent deletion
     result = {
       technical: Array.isArray(result.technical) && result.technical.length > 0 ? result.technical : currentSectionData?.technical || [],
       soft: Array.isArray(result.soft) && result.soft.length > 0 ? result.soft : currentSectionData?.soft || []
     };
   }
-  
+
   return result;
 }
 
@@ -251,12 +258,12 @@ No explanation.`;
 
   const userPrompt = `Current item data: ${JSON.stringify(currentItemData)}`;
   const result = await callGemini(systemPrompt, userPrompt);
-  
+
   // Ensure the id remains unchanged to prevent React key issues
   if (result && typeof result === 'object' && currentItemData.id) {
     result.id = currentItemData.id;
   }
-  
+
   return result;
 }
 
@@ -395,35 +402,43 @@ ${resumeText}`;
 
 export async function rewriteResumeBullet(originalBullet, targetContext = {}) {
   const systemPrompt = `You are an expert resume writer.
-Rewrite one resume bullet for stronger ATS match and recruiter impact.
-Use the source document as factual background when it is provided.
-Return ONLY valid JSON matching:
+Your task is to rewrite one resume bullet point.
+
+CRITICAL INSTRUCTIONS:
+1. SEMANTIC CONTINUITY: You MUST preserve the core meaning, factual content, and value of the "Original Bullet".
+2. DO NOT drift into unrelated topics. The rewritten bullet must represent the SAME experience or achievement as the original, but with better wording or a specific focus.
+3. If the user provides a "USER INSTRUCTION", apply that specific change (e.g., "make it sound more leadership-focused") WITHOUT losing the underlying facts of the original bullet.
+4. DO NOT invent new metrics, tools, or responsibilities that were not in the original text or context.
+5. Return ONLY valid JSON matching this schema:
 {
   "rewrites": [
     {
-      "version": "string",
-      "focus": "string",
-      "whyItWorks": "string"
+      "version": "The full rewritten bullet point text. This MUST be the actual content.",
+      "focus": "A 2-3 word short title/label for this variation.",
+      "whyItWorks": "A brief explanation of the improvement."
     }
   ]
 }
 
 Rules:
 1. Provide exactly 3 rewrites.
-2. Keep each rewrite to one bullet line.
-3. Do not invent tools, metrics, or responsibilities not supported by the original bullet and surrounding resume context.
-4. Make each rewrite distinct in emphasis.`;
+2. Each 'version' must be a single, complete bullet line.
+3. CONCISENESS: Keep rewrites sharp and short. Avoid filler words and aim for high impact in few words.
+4. NEVER swap the 'version' and 'focus' fields.
+5. Use strong action verbs.`;
 
   const userPrompt = `Target role: ${targetContext.targetRole || "Not provided"}
 Target job description or notes: ${targetContext.jobDescription || "Not provided"}
-Review tone: ${targetContext.reviewTone || "ATS strict"}
 
 Original bullet:
 ${originalBullet}
 
 Relevant resume context:
 ${targetContext.resumeText || "Not provided"}
-${targetContext.sourceDocumentText ? `\n\nRelevant source document context:\n${targetContext.sourceDocumentText}` : ""}`;
+${targetContext.sourceDocumentText ? `\nRelevant source document context:\n${targetContext.sourceDocumentText}` : ""}
+
+${targetContext.customInstruction ? `USER INSTRUCTION (PRIORITY):
+${targetContext.customInstruction}` : "Improve this bullet for maximum impact and ATS compatibility."}`;
 
   const result = await callGemini(systemPrompt, userPrompt);
   const rawRewrites = normalizeBulletRewrites(result);
@@ -441,11 +456,12 @@ ${targetContext.sourceDocumentText ? `\n\nRelevant source document context:\n${t
 
         if (!item || typeof item !== "object") return null;
 
-        return sanitizeRewriteOption({
-          version: item.version || item.rewrite || item.text || "",
-          focus: item.focus || item.angle || item.theme || "Rewrite",
-          whyItWorks: item.whyItWorks || item.reason || item.rationale || "",
-        });
+        // More robust mapping to handle AI variations in keys
+        const version = item.version || item.content || item.bullet || item.rewrite || item.text || "";
+        const focus = item.focus || item.label || item.title || item.angle || item.theme || "Rewrite";
+        const whyItWorks = item.whyItWorks || item.reason || item.rationale || item.explanation || "";
+
+        return sanitizeRewriteOption({ version, focus, whyItWorks });
       })
       .filter((item) => item && item.version),
   };
