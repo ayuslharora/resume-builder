@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Wand2 } from 'lucide-react';
 
 let _activeRewriteFn = null;
+// eslint-disable-next-line react-refresh/only-export-components
 export function triggerActiveRewrite() { _activeRewriteFn?.(); }
 
 export default function InlineEdit({

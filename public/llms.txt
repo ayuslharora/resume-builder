@@ -5,6 +5,9 @@ ResuMe helps job seekers build ATS-friendly resumes, tailor content to a target 
 
 ## Main sections
 - [Homepage](https://resume.ayuslh.in/): Product overview, audience fit, ATS methodology, differentiators, limitations, and FAQ.
+- [Templates](https://resume.ayuslh.in/templates): Browse available resume templates including Classic, Modern, Minimal, and Creative layouts.
+- [ATS Grader Info](https://resume.ayuslh.in/grader-info): How the ATS grading algorithm works, scoring methodology, and what each category measures.
+- [Pricing](https://resume.ayuslh.in/pricing): Free plan details and what features are included at no cost.
 - [Log In](https://resume.ayuslh.in/login): Account access for returning users.
 - [Sign Up](https://resume.ayuslh.in/signup): Account creation for new users.
 

@@ -99,7 +99,7 @@ export function useFirestore() {
       await updateDoc(viewRef, {
         lastViewedAt: serverTimestamp(),
       });
-    } catch (err) {
+    } catch {
       await setDoc(viewRef, {
         resumeId,
         ownerId,

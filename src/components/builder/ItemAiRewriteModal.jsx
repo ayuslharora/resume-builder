@@ -8,7 +8,7 @@ const SECTION_LABELS = {
   education: "Education Entry",
 };
 
-export default function ItemAiRewriteModal({ sectionName, itemIndex, currentItemData, context, bragSheetText, onClose, onGenerated }) {
+export default function ItemAiRewriteModal({ sectionName, currentItemData, context, bragSheetText, onClose, onGenerated }) {
   const [instruction, setInstruction] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);

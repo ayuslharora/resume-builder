@@ -22,8 +22,8 @@ const atsBreakdownLabels = [
 export default function EditStep() {
   const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore, undo, redo, canUndo, canRedo } = useResume();
   const [activeSection, setActiveSection] = useState("personalInfo");
-  const [isRegenerating, setIsRegenerating] = useState(false);
-  const [isRegeneratingItem, setIsRegeneratingItem] = useState(null);
+  const [isRegenerating] = useState(false);
+  const [isRegeneratingItem] = useState(null);
   const [pendingAIChange, setPendingAIChange] = useState(null);
   const [previewScale, setPreviewScale] = useState(1);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
@@ -283,7 +283,7 @@ export default function EditStep() {
     });
   };
 
-  const handleAtsRescan = async () => {
+  async function handleAtsRescan() {
     setIsAtsPanelOpen(true);
     setAtsError(null);
 
@@ -322,7 +322,7 @@ export default function EditStep() {
     } finally {
       setIsScanningAts(false);
     }
-  };
+  }
 
   const atsCardStyle = { background: "var(--surface)", border: "1px solid var(--border)" };
 
@@ -380,6 +380,7 @@ export default function EditStep() {
 
       saveToFirestore({ resumeData: updatedResumeData });
     } catch {
+      // swallow errors from fit-me operation
     } finally {
       setIsFittingMe(false);
     }

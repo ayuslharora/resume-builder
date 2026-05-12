@@ -26,7 +26,6 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
   const accentText = "text-[#D32F2F]";
   const accentBg = "bg-[#D32F2F]";
   const darkText = "text-[#121212]";
-  const borderDark = "border-[#121212]";
   const textMuted = "text-[#555555]";
 
   return (

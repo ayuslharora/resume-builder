@@ -10,9 +10,25 @@ export default defineConfig([
     '**/dist/**',
     '**/.worktrees/**',
     'design-reference/**',
+    '.vercel/**',
   ]),
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['api/**/*.{js,jsx}'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: { ...globals.node },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+  {
+    files: ['src/**/*.{js,jsx}'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,

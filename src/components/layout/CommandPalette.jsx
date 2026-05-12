@@ -34,6 +34,7 @@ export function CommandPalette({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery("");
       setSelectedIdx(0);
       return;
@@ -60,6 +61,7 @@ export function CommandPalette({ isOpen, onClose }) {
       )
     : allItems;
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setSelectedIdx(0); }, [query]);
 
   const go = useCallback(

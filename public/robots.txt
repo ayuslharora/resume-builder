@@ -1,4 +1,23 @@
 User-agent: *
 Allow: /
+Content-Signal: search=yes,ai-input=yes,ai-train=no
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: AnthropicBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Disallow: /
 
 Sitemap: https://resume.ayuslh.in/sitemap.xml

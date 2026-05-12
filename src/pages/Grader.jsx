@@ -95,6 +95,7 @@ export default function Grader() {
 
     const entry = getGraderHistory().find((item) => item.id === reportId);
     if (!entry?.report) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("That saved grader report is not available on this device.");
       return;
     }
