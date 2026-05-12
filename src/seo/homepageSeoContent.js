@@ -262,6 +262,19 @@ export function buildHomepageStaticHtml() {
     ),
   ].join('')
 
+  const mobileNavMarkup = [
+    { label: 'Product', href: '/', current: true },
+    { label: 'Templates', href: '/templates' },
+    { label: 'Grader', href: '/grader-info' },
+    { label: 'Pricing', href: '/pricing' },
+  ].map(
+    (item) => `
+      <a href="${item.href}" class="landing-mobile-nav-link"${item.current ? ' aria-current="page"' : ''}>
+        ${item.label}
+      </a>
+    `,
+  ).join('')
+
   return `
     <div id="homepage-static-shell" class="app-design min-h-screen bg-[var(--bg)]">
       <header class="sticky top-0 z-30 border-b border-[var(--border)]" style="background:color-mix(in oklch, var(--bg) 78%, transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)">
@@ -289,6 +302,15 @@ export function buildHomepageStaticHtml() {
           </div>
         </div>
       </header>
+      <details class="landing-mobile-nav md:hidden">
+        <summary class="landing-mobile-nav-trigger" aria-label="Open navigation">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg>
+        </summary>
+        <div class="landing-mobile-nav-backdrop" aria-hidden="true"></div>
+        <nav class="landing-mobile-nav-panel" aria-label="Landing sections">
+          ${mobileNavMarkup}
+        </nav>
+      </details>
 
       <main>
         <section id="product" class="container" style="padding-top:88px;padding-bottom:96px">
