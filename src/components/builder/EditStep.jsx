@@ -370,6 +370,8 @@ export default function EditStep() {
         changes[sectionName][itemId][bulletIdx] = newText;
       });
 
+      // Build the full updated resumeData so we can persist everything in one save.
+      const updatedResumeData = { ...resumeData };
       Object.entries(changes).forEach(([sectionName, itemChanges]) => {
         const updatedSection = (resumeData[sectionName] || []).map((item) => {
           if (!itemChanges[item.id]) return item;
@@ -379,8 +381,11 @@ export default function EditStep() {
           });
           return { ...item, bullets: newBullets };
         });
+        updatedResumeData[sectionName] = updatedSection;
         updateSection(sectionName, updatedSection);
       });
+
+      saveToFirestore({ resumeData: updatedResumeData });
     } catch {
     } finally {
       setIsFittingMe(false);
