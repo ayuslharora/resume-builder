@@ -184,7 +184,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                       </h3>
                       {(isEditing || proj.techStack?.length > 0) && (
                         <div className={`text-[11px] font-black ${accentText} uppercase tracking-widest mb-3`}>
-                          <InlineEdit value={proj.techStack?.join(" // ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split('//').map(s => s.trim()) } : p))} placeholder="Tech Stack" />
+                          <InlineEdit value={(Array.isArray(proj.techStack) ? proj.techStack : []).join(" // ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split('//').map(s => s.trim()) } : p))} placeholder="Tech Stack" />
                         </div>
                       )}
                       <ul className={`list-none space-y-2 text-[13px] font-semibold ${textMuted} uppercase leading-[1.6] tracking-wide`}>

@@ -230,7 +230,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                       )}
                     </div>
                     <div className="text-xs text-blue-300 font-semibold mb-3 tracking-wide">
-                      <InlineEdit value={proj.techStack?.join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' • ') } : p))} />
+                      <InlineEdit value={(Array.isArray(proj.techStack) ? proj.techStack : []).join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' • ') } : p))} />
                     </div>
                     <ul className="list-disc list-outside ml-5 text-sm space-y-2 text-slate-300 marker:text-slate-600">
                       {(proj.bullets || []).map((bullet, bulletIdx) => (

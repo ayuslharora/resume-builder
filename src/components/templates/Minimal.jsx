@@ -260,7 +260,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                     </h3>
                   </div>
                   <div className="text-xs text-gray-500 mb-2">
-                    <InlineEdit value={proj.techStack?.join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' • ') } : p))} />
+                    <InlineEdit value={(Array.isArray(proj.techStack) ? proj.techStack : []).join(" • ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split(' • ') } : p))} />
                   </div>
                   <ul className="list-disc list-outside ml-4 text-sm space-y-1">
                     {(proj.bullets || []).map((bullet, bulletIdx) => (
