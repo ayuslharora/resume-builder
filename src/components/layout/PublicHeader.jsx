@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Sun, Moon } from "lucide-react";
 
@@ -44,9 +45,63 @@ export default function PublicHeader({ isDark, toggleTheme }) {
     return () => { document.body.style.overflow = ""; };
   }, [mobileNavOpen]);
 
+  const overlay = mobileNavOpen && createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site navigation"
+      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#0c0c0e", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif" }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 64, flexShrink: 0, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <Link to="/" className="flex items-center gap-2" style={{ color: "#fafafa" }} onClick={() => setMobileNavOpen(false)}>
+          <BrandLogo />
+        </Link>
+        <button
+          onClick={() => setMobileNavOpen(false)}
+          aria-label="Close navigation"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, color: "#71717a", cursor: "pointer", background: "transparent", border: "none" }}
+        >
+          <X size={22} color="#71717a" />
+        </button>
+      </div>
+
+      <nav
+        aria-label="Site navigation"
+        style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}
+      >
+        {NAV_ITEMS.map(({ label, to, accent }) => {
+          const current = !accent && pathname === to;
+          return (
+            <Link
+              key={to}
+              to={to}
+              aria-current={current ? "page" : undefined}
+              onClick={() => setMobileNavOpen(false)}
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "center",
+                fontSize: "clamp(32px,9.5vw,44px)",
+                fontWeight: current || accent ? 700 : 600,
+                color: current ? "#fafafa" : accent ? "#3b82f6" : "#52525b",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.25,
+                padding: "7px 0",
+                textDecoration: "none",
+              }}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>,
+    document.body
+  );
+
   return (
     <>
-      <header className="border-b border-[var(--border)]" style={HEADER_STYLE}>
+      <header className="border-b border-[var(--border)]" style={{ ...HEADER_STYLE, ...(mobileNavOpen ? { visibility: "hidden" } : {}) }}>
         <div className="container" style={{ display: "flex", alignItems: "center", height: 64, gap: 24 }}>
           <Link to="/" className="flex items-center gap-2">
             <BrandLogo />
@@ -85,60 +140,12 @@ export default function PublicHeader({ isDark, toggleTheme }) {
         className="landing-mobile-nav-trigger md:hidden"
         onClick={() => setMobileNavOpen(true)}
         aria-label="Open navigation"
+        style={mobileNavOpen ? { visibility: "hidden" } : {}}
       >
         <Menu size={22} strokeWidth={2.2} aria-hidden="true" />
       </button>
 
-      {mobileNavOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site navigation"
-          style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0c0c0e", display: "flex", flexDirection: "column", overflow: "hidden" }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 64, flexShrink: 0, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-            <Link to="/" className="flex items-center gap-2" style={{ color: "#fafafa" }} onClick={() => setMobileNavOpen(false)}>
-              <BrandLogo />
-            </Link>
-            <button
-              onClick={() => setMobileNavOpen(false)}
-              aria-label="Close navigation"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, color: "#71717a", cursor: "pointer", background: "transparent", border: "none" }}
-            >
-              <X size={22} />
-            </button>
-          </div>
-
-          <nav
-            aria-label="Site navigation"
-            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}
-          >
-            {NAV_ITEMS.map(({ label, to, accent }) => {
-              const current = !accent && pathname === to;
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  aria-current={current ? "page" : undefined}
-                  onClick={() => setMobileNavOpen(false)}
-                  style={{
-                    display: "block",
-                    fontSize: "clamp(32px,9.5vw,44px)",
-                    fontWeight: current || accent ? 700 : 600,
-                    color: current ? "#fafafa" : accent ? "#3b82f6" : "#52525b",
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1.25,
-                    padding: "7px 0",
-                    textDecoration: "none",
-                  }}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
+      {overlay}
     </>
   );
 }
