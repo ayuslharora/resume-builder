@@ -1928,3 +1928,10 @@ body.builder-step-4-lock-scroll {
     print-color-adjust: exact !important;
   }
 }
+
+/* Show placeholder text in empty contentEditable fields (InlineEdit in edit mode) */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(156, 163, 175, 0.55);
+  pointer-events: none;
+}

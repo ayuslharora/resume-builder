@@ -45,13 +45,13 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
 
   return (
     <div
-      className="bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex"
+      className="bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex items-stretch"
       style={RESUME_PAGE_MIN_HEIGHT_STYLE}
     >
       {/* Left Sidebar */}
-      <div 
-        className="w-[30%] text-white p-8 relative transition-colors duration-300"
-        style={{ backgroundColor: resumeData.theme?.sidebarColor || '#2B3A5A' }}
+      <div
+        className="w-[30%] text-white p-8 relative transition-colors duration-300 self-stretch"
+        style={{ backgroundColor: resumeData.theme?.sidebarColor || '#2B3A5A', minHeight: '100%' }}
       >
         {isEditing && (
           <div className="absolute top-4 left-4 z-50" ref={pickerRef}>

@@ -2,6 +2,7 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
+import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
 export default function Minimal({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
   if (!resumeData) return null;
@@ -20,7 +21,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
   const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
 
   return (
-    <div className="bg-white p-8 md:p-12 max-w-[850px] min-h-[1100px] mx-auto text-gray-900 font-sans">
+    <div className="bg-white p-8 md:p-12 max-w-[850px] mx-auto text-gray-900 font-sans" style={RESUME_PAGE_MIN_HEIGHT_STYLE}>
       <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold uppercase tracking-wide">

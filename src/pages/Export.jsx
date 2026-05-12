@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check } from "lucide-react";
+import { templates } from "../components/templates";
+import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
 
@@ -22,9 +23,22 @@ export default function Export() {
   const [shareToken, setShareToken] = useState(null);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
+  const [resumeHeight, setResumeHeight] = useState(0);
   const { getResume, updateResume } = useFirestore();
   const resumeRef = useRef(null);
   const navigate = useNavigate();
+
+  // Callback ref: attaches ResizeObserver the moment the shadow div mounts,
+  // even when templateId loads asynchronously after initial render.
+  const shadowCallbackRef = (el) => {
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setResumeHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(el);
+  };
 
   useEffect(() => {
     // Case 1: brand-new resume that was never saved (id="new")
@@ -222,6 +236,19 @@ export default function Export() {
       {/* ── Resume preview ── */}
       <main className="scroll flex-1 overflow-y-auto px-4 py-8 print-resume-wrapper sm:px-6">
         <div className="mx-auto w-full max-w-[1120px]">
+
+          {resumeHeight > 1122 && (
+            <div className="print-hide flex justify-center mb-6">
+              <div className="flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-sm text-amber-300 shadow-sm">
+                <AlertTriangle size={14} className="shrink-0" />
+                <span>
+                  Your resume needs some adjustments — it will download as{" "}
+                  <span className="font-semibold">2 pages</span>. Go back to the editor and shorten content or use{" "}
+                  <span className="font-semibold">Fit Me</span>.
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex justify-center overflow-x-auto print-resume-wrapper">
             <div
               ref={resumeRef}
@@ -238,6 +265,30 @@ export default function Export() {
           </div>
         </div>
       </main>
+
+      {/* Hidden shadow render at 794px (PDF width) with isEditing=false for accurate height */}
+      {templates[templateId] && (() => {
+        const { component: TemplateComponent } = templates[templateId];
+        return (
+          <div
+            ref={shadowCallbackRef}
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: '-9999px',
+              width: '794px',
+              visibility: 'hidden',
+              pointerEvents: 'none',
+              zIndex: -1,
+            }}
+          >
+            <Suspense fallback={null}>
+              <TemplateComponent resumeData={resumeData} isEditing={false} />
+            </Suspense>
+          </div>
+        );
+      })()}
     </div>
   );
 }

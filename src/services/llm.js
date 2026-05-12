@@ -76,12 +76,16 @@ You have been given a Job Description (JD). You MUST:
 - Omit skills and technologies that are not relevant to this specific role, even if the candidate has them.` : `KEYWORD SELECTION:
 Focus on skills and keywords that directly support the target role. Do not include every skill from the brag sheet — be selective and relevant.`}
 
-${isOnePage ? `ONE-PAGE GOAL:
-The candidate wants a single-page resume. Be ruthlessly concise — every word must earn its place.
-- Keep the summary tight and punchy.
-- Only include skills, projects, and experience entries that are directly relevant to this role. Omit anything that does not strengthen the application.
-- Prefer fewer, stronger bullets over many weak ones.
-- When two items are roughly equivalent in relevance, drop the weaker one.` : `TWO-PAGE GOAL:
+${isOnePage ? `ONE-PAGE HARD LIMIT — this is the most critical constraint:
+The output MUST fit on a single A4 page. Violating this is worse than omitting content.
+- Summary: maximum 50 words. 2-3 punchy sentences only.
+- Every bullet: maximum 20 words. One clause. Strong action verb. No filler.
+- Experience: maximum 4 entries. Maximum 4 bullets each — prefer 3.
+- Projects: maximum 3 entries. Maximum 3 bullets each — prefer 2.
+- Skills: maximum 8 technical skills, 4 soft skills. Only include skills relevant to the role.
+- Omit achievements, languages, and extracurriculars entirely unless they are directly critical to the role.
+- When two items are equivalent in relevance, always drop the weaker one.
+- If in doubt between more content and fitting on one page: always choose fitting on one page.` : `TWO-PAGE GOAL:
 The candidate is comfortable with two pages. Be thorough but still concise and focused on the target role.`}`;
 
   const userPrompt = `Here is the candidate's raw achievements document (Brag Sheet):

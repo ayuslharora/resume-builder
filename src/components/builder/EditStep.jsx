@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
-import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { templates } from "../templates";
+import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, Scissors } from "lucide-react";
 import AiRewriteModal from "./AiRewriteModal";
 import SectionAiRewriteModal from "./SectionAiRewriteModal";
 import RichTextToolbar from "./RichTextToolbar";
@@ -31,9 +32,12 @@ export default function EditStep() {
   const [isScanningAts, setIsScanningAts] = useState(false);
   const [atsResult, setAtsResult] = useState(null);
   const [atsError, setAtsError] = useState(null);
+  const [resumeHeight, setResumeHeight] = useState(0);
+  const [isFittingMe, setIsFittingMe] = useState(false);
   const atsScanCacheRef = useRef(new Map());
   const atsScanRequestIdRef = useRef(0);
   const previewContainerRef = useRef(null);
+  const resumeDocRef = useRef(null);
   const navigate = useNavigate();
 
   const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
@@ -67,6 +71,17 @@ export default function EditStep() {
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Callback ref: attaches ResizeObserver the moment the shadow div mounts.
+  const shadowCallbackRef = (el) => {
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setResumeHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(el);
+  };
 
   useEffect(() => {
     if (isAtsPanelOpen) {
@@ -318,6 +333,60 @@ export default function EditStep() {
 
   const atsCardStyle = { background: "var(--surface)", border: "1px solid var(--border)" };
 
+  const overflowPx = resumeHeight > 0 ? Math.round(resumeHeight - 1122) : 0;
+
+  const handleFitMe = async () => {
+    setIsFittingMe(true);
+    try {
+      const allBullets = [];
+      ["experience", "projects"].forEach((sectionName) => {
+        const section = resumeData[sectionName] || [];
+        section.forEach((item) => {
+          (item.bullets || []).forEach((bullet, bulletIdx) => {
+            const wordCount = (bullet || "").replace(/<[^>]*>?/gm, "").trim().split(/\s+/).filter(Boolean).length;
+            allBullets.push({ sectionName, itemId: item.id, bulletIdx, bullet, wordCount });
+          });
+        });
+      });
+
+      allBullets.sort((a, b) => b.wordCount - a.wordCount);
+      const N = Math.min(Math.ceil(overflowPx / 28), 4);
+      const topBullets = allBullets.slice(0, N);
+
+      const { rewriteResumeBullet } = await import("../../services/llm");
+      const context = { targetRole: interviewAnswers.targetRole, jobDescription: interviewAnswers.jobDescription || "" };
+
+      const rewrites = await Promise.all(
+        topBullets.map(({ bullet, sectionName, itemId, bulletIdx }) =>
+          rewriteResumeBullet(bullet, { ...context, customInstruction: "Shorten to under 15 words while keeping the core achievement. Cut filler words. Keep the action verb and the key metric." })
+            .then((result) => ({ sectionName, itemId, bulletIdx, newText: result?.rewrites?.[0]?.version || bullet }))
+        )
+      );
+
+      const changes = {};
+      rewrites.forEach(({ sectionName, itemId, bulletIdx, newText }) => {
+        if (!changes[sectionName]) changes[sectionName] = {};
+        if (!changes[sectionName][itemId]) changes[sectionName][itemId] = {};
+        changes[sectionName][itemId][bulletIdx] = newText;
+      });
+
+      Object.entries(changes).forEach(([sectionName, itemChanges]) => {
+        const updatedSection = (resumeData[sectionName] || []).map((item) => {
+          if (!itemChanges[item.id]) return item;
+          const newBullets = [...(item.bullets || [])];
+          Object.entries(itemChanges[item.id]).forEach(([idx, text]) => {
+            newBullets[Number(idx)] = text;
+          });
+          return { ...item, bullets: newBullets };
+        });
+        updateSection(sectionName, updatedSection);
+      });
+    } catch {
+    } finally {
+      setIsFittingMe(false);
+    }
+  };
+
   return (
     <div className="app-design flex flex-col lg:flex-row gap-4 lg:gap-6 w-full min-h-0 lg:h-[calc(100dvh-190px)] justify-center">
       {isAtsPanelOpen && (
@@ -494,6 +563,37 @@ export default function EditStep() {
                 <ChevronRight size={16} />
               </button>
             </div>
+
+            {resumeHeight > 200 && (
+              <div className="hidden sm:flex items-center gap-2 ml-1">
+                <span
+                  className="text-[10px] font-mono px-2 py-1 rounded-md"
+                  style={
+                    overflowPx > 30
+                      ? { color: "rgb(239,68,68)", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }
+                      : overflowPx > 0
+                      ? { color: "rgb(217,119,6)", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.25)" }
+                      : { color: "var(--accent)", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }
+                  }
+                >
+                  {overflowPx > 0
+                    ? `${overflowPx > 30 ? "✕" : "⚠"} ${overflowPx}px over`
+                    : "✓ fits"}
+                </span>
+
+                {overflowPx >= 10 && (
+                  <button
+                    onClick={handleFitMe}
+                    disabled={isFittingMe}
+                    className="btn btn-ghost btn-sm flex items-center gap-1 text-[11px] font-semibold"
+                    title="Auto-shorten longest bullets to fit one page"
+                  >
+                    {isFittingMe ? <Loader2 size={13} className="animate-spin" /> : <Scissors size={13} />}
+                    Fit Me
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="order-last w-full sm:order-none sm:w-auto">
@@ -565,9 +665,10 @@ export default function EditStep() {
           {/* Ambient Glow Behind Document */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] blur-[120px] rounded-full pointer-events-none" style={{ background: "var(--accent-soft)" }}></div>
 
-          <div 
-            className="bg-white relative z-10 transition-transform duration-200" 
-            style={{ 
+          <div
+            ref={resumeDocRef}
+            className="bg-white relative z-10 transition-transform duration-200"
+            style={{
               width: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
               minWidth: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
               transform: isMobilePreview ? `scale(${previewScale})` : undefined,
@@ -577,6 +678,46 @@ export default function EditStep() {
               borderRadius: "4px"
             }}
           >
+            {resumeHeight > 200 && resumeHeight > 980 && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  zIndex: 50,
+                  overflow: "visible",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 1050,
+                    left: 0,
+                    right: 0,
+                    height: 72,
+                    background: "rgba(239,68,68,0.07)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 1122,
+                    left: 0,
+                    right: 0,
+                    borderTop: "2px dashed rgba(239,68,68,0.65)",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    paddingRight: 6,
+                    paddingTop: 2,
+                  }}
+                >
+                  <span style={{ fontSize: 9, color: "rgba(239,68,68,0.75)", fontFamily: "monospace", lineHeight: 1 }}>
+                    ↑ page 1 end
+                  </span>
+                </div>
+              </div>
+            )}
             <ResumePreview
               resumeData={resumeData}
               templateId={templateId}
@@ -622,6 +763,31 @@ export default function EditStep() {
 
         </div>
       </div>
+
+      {/* Hidden shadow render — isEditing=false at natural 794px, no zoom.
+          Matches what Puppeteer sees: empty sections hidden, real font layout. */}
+      {templates[templateId] && (() => {
+        const { component: TemplateComponent } = templates[templateId];
+        return (
+          <div
+            ref={shadowCallbackRef}
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: '-9999px',
+              width: '794px',
+              visibility: 'hidden',
+              pointerEvents: 'none',
+              zIndex: -1,
+            }}
+          >
+            <Suspense fallback={null}>
+              <TemplateComponent resumeData={resumeData} isEditing={false} />
+            </Suspense>
+          </div>
+        );
+      })()}
     </div>
   );
 }

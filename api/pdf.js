@@ -55,6 +55,7 @@ export default async function handler(req, res) {
     }
 
     const page = await browser.newPage();
+    await page.setViewport({ width: 794, height: 1122 });
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 20000 });
 
     const pdfBuffer = await page.pdf({

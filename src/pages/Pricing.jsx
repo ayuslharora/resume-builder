@@ -81,16 +81,16 @@ export default function Pricing() {
 
   const themeStyles = isDark
     ? {
-        "--bg": "#0a0a0b",
-        "--surface": "#18181b",
-        "--surface-2": "#27272a",
-        "--border": "#27272a",
-        "--border-strong": "#3f3f46",
-        "--text": "#ffffff",
-        "--text-2": "#a1a1aa",
-        "--muted": "#71717a",
-        "--faint": "#52525b",
-      }
+      "--bg": "#0a0a0b",
+      "--surface": "#18181b",
+      "--surface-2": "#27272a",
+      "--border": "#27272a",
+      "--border-strong": "#3f3f46",
+      "--text": "#ffffff",
+      "--text-2": "#a1a1aa",
+      "--muted": "#71717a",
+      "--faint": "#52525b",
+    }
     : {};
 
   return (
@@ -126,7 +126,7 @@ export default function Pricing() {
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            
+
             <div className="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block" />
 
             <Link to="/login" className="btn btn-outline btn-sm">Log in</Link>
@@ -139,12 +139,12 @@ export default function Pricing() {
         <section className="container">
           <div className="text-center mb-16">
             <h1 className="h-display" style={{ fontSize: "clamp(64px, 8vw, 104px)", letterSpacing: "-0.055em", margin: 0, lineHeight: 0.94 }}>
-              Fu*k pricing. <br className="hidden sm:block" />
+              F*ck pricing. <br className="hidden sm:block" />
               <span className="serif italic font-normal text-[var(--accent)]">This tool is on us.</span>
             </h1>
-            
+
             <p style={{ color: "var(--text-2)", fontSize: "clamp(16px, 2vw, 20px)", lineHeight: 1.6, marginTop: 32, maxWidth: 680, marginInline: "auto" }}>
-              Most resume builders exist to suck your pockets dry. They let you build a full draft, and right when you click download—bam—they hit you with a paywall, wasting hours of your time. 
+              Most resume builders exist to suck your pockets dry. They let you build a full draft, and right when you click download—bam—they hit you with a paywall, wasting hours of your time.
             </p>
           </div>
 
@@ -203,10 +203,10 @@ export default function Pricing() {
           </div>
 
           <div className="max-w-3xl mx-auto text-center mt-24">
-             <h3 className="h-display text-3xl mb-6">Why we do it.</h3>
-             <p className="text-[18px] text-[var(--text-2)] leading-relaxed">
-               Job hunting is hard enough. You shouldn't have to pay to prove your worth. We don't use cheap tricks because we respect your time and ambition. We built this tool to level the playing field. No paywalls, no subscriptions, just pure value.
-             </p>
+            <h3 className="h-display text-3xl mb-6">Why we do it.</h3>
+            <p className="text-[18px] text-[var(--text-2)] leading-relaxed">
+              Job hunting is hard enough. You shouldn't have to pay to prove your worth. We don't use cheap tricks because we respect your time and ambition. We built this tool to level the playing field. No paywalls, no subscriptions, just pure value.
+            </p>
           </div>
         </section>
       </main>
