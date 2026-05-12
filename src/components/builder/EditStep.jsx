@@ -6,6 +6,7 @@ import { templates } from "../templates";
 import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, Scissors } from "lucide-react";
 import AiRewriteModal from "./AiRewriteModal";
 import SectionAiRewriteModal from "./SectionAiRewriteModal";
+import ItemAiRewriteModal from "./ItemAiRewriteModal";
 import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
 import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
@@ -28,6 +29,7 @@ export default function EditStep() {
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [rewriteBulletData, setRewriteBulletData] = useState(null);
   const [sectionRewriteData, setSectionRewriteData] = useState(null);
+  const [rewriteItemData, setRewriteItemData] = useState(null);
   const [isAtsPanelOpen, setIsAtsPanelOpen] = useState(false);
   const [isScanningAts, setIsScanningAts] = useState(false);
   const [atsResult, setAtsResult] = useState(null);
@@ -175,34 +177,25 @@ export default function EditStep() {
     setSectionRewriteData(null);
   };
 
-  const handleRegenerateItem = async (sectionName, itemIndex) => {
-    setIsRegeneratingItem(`${sectionName}-${itemIndex}`);
-    try {
-      const { regenerateItem } = await import("../../services/llm");
-      const currentSectionArray = resumeData?.[sectionName] || [];
-      const itemToRegenerate = currentSectionArray[itemIndex];
-      
-      if (!itemToRegenerate) throw new Error("Item not found");
+  // Opens the instruction modal — actual rewrite happens in handleItemGenerated.
+  const handleRegenerateItem = (sectionName, itemIndex) => {
+    setRewriteItemData({ sectionName, itemIndex });
+  };
 
-      const newData = await regenerateItem(sectionName, itemToRegenerate, interviewAnswers, bragSheetText);
-      
-      const updatedSectionArray = [...currentSectionArray];
-      updatedSectionArray[itemIndex] = {
-        ...newData,
-        id: itemToRegenerate.id // preserve the original ID if it existed
-      };
-
-      updateSection(sectionName, updatedSectionArray);
-      setPendingAIChange({
-        sectionName,
-        originalData: currentSectionArray,
-        newData: updatedSectionArray
-      });
-    } catch (err) {
-      alert("Failed to regenerate item: " + err.message);
-    } finally {
-      setIsRegeneratingItem(null);
-    }
+  const handleItemGenerated = async (newData) => {
+    if (!rewriteItemData) return;
+    const { sectionName, itemIndex } = rewriteItemData;
+    const currentSectionArray = resumeData?.[sectionName] || [];
+    const originalItem = currentSectionArray[itemIndex];
+    const updatedSectionArray = [...currentSectionArray];
+    updatedSectionArray[itemIndex] = { ...newData, id: originalItem?.id };
+    updateSection(sectionName, updatedSectionArray);
+    setPendingAIChange({
+      sectionName,
+      originalData: currentSectionArray,
+      newData: updatedSectionArray,
+    });
+    setRewriteItemData(null);
   };
 
   const handleRewriteBulletRequest = (sectionName, itemId, bulletIdx, currentText) => {
@@ -763,6 +756,18 @@ export default function EditStep() {
               bragSheetText={bragSheetText}
               onClose={() => setSectionRewriteData(null)}
               onGenerated={handleSectionGenerated}
+            />
+          )}
+
+          {rewriteItemData && (
+            <ItemAiRewriteModal
+              sectionName={rewriteItemData.sectionName}
+              itemIndex={rewriteItemData.itemIndex}
+              currentItemData={(resumeData[rewriteItemData.sectionName] || [])[rewriteItemData.itemIndex]}
+              context={interviewAnswers}
+              bragSheetText={bragSheetText}
+              onClose={() => setRewriteItemData(null)}
+              onGenerated={handleItemGenerated}
             />
           )}
 

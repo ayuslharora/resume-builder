@@ -208,11 +208,11 @@ ${customInstruction}` : "Improve this section for better impact and clarity whil
   return result;
 }
 
-export async function regenerateItem(sectionName, currentItemData, context, bragSheetText = "") {
+export async function regenerateItem(sectionName, currentItemData, context, bragSheetText = "", customInstruction = "") {
   const systemPrompt = `You are an expert resume writer.
 Rewrite ONLY this single item from the "${sectionName}" section of the candidate's resume.
 Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
-${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}
+${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}${customInstruction ? `\nUSER INSTRUCTION: ${customInstruction}\n` : ''}
 CRITICAL RULES:
 - NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
 - Do NOT invent new experiences. Improve wording, impact, and formatting only.
