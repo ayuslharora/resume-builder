@@ -4,18 +4,21 @@ async function collectPageCSS() {
   const sheets = Array.from(document.styleSheets);
   const parts = await Promise.all(
     sheets.map(async (sheet) => {
-      if (sheet.cssRules) {
+      try {
+        // Same-origin sheets expose cssRules directly
         return Array.from(sheet.cssRules).map((r) => r.cssText).join('\n');
-      }
-      if (sheet.href) {
-        try {
-          const res = await fetch(sheet.href);
-          return await res.text();
-        } catch {
-          return '';
+      } catch {
+        // Cross-origin sheets throw DOMException — fetch the text instead
+        if (sheet.href) {
+          try {
+            const res = await fetch(sheet.href);
+            return await res.text();
+          } catch {
+            return '';
+          }
         }
+        return '';
       }
-      return '';
     })
   );
   return parts.join('\n');

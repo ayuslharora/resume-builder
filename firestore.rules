@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read and write only their own profile document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Resumes: owner has full access; shared resumes are publicly readable
+    match /resumes/{resumeId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if resource.data.isShared == true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Grader reports: any authenticated user can create; shared reports are publicly readable
+    match /graderReports/{reportId} {
+      allow create: if request.auth != null;
+      allow read: if resource.data.isShared == true;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Resume views: authenticated users can create/update their own view record; owner can read counts
+    match /resumeViews/{viewId} {
+      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.viewerId;
+      allow read: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    }
+  }
+}

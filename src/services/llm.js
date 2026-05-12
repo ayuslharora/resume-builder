@@ -149,6 +149,12 @@ CRITICAL INSTRUCTIONS:
 }
 5. The <updated data> MUST strictly match the exact schema and structure of the original data.
 6. NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons.
+7. LENGTH CONSTRAINTS — the resume must stay on ONE page:
+   - Every bullet point: maximum 20 words. One clause. No compound sentences.
+   - Summary field: maximum 50 words.
+   - Experience bullets: maximum 4 bullets per entry.
+   - Project bullets: maximum 3 bullets per entry.
+   - If a USER INSTRUCTION asks for "more bullets", add at most 1 extra bullet beyond the current count.
 No explanation.`;
 
   const userPrompt = `Current section data: ${JSON.stringify(currentSectionData)}
@@ -203,9 +209,14 @@ export async function regenerateItem(sectionName, currentItemData, context, brag
 Rewrite ONLY this single item from the "${sectionName}" section of the candidate's resume.
 Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
 ${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}
-CRITICAL RULE: NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
-Do NOT invent new experiences, but improve the wording, impact, and formatting of the existing details. Keep bullets concise and start with strong action verbs.
-Output ONLY valid JSON representing the updated item. Maintain the same schema as the input object, specifically keeping the "id" unchanged.
+CRITICAL RULES:
+- NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
+- Do NOT invent new experiences. Improve wording, impact, and formatting only.
+- LENGTH CONSTRAINTS — resume must fit on ONE page:
+  - Every bullet: maximum 20 words, one clause, strong action verb at start.
+  - Maximum 4 bullets for experience entries; maximum 3 for project entries.
+  - Do NOT add more bullets than already exist in the original item.
+Output ONLY valid JSON representing the updated item. Keep the same schema and keep "id" unchanged.
 No explanation.`;
 
   const userPrompt = `Current item data: ${JSON.stringify(currentItemData)}`;
@@ -375,7 +386,7 @@ CRITICAL INSTRUCTIONS:
 Rules:
 1. Provide exactly 3 rewrites.
 2. Each 'version' must be a single, complete bullet line.
-3. CONCISENESS: Keep rewrites sharp and short. Avoid filler words and aim for high impact in few words.
+3. CONCISENESS: Maximum 20 words per rewrite. One clause only. No compound sentences. High impact, zero filler.
 4. NEVER swap the 'version' and 'focus' fields.
 5. Use strong action verbs.`;
 
@@ -440,7 +451,13 @@ Return ONLY valid JSON matching this schema:
 Rules:
 1. Improve wording, ordering, summaries, and bullets for the target role.
 2. Preserve only supported facts from the source text.
-3. Use concise impact-focused bullets.
+3. LENGTH CONSTRAINTS — the output must fit on ONE page when printed:
+   - Summary: maximum 50 words.
+   - Every bullet: maximum 20 words, one clause, strong action verb at start.
+   - Experience bullets: maximum 4 per entry. Prefer 3.
+   - Project bullets: maximum 3 per entry. Prefer 2.
+   - Skills: keep lists tight — no more than 8 technical skills, 4 soft skills.
+   - Omit achievements, languages, extracurriculars unless they are directly relevant to the role.
 4. Ensure all IDs are unique UUID strings.
 5. Output only the JSON object.`;
 
