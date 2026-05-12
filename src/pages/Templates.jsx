@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sun, Moon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouteSeo } from "../seo/routeSeo";
 import PublicFooter from "../components/layout/PublicFooter";
-
-const LANDING_HEADER_STYLE = {
-  position: "sticky",
-  top: 0,
-  zIndex: 30,
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  background: "color-mix(in oklch, var(--bg) 78%, transparent)",
-};
+import PublicHeader from "../components/layout/PublicHeader";
 
 const TEMPLATES = [
   {
@@ -39,29 +31,6 @@ const TEMPLATES = [
     image: "/templates/creative.png",
   },
 ];
-
-function BrandLogo() {
-  return (
-    <>
-      <div
-        className="flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]"
-        style={{
-          boxShadow: "0 1px 2px rgba(15,23,42,.16)",
-        }}
-      >
-        <img
-          src="/favicon.svg"
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full"
-        />
-      </div>
-      <span className="text-[15px] font-semibold tracking-[-0.01em]">
-        Resu<span className="serif italic font-normal">Me</span>
-      </span>
-    </>
-  );
-}
 
 export default function Templates() {
   useRouteSeo({
@@ -131,35 +100,7 @@ export default function Templates() {
         color: "var(--text)",
       }}
     >
-      <header className="border-b border-[var(--border)]" style={LANDING_HEADER_STYLE}>
-        <div className="container" style={{ display: "flex", alignItems: "center", height: 64, gap: 24 }}>
-          <Link to="/" className="flex items-center gap-2">
-            <BrandLogo />
-          </Link>
-          <nav className="hidden md:flex" style={{ gap: 22, marginLeft: 32 }}>
-            <Link to="/" className="ulink text-[13.5px] text-[var(--text-2)]">Product</Link>
-            <Link to="/templates" className="ulink text-[13.5px] text-[var(--text)] font-medium">Templates</Link>
-            <Link to="/grader-info" className="ulink text-[13.5px] text-[var(--text-2)]">Grader</Link>
-            <Link to="/pricing" className="ulink text-[13.5px] text-[var(--text-2)]">Pricing</Link>
-          </nav>
-          <span className="flex-1" />
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)] transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
-            <div className="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block" />
-
-            <Link to="/login" className="btn btn-outline btn-sm">Log in</Link>
-            <Link to="/signup" className="btn btn-primary btn-sm">Get started</Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
 
       <main>
         <section className="container" style={{ paddingTop: 88, paddingBottom: 64 }}>

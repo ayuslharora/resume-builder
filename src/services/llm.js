@@ -1,6 +1,17 @@
 import { auth } from "./firebase";
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
 
+function coerceToString(val) {
+  if (typeof val === "string") return val;
+  if (!val || typeof val !== "object") return "";
+  return val.text || val.content || val.summary || val.description || val.value || "";
+}
+
+function normalizeStringArray(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map(coerceToString).filter(Boolean);
+}
+
 function normalizeBulletRewrites(payload) {
   if (Array.isArray(payload)) return payload;
   if (!payload || typeof payload !== "object") return [];
@@ -226,9 +237,14 @@ No explanation.`;
   const userPrompt = `Current item data: ${JSON.stringify(currentItemData)}`;
   const result = await callGemini(systemPrompt, userPrompt);
 
-  // Ensure the id remains unchanged to prevent React key issues
-  if (result && typeof result === 'object' && currentItemData.id) {
-    result.id = currentItemData.id;
+  if (result && typeof result === 'object') {
+    if (currentItemData.id) result.id = currentItemData.id;
+    if (Array.isArray(result.bullets)) {
+      result.bullets = result.bullets.map(coerceToString).filter(Boolean);
+    }
+    if (Array.isArray(result.achievements)) {
+      result.achievements = result.achievements.map(coerceToString).filter(Boolean);
+    }
   }
 
   return result;
@@ -350,18 +366,20 @@ ${resumeText}`;
       clarity: Number.isFinite(result?.atsBreakdown?.clarity) ? result.atsBreakdown.clarity : 0,
     },
     sectionScores: Array.isArray(result.sectionScores) ? result.sectionScores : [],
-    strengths: Array.isArray(result.strengths) ? result.strengths : [],
+    strengths: normalizeStringArray(result.strengths),
     priorityFixes: Array.isArray(result.priorityFixes) ? result.priorityFixes : [],
-    keywordGaps: Array.isArray(result.keywordGaps) ? result.keywordGaps : [],
+    keywordGaps: normalizeStringArray(result.keywordGaps),
     keywordPlacementSuggestions: Array.isArray(result.keywordPlacementSuggestions) ? result.keywordPlacementSuggestions : [],
     weakBullets: Array.isArray(result.weakBullets) ? result.weakBullets : [],
-    sectionFeedback: Array.isArray(result.sectionFeedback) ? result.sectionFeedback : [],
+    sectionFeedback: Array.isArray(result.sectionFeedback)
+      ? result.sectionFeedback.map((s) => ({ ...s, changes: normalizeStringArray(s.changes) }))
+      : [],
     rewriteSuggestions: Array.isArray(result.rewriteSuggestions) ? result.rewriteSuggestions : [],
     atsRisks: Array.isArray(result.atsRisks) ? result.atsRisks : [],
     jobMatch: {
-      matchedRequirements: Array.isArray(result?.jobMatch?.matchedRequirements) ? result.jobMatch.matchedRequirements : [],
-      partialMatches: Array.isArray(result?.jobMatch?.partialMatches) ? result.jobMatch.partialMatches : [],
-      missingEvidence: Array.isArray(result?.jobMatch?.missingEvidence) ? result.jobMatch.missingEvidence : [],
+      matchedRequirements: normalizeStringArray(result?.jobMatch?.matchedRequirements),
+      partialMatches: normalizeStringArray(result?.jobMatch?.partialMatches),
+      missingEvidence: normalizeStringArray(result?.jobMatch?.missingEvidence),
     },
     tonePerspective: result.tonePerspective || "",
   };

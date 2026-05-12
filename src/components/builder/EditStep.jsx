@@ -351,8 +351,8 @@ export default function EditStep() {
 
       const rewrites = await Promise.all(
         topBullets.map(({ bullet, sectionName, itemId, bulletIdx }) =>
-          rewriteResumeBullet(bullet, { ...context, customInstruction: "Shorten to under 15 words while keeping the core achievement. Cut filler words. Keep the action verb and the key metric." })
-            .then((result) => ({ sectionName, itemId, bulletIdx, newText: result?.rewrites?.[0]?.version || bullet }))
+          rewriteResumeBullet(typeof bullet === "string" ? bullet : "", { ...context, customInstruction: "Shorten to under 15 words while keeping the core achievement. Cut filler words. Keep the action verb and the key metric." })
+            .then((result) => ({ sectionName, itemId, bulletIdx, newText: result?.rewrites?.[0]?.version || (typeof bullet === "string" ? bullet : "") }))
         )
       );
 
