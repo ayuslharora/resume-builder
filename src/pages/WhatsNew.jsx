@@ -52,7 +52,7 @@ const CHANGELOG = [
       {
         type: "improvement",
         title: "Pixel-accurate PDF export",
-        desc: "Rebuilt PDF rendering with html2canvas for output that matches the builder exactly. What you see is what you get — every font, every spacing decision, preserved.",
+        desc: "Rebuilt PDF rendering with server-side Puppeteer — every font and color preserved, with a real text layer so ATS scanners can read your resume.",
         icon: Zap,
       },
     ],

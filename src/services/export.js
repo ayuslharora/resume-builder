@@ -1,41 +1,68 @@
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel } from "docx";
 
+async function collectPageCSS() {
+  const sheets = Array.from(document.styleSheets);
+  const parts = await Promise.all(
+    sheets.map(async (sheet) => {
+      if (sheet.cssRules) {
+        return Array.from(sheet.cssRules).map((r) => r.cssText).join('\n');
+      }
+      if (sheet.href) {
+        try {
+          const res = await fetch(sheet.href);
+          return await res.text();
+        } catch {
+          return '';
+        }
+      }
+      return '';
+    })
+  );
+  return parts.join('\n');
+}
+
+function buildStandaloneHTML(resumeElement, css) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { margin: 0; padding: 0; background: white; }
+${css}
+</style>
+</head>
+<body>
+${resumeElement.outerHTML}
+</body>
+</html>`;
+}
+
 export async function exportPDF(resumeElement, fileName) {
-  // Temporarily remove shadow to prevent html2canvas from capturing extra padding
-  const originalBoxShadow = resumeElement.style.boxShadow;
-  resumeElement.style.boxShadow = 'none';
+  const css = await collectPageCSS();
+  const html = buildStandaloneHTML(resumeElement, css);
 
-  const canvas = await html2canvas(resumeElement, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    windowWidth: resumeElement.scrollWidth,
-    windowHeight: resumeElement.scrollHeight,
+  const response = await fetch('/api/pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html, fileName }),
   });
-  
-  // Restore original shadow
-  resumeElement.style.boxShadow = originalBoxShadow;
-  
-  const imgWidth = 210; // A4 width in mm
-  const minPageHeight = 297; // A4 height in mm
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  
-  // Set the PDF page height to match the resume's exact height (with a minimum of A4 height)
-  // This ensures the entire resume fits on a single continuous page without cutting content.
-  const finalHeight = Math.max(minPageHeight, imgHeight);
-  
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: [imgWidth, finalHeight]
-  });
-  
-  pdf.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, 0, imgWidth, imgHeight);
 
-  pdf.save(`${fileName}.pdf`);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `PDF API returned ${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${fileName}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 export async function exportDOCX(resumeData, fileName) {
@@ -54,16 +81,16 @@ export async function exportDOCX(resumeData, fileName) {
           new Paragraph({ text: resumeData.personalInfo?.fullName || "Resume", heading: HeadingLevel.HEADING_1 }),
           new Paragraph({ text: personalDetails, spacing: { after: 200 } }),
           new Paragraph({ text: resumeData.summary || "", spacing: { after: 400 } }),
-          
+
           new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_2 }),
           ...(resumeData.experience || []).flatMap(exp => [
-             new Paragraph({ text: `${exp.role} at ${exp.company} (${exp.duration})`, heading: HeadingLevel.HEADING_3 }),
-             ...(exp.bullets || []).map(b => new Paragraph({ text: b, bullet: { level: 0 } }))
+            new Paragraph({ text: `${exp.role} at ${exp.company} (${exp.duration})`, heading: HeadingLevel.HEADING_3 }),
+            ...(exp.bullets || []).map(b => new Paragraph({ text: b, bullet: { level: 0 } }))
           ]),
 
           new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
           ...(resumeData.education || []).flatMap(edu => [
-             new Paragraph({ text: `${edu.degree} in ${edu.field} - ${edu.institution} (${edu.duration})`, heading: HeadingLevel.HEADING_3 })
+            new Paragraph({ text: `${edu.degree} in ${edu.field} - ${edu.institution} (${edu.duration})`, heading: HeadingLevel.HEADING_3 })
           ]),
 
           new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
@@ -72,8 +99,8 @@ export async function exportDOCX(resumeData, fileName) {
 
           new Paragraph({ text: "Projects", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
           ...(resumeData.projects || []).flatMap(proj => [
-             new Paragraph({ text: `${proj.name} ${proj.techStack?.length ? `[${proj.techStack.join(', ')}]` : ''}`, heading: HeadingLevel.HEADING_3 }),
-             ...(proj.bullets || []).map(b => new Paragraph({ text: b, bullet: { level: 0 } }))
+            new Paragraph({ text: `${proj.name} ${proj.techStack?.length ? `[${proj.techStack.join(', ')}]` : ''}`, heading: HeadingLevel.HEADING_3 }),
+            ...(proj.bullets || []).map(b => new Paragraph({ text: b, bullet: { level: 0 } }))
           ])
         ],
       },
