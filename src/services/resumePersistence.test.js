@@ -18,23 +18,23 @@ test("getResumeBuilderStep restores the farthest completed builder step", () => 
   assert.equal(getResumeBuilderStep({ status: "complete", templateId: "modern" }), 5);
 });
 
-test("buildResumeWriteData preserves userId from cached resume for cloud upserts", () => {
+test("buildResumeWriteData preserves immutable ownership fields from cached resume for cloud upserts", () => {
   assert.deepEqual(
     buildResumeWriteData(
-      { id: "resume-1", userId: "user-1", title: "Old" },
+      { id: "resume-1", userId: "user-1", createdAt: "2024-01-01", title: "Old" },
       { title: "New" }
     ),
-    { userId: "user-1", title: "New" }
+    { userId: "user-1", createdAt: "2024-01-01", title: "New" }
   );
 });
 
-test("buildResumeWriteData prefers explicit userId from incoming data", () => {
+test("buildResumeWriteData ignores incoming ownership field overrides", () => {
   assert.deepEqual(
     buildResumeWriteData(
-      { id: "resume-1", userId: "user-1", title: "Old" },
-      { userId: "user-2", title: "New" }
+      { id: "resume-1", userId: "user-1", createdAt: "2024-01-01", title: "Old" },
+      { userId: "user-2", createdAt: "2025-01-01", title: "New" }
     ),
-    { userId: "user-2", title: "New" }
+    { userId: "user-1", createdAt: "2024-01-01", title: "New" }
   );
 });
 

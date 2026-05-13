@@ -24,12 +24,12 @@ export function useFirestore() {
     const docRef = doc(collection(db, "resumes"));
     const serverTime = serverTimestamp();
     const docData = {
-      userId,
-      createdAt: serverTime,
-      updatedAt: serverTime,
       title: "Untitled Resume",
       status: "draft",
       ...data,
+      userId,
+      createdAt: serverTime,
+      updatedAt: serverTime,
     };
     await setDoc(docRef, docData);
 
@@ -71,9 +71,9 @@ export function useFirestore() {
     const serverTime = serverTimestamp();
     await setDoc(docRef, {
       ...data,
+      isShared: true,
       createdAt: serverTime,
       updatedAt: serverTime,
-      isShared: true,
     });
 
     return docRef.id;

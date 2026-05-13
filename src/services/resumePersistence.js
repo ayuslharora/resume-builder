@@ -8,9 +8,16 @@ export function getResumeBuilderStep(resume) {
 }
 
 export function buildResumeWriteData(existingResume, data) {
+  const {
+    userId: _incomingUserId,
+    createdAt: _incomingCreatedAt,
+    ...rest
+  } = data ?? {};
+
   return {
     ...(existingResume?.userId ? { userId: existingResume.userId } : {}),
-    ...data,
+    ...(existingResume?.createdAt ? { createdAt: existingResume.createdAt } : {}),
+    ...rest,
   };
 }
 
