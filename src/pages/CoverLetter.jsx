@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import { generateCoverLetter } from "../services/llm";
-import { exportPDF } from "../services/export";
 import { ArrowLeft, Wand2, Download, FileText, Loader2, Home } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 
@@ -18,10 +17,8 @@ export default function CoverLetter() {
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetterText, setCoverLetterText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState(null);
   
-  const paperRef = useRef(null);
   const contentRef = useRef(null);
 
   useEffect(() => {
@@ -60,22 +57,14 @@ export default function CoverLetter() {
     }
   };
 
-  const handleExportPDF = async () => {
+  const handlePrintPDF = () => {
     // Ensure we capture the latest text before export if user hasn't blurred
     if (contentRef.current) {
       setCoverLetterText(contentRef.current.innerText);
     }
     
     if (!coverLetterText && !contentRef.current?.innerText) return;
-    setIsExporting(true);
-    try {
-      const name = resumeData?.personalInfo?.fullName?.replace(/\s+/g, "_") || "User";
-      await exportPDF(paperRef.current, `Cover_Letter_${name}`);
-    } catch (err) {
-      alert("Failed to export PDF: " + err.message);
-    } finally {
-      setIsExporting(false);
-    }
+    window.print();
   };
 
   if (loading) return <Spinner />;
@@ -106,7 +95,7 @@ export default function CoverLetter() {
     <div className="flex flex-col lg:flex-row h-[100dvh] bg-surface w-full overflow-hidden">
       
       {/* ── LEFT SIDEBAR ── */}
-      <aside className="w-full lg:w-[400px] shrink-0 border-r border-white/5 bg-surface-lowest flex flex-col h-full z-20">
+      <aside className="print-hide w-full lg:w-[400px] shrink-0 border-r border-white/5 bg-surface-lowest flex flex-col h-full z-20">
         <div className="p-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2">
              <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 text-on-surface-variant hover:text-primary transition-colors">
@@ -156,12 +145,11 @@ export default function CoverLetter() {
                 3. Export
               </label>
               <button
-                onClick={handleExportPDF}
-                disabled={isExporting}
+                onClick={handlePrintPDF}
                 className="w-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm border border-white/5"
               >
-                {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                Download PDF
+                <Download size={16} />
+                Save as PDF
               </button>
             </div>
           )}
@@ -170,7 +158,7 @@ export default function CoverLetter() {
 
       {/* ── RIGHT PREVIEW AREA ── */}
       <main 
-        className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar p-6 sm:p-10 flex justify-center relative"
+        className="print-resume-wrapper flex-1 overflow-y-auto overflow-x-auto custom-scrollbar p-6 sm:p-10 flex justify-center relative"
         style={{
           backgroundColor: "#0b1021",
           backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
@@ -191,8 +179,7 @@ export default function CoverLetter() {
           >
              {/* A4 Paper Container */}
             <div
-              ref={paperRef}
-              className="bg-white w-full min-h-full shadow-[0_0_50px_rgba(0,0,0,0.5)] p-[1in] flex flex-col"
+              className="print-resume-document bg-white w-full min-h-full shadow-[0_0_50px_rgba(0,0,0,0.5)] p-[1in] flex flex-col"
               style={{ boxSizing: 'border-box' }}
             >
               {/* Cover Letter Header */}

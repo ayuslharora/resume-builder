@@ -1769,6 +1769,344 @@
     max-width: 960px;
   }
 
+  body:has(aside.print-hide+main.print-resume-wrapper),
+  .glass-card.ghost-border,
+  aside.print-hide,
+  aside.print-hide+main.print-resume-wrapper {
+    --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --surface-2: #f4f4f5;
+    --border: #ececef;
+    --border-strong: #d4d4d8;
+    --text: #0a0a0b;
+    --text-2: #3f3f46;
+    --muted: #71717a;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --accent-fg: #ffffff;
+    --shadow-sm: 0 1px 2px rgba(15, 15, 20, 0.05);
+    --shadow-md: 0 4px 14px -4px rgba(15, 15, 20, 0.08), 0 2px 4px -2px rgba(15, 15, 20, 0.04);
+    --shadow-lg: 0 24px 48px -16px rgba(15, 15, 20, 0.14), 0 8px 16px -8px rgba(15, 15, 20, 0.06);
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+  }
+
+  body[data-theme="dark"]:has(aside.print-hide+main.print-resume-wrapper),
+  body[data-theme="dark"] .glass-card.ghost-border,
+  body[data-theme="dark"] aside.print-hide,
+  body[data-theme="dark"] aside.print-hide+main.print-resume-wrapper {
+    --bg: #0a0a0c;
+    --surface: #111114;
+    --surface-2: #17171b;
+    --border: #1f1f24;
+    --border-strong: #2a2a31;
+    --text: #fafafa;
+    --text-2: #d4d4d8;
+    --muted: #8b8b95;
+    --accent: #2563eb;
+    --accent-soft: #172554;
+    --accent-fg: #ffffff;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 14px -4px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, 0.6), 0 8px 16px -8px rgba(0, 0, 0, 0.4);
+  }
+
+  body[data-accent="mono"]:has(aside.print-hide+main.print-resume-wrapper),
+  body[data-accent="mono"] .glass-card.ghost-border,
+  body[data-accent="mono"] aside.print-hide,
+  body[data-accent="mono"] aside.print-hide+main.print-resume-wrapper {
+    --accent: #0a0a0b;
+    --accent-soft: #f4f4f5;
+    --accent-fg: #ffffff;
+  }
+
+  body[data-theme="dark"][data-accent="mono"]:has(aside.print-hide+main.print-resume-wrapper),
+  body[data-theme="dark"][data-accent="mono"] .glass-card.ghost-border,
+  body[data-theme="dark"][data-accent="mono"] aside.print-hide,
+  body[data-theme="dark"][data-accent="mono"] aside.print-hide+main.print-resume-wrapper {
+    --accent: #fafafa;
+    --accent-soft: #27272a;
+    --accent-fg: #0a0a0c;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-surface,
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-surface-lowest,
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-surface-container,
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-surface-container-high,
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-surface-container-highest {
+    background: var(--bg) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) .text-on-surface,
+  body:has(aside.print-hide+main.print-resume-wrapper) .hover\:text-on-surface:hover {
+    color: var(--text) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) .text-on-surface-variant {
+    color: var(--muted) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) .text-primary,
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="text-blue-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="text-cyan-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) .hover\:text-primary:hover {
+    color: var(--accent) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) .bg-primary,
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-blue-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-cyan-"] {
+    background: var(--accent) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-blue-50"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-blue-100"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-blue-500/5"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-blue-500/10"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-cyan-500/5"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="bg-cyan-500/10"] {
+    background: var(--accent-soft) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="border-blue-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="border-cyan-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="border-primary"] {
+    border-color: var(--accent) !important;
+  }
+
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="ring-blue-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="ring-cyan-"],
+  body:has(aside.print-hide+main.print-resume-wrapper) [class*="ring-primary"] {
+    --tw-ring-color: color-mix(in oklch, var(--accent) 18%, transparent) !important;
+  }
+
+  .glass-card.ghost-border {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-card.ghost-border h2 {
+    color: var(--text);
+  }
+
+  .glass-card.ghost-border p {
+    color: var(--muted);
+  }
+
+  .glass-card.ghost-border .btn-primary {
+    background: var(--accent);
+    color: var(--accent-fg) !important;
+    box-shadow: none;
+  }
+
+  aside.print-hide {
+    width: min(100%, 408px);
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: 12px 0 40px -34px rgba(15, 15, 20, 0.5);
+  }
+
+  aside.print-hide>div:first-child {
+    min-height: 64px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklch, var(--bg) 92%, var(--surface));
+  }
+
+  aside.print-hide h2 {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  aside.print-hide button:not(.btn-primary):not([class*="bg-surface-container-high"]) {
+    display: inline-flex;
+    min-width: 34px;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--muted);
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+
+  aside.print-hide button:not(.btn-primary):not([class*="bg-surface-container-high"]):hover {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  aside.print-hide label {
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  aside.print-hide label+p {
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  aside.print-hide textarea {
+    min-height: 220px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: none;
+  }
+
+  aside.print-hide textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+  }
+
+  aside.print-hide textarea::placeholder {
+    color: color-mix(in oklch, var(--muted) 68%, transparent);
+  }
+
+  aside.print-hide .btn-primary {
+    width: 100%;
+    height: 42px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-fg) !important;
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  aside.print-hide .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
+    transform: none;
+    box-shadow: none !important;
+  }
+
+  aside.print-hide button[class*="bg-surface-container-high"] {
+    display: inline-flex;
+    width: 100%;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  aside.print-hide button[class*="bg-surface-container-high"]:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  aside.print-hide .custom-scrollbar,
+  aside.print-hide+main.print-resume-wrapper {
+    scrollbar-color: var(--border-strong) transparent;
+    scrollbar-width: thin;
+  }
+
+  aside.print-hide .custom-scrollbar::-webkit-scrollbar-thumb,
+  aside.print-hide+main.print-resume-wrapper::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--border-strong);
+  }
+
+  aside.print-hide+main.print-resume-wrapper {
+    align-items: flex-start;
+    background-color: var(--surface) !important;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px) !important;
+    background-size: 28px 28px !important;
+  }
+
+  aside.print-hide+main.print-resume-wrapper>[class~="absolute"] {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  aside.print-hide+main.print-resume-wrapper>[class~="absolute"] svg {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--accent);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  aside.print-hide+main.print-resume-wrapper>[class~="absolute"] p {
+    max-width: 24ch;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  aside.print-hide+main.print-resume-wrapper>div[class~="relative"] {
+    width: min(100%, 816px) !important;
+  }
+
+  aside.print-hide+main.print-resume-wrapper .print-resume-document {
+    box-shadow: 0 28px 80px -42px rgba(15, 15, 20, 0.45) !important;
+  }
+
+  aside.print-hide+main.print-resume-wrapper .print-resume-document+div[class~="absolute"] {
+    background: color-mix(in oklch, #ffffff 76%, transparent) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  aside.print-hide+main.print-resume-wrapper .print-resume-document+div[class~="absolute"]>div {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+  }
+
+  @media (max-width: 1023px) {
+    aside.print-hide {
+      width: 100%;
+      height: auto;
+      max-height: 48dvh;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 12px 40px -34px rgba(15, 15, 20, 0.5);
+    }
+
+    aside.print-hide textarea {
+      min-height: 150px;
+    }
+
+    aside.print-hide+main.print-resume-wrapper {
+      min-height: 52dvh;
+      padding: 24px 16px;
+    }
+  }
+
   .app-design .avatar {
     display: inline-flex;
     align-items: center;

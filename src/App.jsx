@@ -33,6 +33,13 @@ function AppRoot() {
   useEffect(() => {
     const publicRoutes = ["/", "/templates", "/pricing", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
+    const savedTheme = localStorage.getItem("app-theme");
+
+    if (savedTheme === "dark") {
+      document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.removeAttribute("data-theme");
+    }
     
     if (isPublic) {
       document.body.removeAttribute("data-accent");

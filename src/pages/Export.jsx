@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
@@ -25,7 +25,6 @@ export default function Export() {
   const [shareBusy, setShareBusy] = useState(false);
   const [resumeHeight, setResumeHeight] = useState(0);
   const { getResume, updateResume } = useFirestore();
-  const resumeRef = useRef(null);
   const navigate = useNavigate();
 
   // Callback ref: attaches ResizeObserver the moment the shadow div mounts,
@@ -112,16 +111,8 @@ export default function Export() {
     </div>
   );
 
-  const handleDownloadPDF = async () => {
-    try {
-      setExportingType('pdf');
-      const { exportPDF } = await import("../services/export");
-      await exportPDF(resumeRef.current, `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`);
-    } catch (e) {
-      alert("Failed to export PDF: " + e.message);
-    } finally {
-      setExportingType(null);
-    }
+  const handlePrintPDF = () => {
+    window.print();
   };
 
   const handleDownloadDOCX = async () => {
@@ -223,11 +214,11 @@ export default function Export() {
                 <FileText size={13} /> {exportingType === 'docx' ? 'Preparing...' : 'DOCX'}
               </button>
               <button 
-                 onClick={handleDownloadPDF} 
-                 disabled={exportingType || shareBusy}
+                 onClick={handlePrintPDF}
+                 disabled={shareBusy}
                  className="btn btn-accent btn-sm disabled:opacity-50"
               >
-                <Download size={13} /> {exportingType === 'pdf' ? 'Preparing...' : 'Download PDF'}
+                <Download size={13} /> Save as PDF
               </button>
             </>
         </div>
@@ -251,7 +242,6 @@ export default function Export() {
           )}
           <div className="flex justify-center overflow-x-auto print-resume-wrapper">
             <div
-              ref={resumeRef}
               className="paper print-resume-document mx-auto"
               style={{ width: '850px', flexShrink: 0 }}
             >

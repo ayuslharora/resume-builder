@@ -32,3 +32,15 @@ test("app shell uses a single current sidebar implementation", async () => {
   assert.match(cssSource, /body\.ats-panel-open \.app-sidebar-mobile/);
   assert.doesNotMatch(appLayoutSource, /<Sidebar\s+variant=/);
 });
+
+test("AppRoot restores saved theme for fullscreen routes", async () => {
+  const appSource = await readFile(new URL("./App.jsx", import.meta.url), "utf8");
+
+  assert.match(appSource, /localStorage\.getItem\("app-theme"\)/);
+  assert.match(appSource, /localStorage\.getItem\("app-accent"\)/);
+  assert.match(appSource, /document\.body\.setAttribute\("data-theme", "dark"\)/);
+  assert.match(appSource, /document\.body\.setAttribute\("data-accent", "mono"\)/);
+  assert.match(appSource, /document\.body\.removeAttribute\("data-theme"\)/);
+  assert.match(appSource, /document\.body\.removeAttribute\("data-accent"\)/);
+  assert.match(appSource, /path:\s*"\/cover-letter\/:resumeId", element:\s*<CoverLetter \/>/);
+});
