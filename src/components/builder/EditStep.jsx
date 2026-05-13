@@ -85,6 +85,21 @@ export default function EditStep() {
     observer.observe(el);
   };
 
+  function buildCompleteResumeSavePayload() {
+    const title = resumeData.personalInfo?.fullName
+      ? `${resumeData.personalInfo.fullName} — ${interviewAnswers.targetRole || 'Resume'}`
+      : interviewAnswers.targetRole || 'New Resume';
+
+    return {
+      resumeData,
+      templateId,
+      interviewAnswers,
+      title,
+      targetRole: interviewAnswers.targetRole || "",
+      status: "complete",
+    };
+  }
+
   useEffect(() => {
     if (isAtsPanelOpen) {
       document.body.classList.add("ats-panel-open");
@@ -100,34 +115,14 @@ export default function EditStep() {
   // Save immediately when entering EditStep — this is the critical save
   useEffect(() => {
     if (resumeData) {
-      const title = resumeData.personalInfo?.fullName
-        ? `${resumeData.personalInfo.fullName} — ${interviewAnswers.targetRole || 'Resume'}`
-        : interviewAnswers.targetRole || 'New Resume';
-      saveNow({
-        resumeData,
-        templateId,
-        interviewAnswers,
-        title,
-        targetRole: interviewAnswers.targetRole || "",
-        status: "complete",
-      });
+      saveNow(buildCompleteResumeSavePayload());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount — data is already in context
 
   useKeyboardShortcut("s", () => {
     if (resumeData) {
-      const title = resumeData.personalInfo?.fullName
-        ? `${resumeData.personalInfo.fullName} — ${interviewAnswers.targetRole || 'Resume'}`
-        : interviewAnswers.targetRole || 'New Resume';
-      saveNow({
-        resumeData,
-        templateId,
-        interviewAnswers,
-        title,
-        targetRole: interviewAnswers.targetRole || "",
-        status: "complete",
-      });
+      saveNow(buildCompleteResumeSavePayload());
     }
   });
 
@@ -135,11 +130,23 @@ export default function EditStep() {
     setIsAtsPanelOpen(prev => !prev);
   });
 
+  async function handleCompleteRendering() {
+    if (!activeResumeId || !resumeData) return;
+
+    const completeResumePayload = buildCompleteResumeSavePayload();
+    const savedResumeId = await saveNow(completeResumePayload);
+    const exportResumeId = savedResumeId || activeResumeId;
+
+    navigate(`/export/${exportResumeId}`, {
+      state: {
+        builderData: { ...builderData, ...completeResumePayload },
+      },
+    });
+  }
+
   useKeyboardShortcut("p", () => {
     if (activeResumeId) {
-      saveNow({ status: "complete" }).then(() => {
-        navigate(`/export/${activeResumeId}`, { state: { builderData } });
-      });
+      handleCompleteRendering();
     }
   });
 
@@ -217,6 +224,12 @@ export default function EditStep() {
     });
     
     updateSection(sectionName, updatedSection);
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        [sectionName]: updatedSection
+      }
+    });
     setRewriteBulletData(null);
   };
 
@@ -237,6 +250,12 @@ export default function EditStep() {
       return item;
     });
     updateSection(sectionName, updatedSection);
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        [sectionName]: updatedSection
+      }
+    });
   };
 
   const handleAddBullet = (sectionName, itemId) => {
@@ -249,6 +268,12 @@ export default function EditStep() {
       return item;
     });
     updateSection(sectionName, updatedSection);
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        [sectionName]: updatedSection
+      }
+    });
   };
 
   const handleAcceptAIChange = () => {
@@ -640,10 +665,7 @@ export default function EditStep() {
               Re-scan
             </button>
             <button 
-              onClick={async () => {
-                await saveNow({ status: "complete" });
-                navigate(`/export/${activeResumeId}`, { state: { builderData } });
-              }}
+              onClick={handleCompleteRendering}
               className="btn-primary h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
               <FileText size={14} /> 

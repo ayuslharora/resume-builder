@@ -46,8 +46,43 @@ test("EditStep keeps the complete rendering export action in step 5", async () =
   const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
 
   assert.match(source, /Complete Rendering/);
-  assert.match(source, /navigate\(`\/export\/\$\{activeResumeId\}`/);
+  assert.match(source, /navigate\(`\/export\/\$\{exportResumeId\}`/);
   assert.match(source, /FileText size=\{14\}/);
+});
+
+test("EditStep saves the complete current resume payload before exporting", async () => {
+  const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
+  const shortcut = source.slice(
+    source.indexOf('useKeyboardShortcut("p"'),
+    source.indexOf('useKeyboardShortcut("g"')
+  );
+  const handler = source.slice(
+    source.indexOf("async function handleCompleteRendering"),
+    source.indexOf("useKeyboardShortcut(\"g\"")
+  );
+
+  assert.match(source, /function buildCompleteResumeSavePayload\(\) \{/);
+  assert.match(handler, /const completeResumePayload = buildCompleteResumeSavePayload\(\)/);
+  assert.match(handler, /await saveNow\(completeResumePayload\)/);
+  assert.match(handler, /builderData:\s*\{\s*\.\.\.builderData,\s*\.\.\.completeResumePayload\s*\}/);
+  assert.match(shortcut, /handleCompleteRendering\(\)/);
+  assert.match(source, /onClick=\{handleCompleteRendering\}[\s\S]*Complete Rendering/);
+  assert.doesNotMatch(shortcut, /saveNow\(\{\s*status:\s*"complete"\s*\}\)/);
+});
+
+test("EditStep persists bullet edits before the final render fetches from Firestore", async () => {
+  const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
+  const bulletUpdateHandler = source.slice(
+    source.indexOf("const handleUpdateBullet"),
+    source.indexOf("const handleAddBullet")
+  );
+  const bulletRewriteHandler = source.slice(
+    source.indexOf("const handleApplyBulletRewrite"),
+    source.indexOf("const handleUpdateBullet")
+  );
+
+  assert.match(bulletUpdateHandler, /saveToFirestore\(\{\s*resumeData:\s*\{\s*\.\.\.resumeData,\s*\[sectionName\]:\s*updatedSection\s*\}\s*\}\)/);
+  assert.match(bulletRewriteHandler, /saveToFirestore\(\{\s*resumeData:\s*\{\s*\.\.\.resumeData,\s*\[sectionName\]:\s*updatedSection\s*\}\s*\}\)/);
 });
 
 test("EditStep ATS panel uses the new app design theme instead of legacy dark glass", async () => {

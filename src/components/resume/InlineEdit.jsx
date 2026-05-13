@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Wand2 } from 'lucide-react';
+import { sanitizeResumeHtml, stripResumeHtml } from '../../services/resumeHtmlSanitizer';
 
 let _activeRewriteFn = null;
 // eslint-disable-next-line react-refresh/only-export-components
@@ -15,23 +16,24 @@ export default function InlineEdit({
   onAiRewrite
 }) {
   const contentEditableRef = useRef(null);
+  const sanitizedValue = sanitizeResumeHtml(value);
 
   // Sync external value changes (e.g. from AI regeneration or parent loading)
   useEffect(() => {
     if (contentEditableRef.current && document.activeElement !== contentEditableRef.current) {
-      if (contentEditableRef.current.innerHTML !== value) {
-        contentEditableRef.current.innerHTML = value || "";
+      if (contentEditableRef.current.innerHTML !== sanitizedValue) {
+        contentEditableRef.current.innerHTML = sanitizedValue;
       }
     }
-  }, [value]);
+  }, [sanitizedValue]);
 
   const handleBlur = () => {
     if (contentEditableRef.current) {
-      const newValue = contentEditableRef.current.innerHTML;
-      const isEmpty = newValue.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() === "";
+      const newValue = sanitizeResumeHtml(contentEditableRef.current.innerHTML);
+      const isEmpty = stripResumeHtml(newValue).trim() === "";
       if (isEmpty) {
         onChange("");
-      } else if (newValue !== value) {
+      } else if (newValue !== sanitizedValue) {
         onChange(newValue);
       }
     }
@@ -45,19 +47,19 @@ export default function InlineEdit({
   };
 
   if (!isEditing) {
-    if (!value) return null;
-    return <span className={className} dangerouslySetInnerHTML={{ __html: value }} />;
+    if (!stripResumeHtml(sanitizedValue).trim()) return null;
+    return <span className={className} dangerouslySetInnerHTML={{ __html: sanitizedValue }} />;
   }
 
   const handleRewrite = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onAiRewrite) onAiRewrite(value || "");
+    if (onAiRewrite) onAiRewrite(stripResumeHtml(value || ""));
   };
 
   const handleFocus = () => {
     _activeRewriteFn = onAiRewrite
-      ? () => onAiRewrite(contentEditableRef.current?.innerHTML || value || "")
+      ? () => onAiRewrite(stripResumeHtml(contentEditableRef.current?.innerHTML || value || ""))
       : null;
   };
 
@@ -72,7 +74,7 @@ export default function InlineEdit({
         onKeyDown={handleKeyDown}
         className={`outline-none min-w-[20px] whitespace-pre-wrap [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:my-1`}
         data-placeholder={placeholder}
-        dangerouslySetInnerHTML={{ __html: value || "" }}
+        dangerouslySetInnerHTML={{ __html: sanitizedValue }}
       />
       {onAiRewrite && (
         <button

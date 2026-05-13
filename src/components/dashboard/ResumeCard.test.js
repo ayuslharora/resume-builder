@@ -89,7 +89,7 @@ test("successful resume deletes notify the sidebar list immediately", async () =
   assert.match(sidebarSource, /subscribeToResumeDeleted/);
   assert.match(sidebarSource, /setResumes\(prev => prev\.filter\(resume => resume\.id !== deletedResumeId\)\)/);
 
-  const firestoreDeleteIndex = deleteSource.indexOf("await deleteDoc");
+  const firestoreDeleteIndex = deleteSource.indexOf("await batch.commit()");
   const notifyIndex = deleteSource.indexOf("notifyResumeDeleted(resumeId)");
   assert.notEqual(firestoreDeleteIndex, -1);
   assert.notEqual(notifyIndex, -1);

@@ -68,8 +68,6 @@ export default function PublicResume() {
         const data = await getResumeByShareToken(token);
         if (!data) {
           setError("Resume not found.");
-        } else if (!data.isShared) {
-          setError("This resume is not published.");
         } else {
           setResume(data);
           recordResumeView({
