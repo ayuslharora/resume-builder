@@ -37,7 +37,7 @@ function normalizeBulletRewrites(payload) {
   return numbered.length ? numbered : [];
 }
 
-async function callGemini(systemPrompt, userPrompt, options = {}) {
+async function callLlmTask(task, payload = {}) {
   try {
     const user = auth.currentUser;
     if (!user) throw new Error("User must be logged in to use AI features.");
@@ -50,7 +50,7 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ systemPrompt, userPrompt, options })
+      body: JSON.stringify({ task, payload })
     });
 
     const result = await response.json();
@@ -66,77 +66,7 @@ async function callGemini(systemPrompt, userPrompt, options = {}) {
 }
 
 export async function generateResume(bragSheetText, interviewAnswers) {
-  const isOnePage = interviewAnswers.preferredLength !== "2-pages";
-  const hasJD = interviewAnswers.jobDescription && interviewAnswers.jobDescription.trim().length > 0;
-
-  const systemPrompt = `You are an expert resume writer. You write resumes for students and freshers applying to tech roles.
-
-CRITICAL RULES:
-1. Extract and use ONLY information from the candidate's Brag Sheet and interview answers. DO NOT invent experience, projects, education, or skills.
-2. If a section has no data, leave it as an empty array. Never fabricate.
-3. Output ONLY valid JSON matching the schema. No markdown, no explanation.
-4. All bullets start with strong action verbs (Led, Built, Developed, Designed, Implemented, Optimized, etc.).
-5. Keep every bullet impact-driven and under 20 words.
-6. NEVER use em-dashes ("—"). Use a hyphen ("-") or colon instead.
-
-${hasJD ? `KEYWORD SELECTION — CRITICAL:
-You have been given a Job Description (JD). You MUST:
-- Read the JD carefully and identify the skills, tools, and technologies that are EXPLICITLY mentioned or clearly implied.
-- In the "skills" section, include ONLY skills that (a) appear in the JD and (b) are genuinely present in the candidate's background. Do NOT dump every skill from the brag sheet.
-- In bullets, weave in JD-relevant keywords naturally where the candidate's experience supports it.
-- Omit skills and technologies that are not relevant to this specific role, even if the candidate has them.` : `KEYWORD SELECTION:
-Focus on skills and keywords that directly support the target role. Do not include every skill from the brag sheet — be selective and relevant.`}
-
-${isOnePage ? `ONE-PAGE HARD LIMIT — this is the most critical constraint:
-The output MUST fit on a single A4 page. Violating this is worse than omitting content.
-- Summary: maximum 50 words. 2-3 punchy sentences only.
-- Every bullet: maximum 20 words. One clause. Strong action verb. No filler.
-- Experience: maximum 4 entries. Maximum 4 bullets each — prefer 3.
-- Projects: maximum 3 entries. Maximum 3 bullets each — prefer 2.
-- Skills: maximum 8 technical skills, 4 soft skills. Only include skills relevant to the role.
-- Omit achievements, languages, and extracurriculars entirely unless they are directly critical to the role.
-- When two items are equivalent in relevance, always drop the weaker one.
-- If in doubt between more content and fitting on one page: always choose fitting on one page.` : `TWO-PAGE GOAL:
-The candidate is comfortable with two pages. Be thorough but still concise and focused on the target role.`}`;
-
-  const userPrompt = `Here is the candidate's raw achievements document (Brag Sheet):
----
-${bragSheetText ? bragSheetText : "(No document provided. Base the resume strictly on the interview answers below.)"}
----
-
-Here are their interview answers:
-- Target role: ${interviewAnswers.targetRole}
-- Target company type: ${interviewAnswers.targetCompanyType}
-- Experience level: ${interviewAnswers.experienceLevel}
-- Skills to highlight: ${interviewAnswers.skillsToHighlight}
-- Career objective: ${interviewAnswers.careerObjective}
-- Technologies to emphasize: ${interviewAnswers.technologiesToEmphasize}
-- Preferred length: ${interviewAnswers.preferredLength}
-- Additional context: ${interviewAnswers.additionalContext}
-${hasJD ? `\nJob Description to tailor this resume for:\n---\n${interviewAnswers.jobDescription}\n---` : ""}
-
-Generate a complete resume as JSON following this exact schema:
-{
-  "personalInfo": { "fullName": "string", "email": "string", "phone": "string", "location": "string", "linkedin": "string | null", "github": "string | null", "portfolio": "string | null", "photoURL": "string | null" },
-  "summary": "string",
-  "skills": { "technical": ["string"], "soft": ["string"] },
-  "experience": [ { "id": "uuid-string", "company": "string", "role": "string", "duration": "string", "location": "string", "bullets": ["string"] } ],
-  "education": [ { "id": "uuid-string", "institution": "string", "degree": "string", "field": "string", "duration": "string", "cgpa": "string | null", "achievements": ["string"] } ],
-  "projects": [ { "id": "uuid-string", "name": "string", "techStack": ["string"], "description": "string", "bullets": ["string"], "link": "string | null" } ],
-  "certifications": [ { "id": "uuid-string", "name": "string", "issuer": "string", "date": "string", "link": "string | null" } ],
-  "achievements": ["string"],
-  "languages": ["string"],
-  "extracurriculars": ["string"]
-}
-
-Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
-
-  const result = await callGemini(systemPrompt, userPrompt, {
-    // Keep ATS rescans stable so repeated scans on unchanged content
-    // produce near-identical scoring and recommendations.
-    temperature: 0,
-    top_p: 1,
-  });
+  const result = await callLlmTask("generateResume", { bragSheetText, interviewAnswers });
 
   if (!result.personalInfo) result.personalInfo = { fullName: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "" };
   if (!result.summary) result.summary = "";
@@ -151,38 +81,13 @@ Ensure all IDs are unique string UUIDs. Output ONLY the JSON object.`;
 }
 
 export async function regenerateSection(sectionName, currentSectionData, context, bragSheetText = "", customInstruction = "") {
-  const systemPrompt = `You are an expert resume writer.
-Rewrite the "${sectionName}" section of this resume.
-
-CRITICAL INSTRUCTIONS:
-1. SEMANTIC CONTINUITY: You MUST preserve the core facts and value of the original content.
-2. If the user provides a "USER INSTRUCTION", you MUST prioritize it (e.g., "add more detail", "focus on leadership", "add more bullets").
-3. When asked to "add more bullets" or "provide more info", use the provided Brag Sheet (if any) to find REAL additional facts. DO NOT invent fake experiences.
-4. Output ONLY valid JSON in the exact following format:
-{
-  "${sectionName}": <updated data>
-}
-5. The <updated data> MUST strictly match the exact schema and structure of the original data.
-6. NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons.
-7. LENGTH CONSTRAINTS — the resume must stay on ONE page:
-   - Every bullet point: maximum 20 words. One clause. No compound sentences.
-   - Summary field: maximum 50 words.
-   - Experience bullets: maximum 4 bullets per entry.
-   - Project bullets: maximum 3 bullets per entry.
-   - If a USER INSTRUCTION asks for "more bullets", add at most 1 extra bullet beyond the current count.
-No explanation.`;
-
-  const userPrompt = `Current section data: ${JSON.stringify(currentSectionData)}
-
-${bragSheetText ? `Candidate's Raw Background (Brag Sheet):
-${bragSheetText}` : ""}
-
-Context: ${context.targetRole || 'general role'} at ${context.targetCompanyType || 'general'} company.
-
-${customInstruction ? `USER INSTRUCTION (PRIORITY):
-${customInstruction}` : "Improve this section for better impact and clarity while maintaining all facts."}`;
-
-  let result = await callGemini(systemPrompt, userPrompt);
+  let result = await callLlmTask("regenerateSection", {
+    sectionName,
+    currentSectionData,
+    targetContext: context,
+    bragSheetText,
+    customInstruction,
+  });
 
   if (result && result[sectionName] !== undefined) {
     result = result[sectionName];
@@ -220,22 +125,13 @@ ${customInstruction}` : "Improve this section for better impact and clarity whil
 }
 
 export async function regenerateItem(sectionName, currentItemData, context, bragSheetText = "", customInstruction = "") {
-  const systemPrompt = `You are an expert resume writer.
-Rewrite ONLY this single item from the "${sectionName}" section of the candidate's resume.
-Context about the candidate: ${context.targetRole || 'general role'} applying to ${context.targetCompanyType || 'general'} company.
-${bragSheetText ? `\nCandidate's Raw Background/Brag Sheet (Draw facts from here. DO NOT invent details):\n${bragSheetText}\n` : ''}${customInstruction ? `\nUSER INSTRUCTION: ${customInstruction}\n` : ''}
-CRITICAL RULES:
-- NEVER use em-dashes ("—"). Use regular hyphens ("-") or colons instead.
-- Do NOT invent new experiences. Improve wording, impact, and formatting only.
-- LENGTH CONSTRAINTS — resume must fit on ONE page:
-  - Every bullet: maximum 20 words, one clause, strong action verb at start.
-  - Maximum 4 bullets for experience entries; maximum 3 for project entries.
-  - Do NOT add more bullets than already exist in the original item.
-Output ONLY valid JSON representing the updated item. Keep the same schema and keep "id" unchanged.
-No explanation.`;
-
-  const userPrompt = `Current item data: ${JSON.stringify(currentItemData)}`;
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callLlmTask("regenerateItem", {
+    sectionName,
+    currentItemData,
+    targetContext: context,
+    bragSheetText,
+    customInstruction,
+  });
 
   if (result && typeof result === 'object') {
     if (currentItemData.id) result.id = currentItemData.id;
@@ -251,109 +147,11 @@ No explanation.`;
 }
 
 export async function extractBasicInfo(bragSheetText) {
-  const systemPrompt = `Extract the following from this document and return as JSON:
-{ "targetRole": "string | null", "skills": ["string"] | null, "name": "string | null" }
-Output ONLY JSON.`;
-  const userPrompt = `Document: ${bragSheetText}`;
-  return await callGemini(systemPrompt, userPrompt);
+  return await callLlmTask("extractBasicInfo", { bragSheetText });
 }
 
 export async function gradeResume(resumeText, targetContext = {}) {
-  const systemPrompt = `You are an expert ATS optimizer, recruiter, hiring manager, and resume coach.
-Review the resume against the candidate's stated target job.
-Be concrete, practical, and critical without being vague.
-Favor actionable edits over generic advice.
-Return ONLY valid JSON matching this schema:
-{
-  "score": number,
-  "summary": "string",
-  "fitAssessment": "string",
-  "atsBreakdown": {
-    "formatting": number,
-    "keywords": number,
-    "impact": number,
-    "clarity": number
-  },
-  "sectionScores": [
-    {
-      "section": "string",
-      "score": number,
-      "reason": "string"
-    }
-  ],
-  "strengths": ["string"],
-  "priorityFixes": [
-    {
-      "issue": "string",
-      "whyItMatters": "string",
-      "howToFix": "string"
-    }
-  ],
-  "keywordGaps": ["string"],
-  "keywordPlacementSuggestions": [
-    {
-      "keyword": "string",
-      "targetSection": "string",
-      "howToAdd": "string",
-      "example": "string"
-    }
-  ],
-  "weakBullets": [
-    {
-      "originalBullet": "string",
-      "section": "string",
-      "issue": "string",
-      "priority": "high | medium | low"
-    }
-  ],
-  "sectionFeedback": [
-    {
-      "section": "string",
-      "assessment": "string",
-      "changes": ["string"]
-    }
-  ],
-  "rewriteSuggestions": [
-    {
-      "original": "string",
-      "improved": "string",
-      "reason": "string"
-    }
-  ],
-  "atsRisks": [
-    {
-      "risk": "string",
-      "severity": "low | medium | high",
-      "details": "string"
-    }
-  ],
-  "jobMatch": {
-    "matchedRequirements": ["string"],
-    "partialMatches": ["string"],
-    "missingEvidence": ["string"]
-  },
-  "tonePerspective": "string"
-}
-
-Rules:
-1. All scores are integers from 0 to 100.
-2. Keep every list item specific to the actual resume and target role.
-3. If the target role or job description suggests missing keywords, call them out explicitly.
-4. "priorityFixes" should be the highest-impact changes first.
-5. "rewriteSuggestions" should be short before/after style edits the candidate can apply immediately.
-6. "sectionScores" should cover at least Summary, Skills, Experience, Projects, and Education when relevant.
-7. "jobMatch" must compare the resume against the target role or job description directly.
-8. "tonePerspective" should reflect the selected review lens.
-9. "weakBullets" should identify the weakest resume bullets or bullet-like lines worth rewriting first.`;
-
-  const userPrompt = `Target role: ${targetContext.targetRole || "Not provided"}
-Target job description or notes: ${targetContext.jobDescription || "Not provided"}
-Review tone: ${targetContext.reviewTone || "ATS strict"}
-
-Resume text:
-${resumeText}`;
-
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callLlmTask("gradeResume", { resumeText, targetContext });
 
   return {
     score: Number.isFinite(result.score) ? result.score : 0,
@@ -386,46 +184,7 @@ ${resumeText}`;
 }
 
 export async function rewriteResumeBullet(originalBullet, targetContext = {}) {
-  const systemPrompt = `You are an expert resume writer.
-Your task is to rewrite one resume bullet point.
-
-CRITICAL INSTRUCTIONS:
-1. SEMANTIC CONTINUITY: You MUST preserve the core meaning, factual content, and value of the "Original Bullet".
-2. DO NOT drift into unrelated topics. The rewritten bullet must represent the SAME experience or achievement as the original, but with better wording or a specific focus.
-3. If the user provides a "USER INSTRUCTION", apply that specific change (e.g., "make it sound more leadership-focused") WITHOUT losing the underlying facts of the original bullet.
-4. DO NOT invent new metrics, tools, or responsibilities that were not in the original text or context.
-5. Return ONLY valid JSON matching this schema:
-{
-  "rewrites": [
-    {
-      "version": "The full rewritten bullet point text. This MUST be the actual content.",
-      "focus": "A 2-3 word short title/label for this variation.",
-      "whyItWorks": "A brief explanation of the improvement."
-    }
-  ]
-}
-
-Rules:
-1. Provide exactly 3 rewrites.
-2. Each 'version' must be a single, complete bullet line.
-3. CONCISENESS: Maximum 20 words per rewrite. One clause only. No compound sentences. High impact, zero filler.
-4. NEVER swap the 'version' and 'focus' fields.
-5. Use strong action verbs.`;
-
-  const userPrompt = `Target role: ${targetContext.targetRole || "Not provided"}
-Target job description or notes: ${targetContext.jobDescription || "Not provided"}
-
-Original bullet:
-${originalBullet}
-
-Relevant resume context:
-${targetContext.resumeText || "Not provided"}
-${targetContext.sourceDocumentText ? `\nRelevant source document context:\n${targetContext.sourceDocumentText}` : ""}
-
-${targetContext.customInstruction ? `USER INSTRUCTION (PRIORITY):
-${targetContext.customInstruction}` : "Improve this bullet for maximum impact and ATS compatibility."}`;
-
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callLlmTask("rewriteResumeBullet", { originalBullet, targetContext });
   const rawRewrites = normalizeBulletRewrites(result);
 
   return {
@@ -453,45 +212,7 @@ ${targetContext.customInstruction}` : "Improve this bullet for maximum impact an
 }
 
 export async function improveResume(resumeText, targetContext = {}) {
-  const systemPrompt = `You are an expert resume writer improving an existing resume for a specific target role.
-You must keep the candidate truthful and only use evidence from the supplied resume text, source document, and job notes.
-Do not invent employers, degrees, projects, dates, or metrics.
-Return ONLY valid JSON matching this schema:
-{
-  "personalInfo": { "fullName": "string", "email": "string", "phone": "string", "location": "string", "linkedin": "string | null", "github": "string | null", "portfolio": "string | null", "photoURL": "string | null" },
-  "summary": "string",
-  "skills": { "technical": ["string"], "soft": ["string"] },
-  "experience": [ { "id": "uuid-string", "company": "string", "role": "string", "duration": "string", "location": "string", "bullets": ["string"] } ],
-  "education": [ { "id": "uuid-string", "institution": "string", "degree": "string", "field": "string", "duration": "string", "cgpa": "string | null", "achievements": ["string"] } ],
-  "projects": [ { "id": "uuid-string", "name": "string", "techStack": ["string"], "description": "string", "bullets": ["string"], "link": "string | null" } ],
-  "certifications": [ { "id": "uuid-string", "name": "string", "issuer": "string", "date": "string", "link": "string | null" } ],
-  "achievements": ["string"],
-  "languages": ["string"],
-  "extracurriculars": ["string"]
-}
-
-Rules:
-1. Improve wording, ordering, summaries, and bullets for the target role.
-2. Preserve only supported facts from the source text.
-3. LENGTH CONSTRAINTS — the output must fit on ONE page when printed:
-   - Summary: maximum 50 words.
-   - Every bullet: maximum 20 words, one clause, strong action verb at start.
-   - Experience bullets: maximum 4 per entry. Prefer 3.
-   - Project bullets: maximum 3 per entry. Prefer 2.
-   - Skills: keep lists tight — no more than 8 technical skills, 4 soft skills.
-   - Omit achievements, languages, extracurriculars unless they are directly relevant to the role.
-4. Ensure all IDs are unique UUID strings.
-5. Output only the JSON object.`;
-
-  const userPrompt = `Target role: ${targetContext.targetRole || "Not provided"}
-Target job description or notes: ${targetContext.jobDescription || "Not provided"}
-Review tone: ${targetContext.reviewTone || "ATS strict"}
-
-Current resume text:
-${targetContext.rewrittenResumeText || resumeText}
-${targetContext.sourceDocumentText ? `\n\nCandidate's raw background/source document (use this to recover concrete facts and stronger details, but do not invent anything beyond it):\n${targetContext.sourceDocumentText}` : ""}`;
-
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callLlmTask("improveResume", { resumeText, targetContext });
 
   if (!result.personalInfo) result.personalInfo = { fullName: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "", photoURL: null };
   if (!result.summary) result.summary = "";
@@ -508,29 +229,6 @@ ${targetContext.sourceDocumentText ? `\n\nCandidate's raw background/source docu
 }
 
 export async function generateCoverLetter(resumeData, jobDescription) {
-  const systemPrompt = `You are an expert career coach and executive resume writer.
-Your task is to write a highly professional, compelling, and tailored cover letter for the candidate.
-You will be provided with the candidate's resume data (in JSON format) and the target Job Description.
-
-CRITICAL RULES:
-1. Write in a confident, professional, and natural tone. Do not use overly flowery language or cliché openings like "I am writing to express my interest in..."
-2. Start with a strong hook that highlights a key relevant achievement.
-3. Draw DIRECT connections between the candidate's actual experience/skills from their resume and the core requirements in the job description.
-4. DO NOT invent or hallucinate any experience, metrics, or skills that are not present in the resume data.
-5. Format the output with clear paragraphs. Use standard cover letter conventions.
-6. The letter should be exactly 3 to 4 paragraphs long.
-7. Return ONLY a valid JSON object matching this schema exactly:
-{
-  "coverLetter": "The full text of the cover letter with paragraphs separated by double newlines (\\n\\n)"
-}
-Output only the JSON. Do not include markdown formatting or explanations.`;
-
-  const userPrompt = `Candidate's Resume Data:
-${JSON.stringify(resumeData, null, 2)}
-
-Target Job Description:
-${jobDescription || "Not provided (Write a strong general cover letter based on their most recent role)."}`;
-
-  const result = await callGemini(systemPrompt, userPrompt);
+  const result = await callLlmTask("generateCoverLetter", { resumeData, jobDescription });
   return result;
 }

@@ -3,17 +3,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 test("improveResume prompt includes source document context when provided", () => {
-  const groqSource = readFileSync(new URL("./groq.js", import.meta.url), "utf8");
+  const groqSource = readFileSync(new URL("../../api/groqTasks.js", import.meta.url), "utf8");
 
   assert.match(groqSource, /Candidate's raw background\/source document/);
-  assert.match(groqSource, /targetContext\.sourceDocumentText/);
+  assert.match(groqSource, /sourceDocumentText/);
 });
 
 test("rewriteResumeBullet prompt includes source document context when provided", () => {
-  const groqSource = readFileSync(new URL("./groq.js", import.meta.url), "utf8");
+  const groqSource = readFileSync(new URL("../../api/groqTasks.js", import.meta.url), "utf8");
 
   assert.match(groqSource, /Relevant source document context/);
-  assert.match(groqSource, /targetContext\.sourceDocumentText/);
+  assert.match(groqSource, /sourceDocumentText/);
 });
 
 test("grader improve flow forwards the uploaded source document to improveResume", () => {
