@@ -1,22 +1,32 @@
 # ResuMe
 
 <p align="center">
-  <img src="public/social-preview.png" alt="ResuMe social preview" width="900" />
+  <strong>Free resumes. No download ransom.</strong>
 </p>
 
-<p align="center">
-  <strong>F*ck resume paywalls.</strong><br />
-  Build the resume, grade it, rewrite weak bullets, export it, and move on with your life.
-</p>
+<h3 align="center">
+  Live: <a href="https://resume.ayuslh.in/">resume.ayuslh.in</a>
+</h3>
 
 <p align="center">
-  <a href="https://resume.ayuslh.in/">Live app</a>
-  |
   <a href="https://resume.ayuslh.in/templates">Templates</a>
   |
   <a href="https://resume.ayuslh.in/grader-info">ATS grader</a>
   |
   <a href="https://resume.ayuslh.in/pricing">$0 pricing</a>
+</p>
+
+<p align="center">
+  <img src="public/social-preview.png" alt="ResuMe social preview" width="900" />
+</p>
+
+<p align="center">
+  <strong>No more resume paywalls.</strong><br />
+  Build the resume, grade it, rewrite weak bullets, export it, and move on with your life.
+</p>
+
+<p align="center">
+  If this helps, a star helps others find the free option first.
 </p>
 
 <p align="center">
@@ -27,19 +37,9 @@
   <img alt="Price" src="https://img.shields.io/badge/Price-%240%20unlocked-16a34a?style=for-the-badge" />
 </p>
 
-> If this saves one job seeker from building a whole resume just to hit a download paywall, the repo has done its job. Star it so more people find the free option first.
-
 ## Why This Exists
 
-Most resume builders let you spend an hour polishing a draft, then punch you in the face with:
-
-- Paywalls at download
-- Watermarks on your own PDF
-- Monthly subscriptions for a one-time task
-- "Premium" templates that should have been free
-- Generic AI advice that sounds like it never read your resume
-
-ResuMe is the counterpunch: a free, ATS-focused resume workspace that lets you build, grade, rewrite, publish, and export without the usual nonsense.
+Built for students and early-career job seekers who shouldn't have to pay to apply for jobs. ResuMe keeps the builder, grader, rewrites, share links, and exports in one free ATS-focused workspace.
 
 ## What ResuMe Does
 
@@ -48,12 +48,10 @@ ResuMe is the counterpunch: a free, ATS-focused resume workspace that lets you b
 | AI resume builder | Turns rough notes, a resume, a brag sheet, or pasted experience into a structured resume draft for a target role. |
 | ATS resume grader | Scores a resume against a job, then breaks down formatting, keywords, impact, clarity, and job match. |
 | Weak bullet rewriter | Finds vague bullets and generates stronger versions without drifting away from the original facts. |
-| OCR-backed parsing | Reads `PDF`, `DOCX`, and `TXT`; scanned PDFs get OCR fallback instead of failing silently. |
-| Inline editor | Edit directly on the resume preview instead of fighting disconnected forms. |
-| Public resume links | Publish a share link, copy it, and track views from the dashboard. |
-| Shareable grader reports | Copy a report link so feedback can be shared outside the current browser. |
-| PDF and DOCX export | Download the finished resume without a watermark or subscription trap. |
+| Inline resume editor | Edit directly on the resume preview instead of fighting disconnected forms. |
+| Public share links | Publish resumes and grader reports so feedback can move outside the current browser. |
 | Cover letter generator | Generate a tailored cover letter from an existing resume and job description. |
+| Free export | Download the finished resume without a watermark or subscription trap. |
 
 ## Templates
 
@@ -74,17 +72,26 @@ Pick the format that fits the role. Keep it readable. Keep it ATS-safe.
 
 The grader also works as a standalone tool: paste a shared ResuMe link, paste raw resume text, or upload a file, then compare the result against one target role and up to two alternate roles.
 
-## Built Like A Real Product
+## Architecture
 
-This is not a pretty form wrapped around a single prompt.
+```mermaid
+flowchart LR
+  Browser["React + Vite SPA"] --> Auth["Firebase Auth"]
+  Browser --> Firestore["Firestore"]
+  Browser --> Parser["Browser parsers: PDF, DOCX, TXT, OCR"]
+  Browser --> LlmClient["src/services/llm.js"]
+  LlmClient --> Api["/api/groq Vercel serverless function"]
+  Api --> Admin["Firebase Admin token check"]
+  Api --> Tasks["api/groqTasks.js typed prompt builder"]
+  Tasks --> Groq["Groq chat completions"]
+  Firestore --> Shares["Public resume and grader-report mirrors"]
+  Vite["Vite transformIndexHtml"] --> SeoShell["Static homepage SEO shell"]
+```
 
-- **Authenticated AI backend:** the browser sends typed tasks to `/api/groq`; prompts and Groq keys stay server-side.
-- **Rate limiting:** AI tasks are rate-limited per user and task type.
-- **Firebase Auth:** email/password and Google sign-in.
-- **Firestore persistence:** private resumes, public share mirrors, grader reports, profile docs, and view records.
-- **Public sharing:** `/shared/:token` for resumes and `/grader/report/:reportToken` for grader reports.
-- **SEO shell:** the homepage has a build-time static shell from `src/seo/homepageSeoContent.js`, plus `robots.txt`, `sitemap.xml`, and `llms.txt`.
-- **Safety rails:** resume HTML sanitization, structured task validation, Firestore rules, and focused Node tests.
+- **Frontend:** React and Vite handle public pages, authenticated workspace routes, and fullscreen export/cover-letter flows.
+- **API layer:** `/api/groq` is a Vercel serverless function that verifies Firebase tokens, rate-limits requests, builds typed prompts, and calls Groq server-side.
+- **Data layer:** Firestore stores private resumes plus public mirrors for shared resumes and grader reports.
+- **Security basics:** the app sanitizes resume HTML and uses Firestore rules for user-owned data.
 
 ## Tech Stack
 
@@ -128,13 +135,15 @@ npm run dev
 
 Open `http://localhost:5173`.
 
-## Useful Commands
+## Testing
 
 ```bash
 npm run lint
 npm run build
 node --test src/**/*.test.js api/*.test.js
 ```
+
+The Node test suite covers route metadata, public discovery files, Firestore rule expectations, resume persistence, sharing, HTML sanitization, parser-adjacent helpers, dashboard/builder/grader behavior, and the `/api/groq` task/security contract.
 
 ## Deploy
 
@@ -147,10 +156,6 @@ Vercel is the intended deploy target.
 
 The app uses `vercel.json` to route SPA paths back to `index.html`, while `/api/groq` stays available as the serverless AI endpoint.
 
-## Star The Free Option
-
-Resume tooling should not be a trap. If you agree, star the repo and help push the free, no-watermark, no-subscription option above the paywall clones.
-
 ## License
 
-Open source and free to use.
+ResuMe is released under the MIT License. See [LICENSE](LICENSE) for the full license text.
