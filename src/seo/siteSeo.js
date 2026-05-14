@@ -10,7 +10,7 @@ export const SOCIAL_IMAGE = `${SITE_URL}social-preview.png`
 
 export const HOME_TITLE = 'Free AI Resume Builder | ResuMe'
 export const HOME_DESCRIPTION = HOME_SEO_DESCRIPTION
-export const HOME_LAST_MODIFIED = '2026-05-03'
+export const HOME_LAST_MODIFIED = '2026-05-14'
 
 export const HOME_JSON_LD = [
   {

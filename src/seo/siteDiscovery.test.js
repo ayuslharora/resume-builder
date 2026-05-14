@@ -24,7 +24,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
     tagWithAttributes("meta", {
       name: "description",
       content:
-        "ResuMe is a free ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
+        "ResuMe is an open-access ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.",
     }),
   );
   assert.match(
@@ -54,8 +54,8 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
   assert.match(html, /"@type"\s*:\s*"SoftwareApplication"/);
   assert.match(html, /"@type"\s*:\s*"Organization"/);
   assert.match(html, /"@type"\s*:\s*"Offer"/);
-  assert.match(html, /"datePublished"\s*:\s*"2026-05-03"/);
-  assert.match(html, /"dateModified"\s*:\s*"2026-05-03"/);
+  assert.match(html, /"datePublished"\s*:\s*"2026-05-14"/);
+  assert.match(html, /"dateModified"\s*:\s*"2026-05-14"/);
   assert.match(html, /"price"\s*:\s*"0"/);
   assert.match(html, /"availability"\s*:\s*"https:\/\/schema\.org\/InStock"/);
   assert.match(html, /<!-- HOMEPAGE_SEO_SHELL -->/);
@@ -126,6 +126,42 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(llms, /Founder\/creator: Ayush/);
   assert.match(llms, /## Main sections/);
   assert.match(llms, /\[Homepage\]\(https:\/\/resume\.ayuslh\.in\/\)/);
+  assert.match(llms, /Professional/);
+  assert.doesNotMatch(llms, /Classic, Modern, Minimal, and Creative/);
+});
+
+test("vercel routing avoids indexable homepage shells on non-home routes", async () => {
+  const vercel = JSON.parse(await readFile(new URL("../../vercel.json", import.meta.url), "utf8"));
+  const routes = vercel.routes ?? [];
+
+  assert.ok(
+    routes.some((route) => route.src === "/templates" && route.dest === "/templates.html"),
+    "expected /templates to use a static route shell",
+  );
+  assert.ok(
+    routes.some((route) => route.src === "/grader-info" && route.dest === "/grader-info.html"),
+    "expected /grader-info to use a static route shell",
+  );
+  assert.ok(
+    routes.some((route) => route.src === "/pricing" && route.dest === "/pricing.html"),
+    "expected /pricing to use a static route shell",
+  );
+  assert.ok(
+    routes.some((route) => route.src === "/login" && route.dest === "/login.html"),
+    "expected /login to use a noindex auth shell",
+  );
+  assert.ok(
+    routes.some((route) => route.src === "/(.*)" && route.dest === "/404.html" && route.status === 404),
+    "expected unknown routes to return a 404 shell",
+  );
+  assert.ok(
+    routes.some((route) => route.headers?.["Content-Security-Policy"] === "frame-ancestors 'none'"),
+    "expected a frame-ancestor CSP hardening header",
+  );
+  assert.ok(
+    routes.some((route) => route.headers?.["Cache-Control"] === "public, max-age=31536000, immutable"),
+    "expected immutable caching for hashed assets",
+  );
 });
 
 test("homepage static shell contains the public answer blocks used for AI search", () => {
