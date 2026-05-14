@@ -213,6 +213,6 @@ test('siteSeo includes creator and freshness schema signals', async () => {
   assert.match(source, /'@type': 'Person'/);
   assert.match(source, /founder:/);
   assert.match(source, /sameAs:/);
-  assert.match(source, /datePublished: HOME_LAST_MODIFIED/);
-  assert.match(source, /dateModified: HOME_LAST_MODIFIED/);
+  assert.match(source, /datePublished: HOME_DATE_PUBLISHED/);
+  assert.match(source, /dateModified: HOME_DATE_MODIFIED/);
 });

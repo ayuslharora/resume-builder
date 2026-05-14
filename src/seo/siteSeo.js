@@ -10,7 +10,8 @@ export const SOCIAL_IMAGE = `${SITE_URL}social-preview.png`
 
 export const HOME_TITLE = 'Free AI Resume Builder | ResuMe'
 export const HOME_DESCRIPTION = HOME_SEO_DESCRIPTION
-export const HOME_LAST_MODIFIED = '2026-05-14'
+export const HOME_DATE_PUBLISHED = '2026-05-03'
+export const HOME_DATE_MODIFIED = '2026-05-14'
 
 export const HOME_JSON_LD = [
   {
@@ -29,8 +30,8 @@ export const HOME_JSON_LD = [
     name: HOME_TITLE,
     url: SITE_URL,
     description: HOME_DESCRIPTION,
-    datePublished: HOME_LAST_MODIFIED,
-    dateModified: HOME_LAST_MODIFIED,
+    datePublished: HOME_DATE_PUBLISHED,
+    dateModified: HOME_DATE_MODIFIED,
     isPartOf: {
       '@id': `${SITE_URL}#website`,
     },
@@ -71,8 +72,8 @@ export const HOME_JSON_LD = [
     url: SITE_URL,
     image: `${SITE_URL}favicon.svg`,
     description: HOME_DESCRIPTION,
-    datePublished: HOME_LAST_MODIFIED,
-    dateModified: HOME_LAST_MODIFIED,
+    datePublished: HOME_DATE_PUBLISHED,
+    dateModified: HOME_DATE_MODIFIED,
     publisher: {
       '@id': `${SITE_URL}#organization`,
     },

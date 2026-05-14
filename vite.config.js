@@ -26,16 +26,22 @@ function homepageSeoShellPlugin() {
       const indexPath = path.resolve(outDir, 'index.html')
       const html = await readFile(indexPath, 'utf8')
 
-      await Promise.all([
-        ...PUBLIC_STATIC_ROUTES.map((route) =>
-          writeFile(path.resolve(outDir, route.fileName), buildStaticRouteHtml(html, route)),
-        ),
-        ...AUTH_STATIC_ROUTES.map((route) =>
-          writeFile(path.resolve(outDir, route.fileName), buildAppShellHtml(html, route)),
-        ),
-        writeFile(path.resolve(outDir, 'app.html'), buildAppShellHtml(html, APP_SHELL_SEO)),
-        writeFile(path.resolve(outDir, '404.html'), buildAppShellHtml(html, NOT_FOUND_SEO)),
-      ])
+      try {
+        await Promise.all([
+          ...PUBLIC_STATIC_ROUTES.map((route) =>
+            writeFile(path.resolve(outDir, route.fileName), buildStaticRouteHtml(html, route)),
+          ),
+          ...AUTH_STATIC_ROUTES.map((route) =>
+            writeFile(path.resolve(outDir, route.fileName), buildAppShellHtml(html, route)),
+          ),
+          writeFile(path.resolve(outDir, 'app.html'), buildAppShellHtml(html, APP_SHELL_SEO)),
+          writeFile(path.resolve(outDir, '404.html'), buildAppShellHtml(html, NOT_FOUND_SEO)),
+        ])
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        this.error(`Failed to generate static route files: ${message}`)
+        throw error
+      }
     },
   }
 }

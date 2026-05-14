@@ -54,7 +54,7 @@ test("homepage HTML exposes production SEO metadata and structured data", async 
   assert.match(html, /"@type"\s*:\s*"SoftwareApplication"/);
   assert.match(html, /"@type"\s*:\s*"Organization"/);
   assert.match(html, /"@type"\s*:\s*"Offer"/);
-  assert.match(html, /"datePublished"\s*:\s*"2026-05-14"/);
+  assert.match(html, /"datePublished"\s*:\s*"2026-05-03"/);
   assert.match(html, /"dateModified"\s*:\s*"2026-05-14"/);
   assert.match(html, /"price"\s*:\s*"0"/);
   assert.match(html, /"availability"\s*:\s*"https:\/\/schema\.org\/InStock"/);
@@ -162,6 +162,25 @@ test("vercel routing avoids indexable homepage shells on non-home routes", async
     routes.some((route) => route.headers?.["Cache-Control"] === "public, max-age=31536000, immutable"),
     "expected immutable caching for hashed assets",
   );
+});
+
+test("homepage schema keeps published and modified dates separate", async () => {
+  const siteSeoSource = await readFile(new URL("./siteSeo.js", import.meta.url), "utf8");
+
+  assert.match(siteSeoSource, /HOME_DATE_PUBLISHED\s*=\s*'2026-05-03'/);
+  assert.match(siteSeoSource, /HOME_DATE_MODIFIED\s*=\s*'2026-05-14'/);
+  assert.match(siteSeoSource, /datePublished:\s*HOME_DATE_PUBLISHED/);
+  assert.match(siteSeoSource, /dateModified:\s*HOME_DATE_MODIFIED/);
+  assert.doesNotMatch(siteSeoSource, /datePublished:\s*HOME_DATE_MODIFIED/);
+});
+
+test("static route generation reports file write failures clearly", async () => {
+  const viteSource = await readFile(new URL("../../vite.config.js", import.meta.url), "utf8");
+
+  assert.match(viteSource, /try\s*\{\s*await Promise\.all\(/);
+  assert.match(viteSource, /catch\s*\(error\)/);
+  assert.match(viteSource, /Failed to generate static route files/);
+  assert.match(viteSource, /this\.error\(/);
 });
 
 test("homepage static shell contains the public answer blocks used for AI search", () => {
