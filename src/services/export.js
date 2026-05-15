@@ -13,11 +13,12 @@ import {
   TextRun,
   WidthType,
 } from "docx";
+import { stripResumeHtml } from "./resumeHtmlSanitizer";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function clean(v) {
-  return typeof v === "string" ? v.trim() : (v ? String(v).trim() : "");
+  return stripResumeHtml(typeof v === "string" ? v : (v ? String(v) : "")).trim();
 }
 
 // Cell borders: all NONE
