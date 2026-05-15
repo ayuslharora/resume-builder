@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
@@ -24,6 +24,7 @@ export default function Export() {
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [resumeHeight, setResumeHeight] = useState(0);
+  const previewRootRef = useRef(null);
   const { getResume, updateResume } = useFirestore();
   const navigate = useNavigate();
 
@@ -119,7 +120,11 @@ export default function Export() {
     try {
       setExportingType('docx');
       const { exportDOCX } = await import("../services/export");
-      await exportDOCX(resumeData, `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`);
+      await exportDOCX({
+        fileName: `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`,
+        templateId,
+        resumeData,
+      });
     } catch (e) {
       alert("Failed to export DOCX: " + e.message);
     } finally {
@@ -240,7 +245,7 @@ export default function Export() {
               </div>
             </div>
           )}
-          <div className="flex justify-center overflow-x-auto print-resume-wrapper">
+          <div ref={previewRootRef} className="flex justify-center overflow-x-auto print-resume-wrapper">
             <div
               className="paper print-resume-document mx-auto"
               style={{ width: '850px', flexShrink: 0 }}

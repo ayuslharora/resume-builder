@@ -30,7 +30,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
 
   return (
     <div
-      className={`${bg} flex flex-col max-w-[850px] mx-auto font-sans shadow-2xl p-12 relative`}
+      className={`resume-template-root creative-template-root ${bg} flex flex-col max-w-[850px] mx-auto font-sans shadow-2xl p-12 relative`}
       style={RESUME_PAGE_MIN_HEIGHT_STYLE}
     >
       {/* Editorial Name Header */}
@@ -46,7 +46,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </div>
 
           {/* Clean Contact Grid */}
-          <div className={`grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4`}>
+          <div className={`creative-contact-grid grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4`}>
             {(isEditing || resumeData.personalInfo.phone) && (
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.phone ?? "PHONE"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, phone: v })} /></div>
@@ -106,10 +106,10 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                 <div className={`h-1 flex-1 ${accentBg}`}></div>
               </h2>
 
-              <div className="space-y-10 pl-6 md:pl-8 border-l-2 border-[#121212]/20 relative">
-                {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
-                  <div key={exp.id || `exp-${i}`} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 group relative">
-                    <div className={`absolute -left-[31px] md:-left-[39px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
+                <div className="creative-timeline space-y-10 pl-6 md:pl-8 border-l-2 border-[#121212]/20 relative">
+                  {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
+                  <div key={exp.id || `exp-${i}`} className="creative-role-grid grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 group relative">
+                    <div className={`creative-timeline-dot absolute -left-[31px] md:-left-[39px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
                     {/* Left Column: Role & Meta */}
                     <div className="col-span-1 md:col-span-4 md:border-r-2 border-[#121212]/10 md:pr-6">
                       <h3 className={`font-black text-lg ${darkText} uppercase leading-tight mb-2`}>
@@ -136,7 +136,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                     <div className="col-span-1 md:col-span-8">
                       <ul className={`list-none space-y-3 text-[13px] font-semibold ${darkText} leading-[1.7] tracking-wide`}>
                         {(exp.bullets || []).map((bullet, bulletIdx) => (
-                          <li key={bulletIdx} className="relative pl-5 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-[#121212] before:rotate-45">
+                          <li key={bulletIdx} className="creative-bullet-diamond relative pl-5 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-[#121212] before:rotate-45">
                             <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('experience', exp.id, bulletIdx, v) : onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, bullets: Object.assign([...(e.bullets || [])], { [bulletIdx]: v }) } : e))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('experience', exp.id, bulletIdx, v) : undefined} />
                           </li>
                         ))}
@@ -155,7 +155,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
         )}
 
         {/* 2-Column Grid for Skills & Projects/Education */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="creative-two-col-grid grid grid-cols-1 md:grid-cols-2 gap-12">
 
           {hasVisibleProjects && (
             <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
@@ -164,10 +164,10 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                   <InlineEdit className="!w-auto" value={resumeData.labels?.projects ?? "PROJECTS"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, projects: v })} />
                   <div className={`h-1 flex-1 ${accentBg}`}></div>
                 </h2>
-                <div className="space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
+                <div className="creative-timeline space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
                   {resumeData.projects.map((proj, i) => (isEditing || isProjNotEmpty(proj)) && (
                     <div key={proj.id || `proj-${i}`} className="relative">
-                      <div className={`absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
+                      <div className={`creative-timeline-dot absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
                       <h3 className={`font-black text-base ${darkText} uppercase tracking-wider flex items-center flex-wrap gap-2 mb-1`}>
                         <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
                         {isEditing && activeSection === "projects" && onRegenerateItem && (
@@ -188,7 +188,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                       )}
                       <ul className={`list-none space-y-2 text-[13px] font-semibold ${textMuted} uppercase leading-[1.6] tracking-wide`}>
                         {(proj.bullets || []).map((bullet, bulletIdx) => (
-                          <li key={bulletIdx} className="relative pl-4 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:border-2 before:border-[#121212]">
+                          <li key={bulletIdx} className="creative-bullet-square relative pl-4 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:border-2 before:border-[#121212]">
                             <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], { [bulletIdx]: v }) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
                           </li>
                         ))}
@@ -274,10 +274,10 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                     <InlineEdit className="!w-auto" value={resumeData.labels?.education ?? "EDUCATION"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, education: v })} />
                     <div className={`h-1 flex-1 ${accentBg}`}></div>
                   </h2>
-                  <div className="space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
+                  <div className="creative-timeline space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
                     {resumeData.education.map((edu, i) => (isEditing || isEduNotEmpty(edu)) && (
                       <div key={edu.id || `edu-${i}`} className="relative">
-                        <div className={`absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
+                        <div className={`creative-timeline-dot absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
                         <h3 className={`font-black text-[15px] ${darkText} uppercase tracking-wider flex items-center flex-wrap gap-2 mb-1`}>
                           <span><InlineEdit value={edu.degree} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, degree: v } : e))} /> <InlineEdit value={resumeData.labels?.in ?? "IN"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, in: v })} /> <InlineEdit value={edu.field} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, field: v } : e))} /></span>
                           {isEditing && activeSection === "education" && onRegenerateItem && (

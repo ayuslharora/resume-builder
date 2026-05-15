@@ -45,7 +45,7 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
 
   return (
     <div
-      className="bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex items-stretch"
+      className="resume-template-root bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex items-stretch"
       style={RESUME_PAGE_MIN_HEIGHT_STYLE}
     >
       {/* Left Sidebar */}
