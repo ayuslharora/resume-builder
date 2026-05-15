@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { templates } from "../templates";
+import { getResumeTypographyStyle } from "../../services/resumeTypography";
 
 export default function ResumePreview({ 
   resumeData, 
@@ -20,10 +21,11 @@ export default function ResumePreview({
   if (!templateId || !templates[templateId]) return <div className="p-10 text-center text-gray-500">No template selected</div>;
 
   const { component: TemplateComponent } = templates[templateId];
+  const typographyStyle = getResumeTypographyStyle(resumeData?.theme);
 
   return (
     <Suspense fallback={<div className="h-96 flex items-center justify-center text-gray-400 animate-pulse">Loading template...</div>}>
-      <div className="shadow-lg origin-top bg-white" style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}>
+      <div className="shadow-lg origin-top bg-white" style={{ ...typographyStyle, transform: `scale(${scale})`, transformOrigin: 'top center' }}>
         <TemplateComponent
           resumeData={resumeData}
           isEditing={isEditing}

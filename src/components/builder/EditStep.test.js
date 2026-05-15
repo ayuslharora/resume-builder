@@ -8,11 +8,11 @@ test("EditStep exposes an ATS rescan trigger in the editor toolbar", async () =>
   assert.match(source, /btn-ghost h-10 w-full !border-\[#d4d4d8\] sm:w-auto/);
 });
 
-test("EditStep keeps re-scan and complete rendering controls at the same height", async () => {
+test("EditStep keeps re-scan and render controls in the action row", async () => {
   const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
 
   assert.match(source, /btn-ghost h-10 w-full !border-\[#d4d4d8\] sm:w-auto/);
-  assert.match(source, /className="btn-primary h-10[\s\S]*Complete Rendering/);
+  assert.match(source, /className="btn-primary h-10[\s\S]*Render/);
 });
 
 test("EditStep uses a mobile overlay ATS panel and a scrollable preview rail", async () => {
@@ -37,17 +37,16 @@ test("EditStep live preview keeps its layout but uses theme-aware builder tokens
   assert.match(source, /background:\s*"var\(--accent\)"/);
   assert.match(source, /background:\s*"var\(--accent-soft\)"/);
   assert.match(source, /text-primary/);
-  assert.match(source, /bg-primary\/5/);
   assert.doesNotMatch(source, /bg-cyan-400|text-cyan-400|text-cyan-500|bg-cyan-500|border-cyan-500|rgba\(34,211,238|rgba\(6,\s*182,\s*212,\s*0\.15\)/);
   assert.doesNotMatch(source, /background:\s*"#ffffff"|backgroundColor:\s*"#f4f4f5"|bg-\[#eff6ff\]|text-blue-600|bg-\[#2563eb\]|hover:bg-\[#f4f4f5\]/);
 });
 
-test("EditStep keeps the complete rendering export action in step 5", async () => {
+test("EditStep keeps the render export action in step 5", async () => {
   const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
 
-  assert.match(source, /Complete Rendering/);
+  assert.match(source, /Render/);
   assert.match(source, /navigate\(`\/export\/\$\{exportResumeId\}`/);
-  assert.match(source, /FileText size=\{14\}/);
+  assert.match(source, /Play size=\{14\}/);
 });
 
 test("EditStep saves the complete current resume payload before exporting", async () => {
@@ -66,7 +65,7 @@ test("EditStep saves the complete current resume payload before exporting", asyn
   assert.match(handler, /await saveNow\(completeResumePayload\)/);
   assert.match(handler, /builderData:\s*\{\s*\.\.\.builderData,\s*\.\.\.completeResumePayload\s*\}/);
   assert.match(shortcut, /handleCompleteRendering\(\)/);
-  assert.match(source, /onClick=\{handleCompleteRendering\}[\s\S]*Complete Rendering/);
+  assert.match(source, /onClick=\{handleCompleteRendering\}[\s\S]*Render/);
   assert.doesNotMatch(shortcut, /saveNow\(\{\s*status:\s*"complete"\s*\}\)/);
 });
 
@@ -95,4 +94,24 @@ test("EditStep ATS panel uses the new app design theme instead of legacy dark gl
   assert.doesNotMatch(source, /glass-card ghost-border/);
   assert.doesNotMatch(source, /rgba\(7,13,31,0\.45\)/);
   assert.doesNotMatch(source, /linear-gradient\(90deg, #06b6d4 0%, #67e8f9 100%\)/);
+});
+
+test("EditStep exposes compact font controls beside rich text tools", async () => {
+  const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /<RichTextToolbar flat \/>/);
+  assert.match(source, /h-5 w-px bg-surface-container-high/);
+  assert.match(source, /aria-label="Resume font family"/);
+  assert.match(source, /aria-label="Decrease font size"/);
+  assert.match(source, /aria-label="Increase font size"/);
+  assert.match(source, /POPULAR_RESUME_FONTS\.map/);
+});
+
+test("EditStep persists typography changes to theme in resumeData", async () => {
+  const source = await readFile(new URL("./EditStep.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /const handleTypographyChange = \(field, value\) => \{/);
+  assert.match(source, /updateSection\("theme", nextTheme\)/);
+  assert.match(source, /theme: nextTheme/);
+  assert.match(source, /\.\.\.previewTypographyStyle/);
 });

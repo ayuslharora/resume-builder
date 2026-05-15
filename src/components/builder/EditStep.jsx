@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useResume } from "../../context/useResume";
 import ResumePreview from "../resume/ResumePreview";
 import { templates } from "../templates";
-import { Wand2, Save, Loader2, FileText, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, Scissors } from "lucide-react";
+import { Wand2, CheckCircle2, Loader2, Play, RefreshCw, X, AlertCircle, Sparkles, PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, Scissors, Minus, Plus } from "lucide-react";
 import AiRewriteModal from "./AiRewriteModal";
 import SectionAiRewriteModal from "./SectionAiRewriteModal";
 import ItemAiRewriteModal from "./ItemAiRewriteModal";
@@ -11,6 +11,7 @@ import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
 import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
 import { triggerActiveRewrite } from "../resume/InlineEdit";
+import { POPULAR_RESUME_FONTS, DEFAULT_RESUME_FONT_SIZE, getResumeTypographyStyle } from "../../services/resumeTypography";
 
 const atsBreakdownLabels = [
   ["formatting", "Formatting"],
@@ -308,6 +309,21 @@ export default function EditStep() {
     });
   };
 
+  const handleTypographyChange = (field, value) => {
+    const nextTheme = {
+      ...(resumeData.theme || {}),
+      [field]: value,
+    };
+
+    updateSection("theme", nextTheme);
+    saveToFirestore({
+      resumeData: {
+        ...resumeData,
+        theme: nextTheme,
+      },
+    });
+  };
+
   async function handleAtsRescan() {
     setIsAtsPanelOpen(true);
     setAtsError(null);
@@ -350,6 +366,11 @@ export default function EditStep() {
   }
 
   const atsCardStyle = { background: "var(--surface)", border: "1px solid var(--border)" };
+  const currentFontFamily = resumeData.theme?.fontFamily || POPULAR_RESUME_FONTS[0].value;
+  const currentFontSize = Number.isFinite(Number(resumeData.theme?.fontSize))
+    ? Number(resumeData.theme.fontSize)
+    : DEFAULT_RESUME_FONT_SIZE;
+  const previewTypographyStyle = getResumeTypographyStyle(resumeData.theme);
 
   const overflowPx = resumeHeight > 0 ? Math.round(resumeHeight - 1122) : 0;
 
@@ -553,109 +574,155 @@ export default function EditStep() {
         style={{ background: "var(--builder-form-surface)", border: "1px solid var(--builder-form-border-soft)", boxShadow: "0 18px 40px -28px rgba(15,15,20,0.22), 0 1px 2px rgba(15,15,20,0.04)" }}
       >
         <div
-          className="builder-live-preview-toolbar border-b p-3 sm:px-5 sm:py-3 flex flex-wrap gap-3 justify-between items-center z-50 sticky top-0 lg:top-[85px] rounded-t-2xl"
+          className="builder-live-preview-toolbar z-50 sticky top-0 lg:top-[85px] rounded-t-2xl border-b"
           style={{ background: "var(--builder-form-surface)", borderColor: "var(--builder-form-border-soft)" }}
         >
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button 
+          {/* ── Row 1: typography · formatting · status ── */}
+          <div
+            className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 border-b"
+            style={{ borderColor: "var(--builder-form-border-soft)" }}
+          >
+            <button
               onClick={() => setIsAtsPanelOpen(!isAtsPanelOpen)}
-              className="p-1.5 text-on-surface hover:bg-surface-container rounded transition-colors bg-primary/5 mr-2"
+              className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors"
               title="Toggle ATS Feedback Panel"
             >
-              {isAtsPanelOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+              {isAtsPanelOpen ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}
             </button>
-            <div className="hidden sm:flex w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }} />
-            <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] text-primary uppercase">
-              Live Preview
-            </span>
-            
-            <div className="flex items-center gap-0.5 ml-0 sm:ml-2 border-l border-surface-container-high pl-2 sm:pl-3">
+
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+              <span className="text-[13px] font-medium text-on-surface hidden sm:block">Live</span>
+            </div>
+
+            <div className="flex items-center gap-0.5">
               <button
                 onClick={undo}
                 disabled={!canUndo}
-                className={`p-1.5 sm:p-1 rounded transition-colors ${canUndo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
-                title="Undo (Browser Back)"
+                className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${canUndo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                title="Undo"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={15} />
               </button>
               <button
                 onClick={redo}
                 disabled={!canRedo}
-                className={`p-1.5 sm:p-1 rounded transition-colors ${canRedo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
-                title="Redo (Browser Forward)"
+                className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${canRedo ? "text-on-surface hover:bg-surface-container" : "text-on-surface-variant/40 cursor-not-allowed"}`}
+                title="Redo"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={15} />
               </button>
             </div>
 
-            {resumeHeight > 200 && (
-              <div className="hidden sm:flex items-center gap-2 ml-1">
-                <span
-                  className="text-[10px] font-mono px-2 py-1 rounded-md"
-                  style={
-                    overflowPx > 30
-                      ? { color: "rgb(239,68,68)", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }
-                      : overflowPx > 0
-                      ? { color: "rgb(217,119,6)", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.25)" }
-                      : { color: "var(--accent)", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }
-                  }
-                >
-                  {overflowPx > 0
-                    ? `${overflowPx > 30 ? "✕" : "⚠"} ${overflowPx}px over`
-                    : "✓ fits"}
-                </span>
+            <div className="h-5 w-px bg-surface-container-high flex-shrink-0" aria-hidden="true" />
 
-                {overflowPx >= 10 && (
-                  <button
-                    onClick={handleFitMe}
-                    disabled={isFittingMe}
-                    className="btn btn-ghost btn-sm flex items-center gap-1 text-[11px] font-semibold"
-                    title="Auto-shorten longest bullets to fit one page"
-                  >
-                    {isFittingMe ? <Loader2 size={13} className="animate-spin" /> : <Scissors size={13} />}
-                    Fit Me
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          
-          <div className="order-last w-full sm:order-none sm:w-auto">
-            <RichTextToolbar />
-          </div>
+            <select
+              value={currentFontFamily}
+              onChange={(e) => handleTypographyChange("fontFamily", e.target.value)}
+              className="h-8 w-24 max-w-[96px] rounded-lg border border-surface-container-high bg-surface-container px-2 text-[12px] font-medium text-on-surface cursor-pointer focus:outline-none"
+              style={{ width: "96px" }}
+              aria-label="Resume font family"
+            >
+              {POPULAR_RESUME_FONTS.map((font) => (
+                <option key={font.value} value={font.value}>{font.label}</option>
+              ))}
+            </select>
 
-          <div className="flex w-full sm:w-auto flex-wrap gap-3 sm:items-center sm:justify-end">
+            <div className="inline-flex items-center h-8 rounded-lg border border-surface-container-high bg-surface-container overflow-hidden">
+              <button
+                type="button"
+                onClick={() => handleTypographyChange("fontSize", Math.max(12, currentFontSize - 1))}
+                disabled={currentFontSize <= 12}
+                className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Decrease font size"
+                title="Decrease font size"
+              >
+                <Minus size={11} />
+              </button>
+              <span className="w-7 text-center text-[12px] font-medium text-on-surface tabular-nums select-none">
+                {currentFontSize}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleTypographyChange("fontSize", Math.min(20, currentFontSize + 1))}
+                disabled={currentFontSize >= 20}
+                className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-l border-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Increase font size"
+                title="Increase font size"
+              >
+                <Plus size={11} />
+              </button>
+            </div>
+
+            <div className="h-5 w-px bg-surface-container-high flex-shrink-0" aria-hidden="true" />
+
+            <RichTextToolbar flat />
+
+            <div className="flex-1" />
+
             {pendingAIChange ? (
-              <div className="flex w-full sm:w-auto flex-wrap items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
-                <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5 mr-2">
-                  <Wand2 size={12}/> Review AI Change
+              <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 pl-3 pr-1 py-1 rounded-lg animate-in fade-in zoom-in-95">
+                <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5">
+                  <Wand2 size={12} /> Review AI Change
                 </span>
-                <button 
+                <button
                   onClick={handleDiscardAIChange}
                   className="px-3 py-1 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors"
                 >
                   Discard
                 </button>
-                <button 
+                <button
                   onClick={handleAcceptAIChange}
                   className="px-3 py-1 font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all"
                 >
                   Keep
                 </button>
               </div>
+            ) : isSaving ? (
+              <div className="flex items-center gap-1.5 text-[12px] text-on-surface-variant">
+                <Loader2 size={14} className="animate-spin" />
+                <span className="hidden sm:block">Saving</span>
+              </div>
             ) : (
-              isSaving ? (
-                <span className="text-[10px] font-mono text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/20">
-                  <Loader2 size={12} className="inline mr-1 animate-spin" />
-                  SAVING
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/20">
-                  <Save size={12} className="inline mr-1" />
-                  AUTO-SAVED
-                </span>
-              )
+              <div className="flex items-center gap-1.5 text-[12px] text-emerald-500">
+                <CheckCircle2 size={15} />
+                <span className="hidden sm:block">Saved</span>
+              </div>
             )}
+          </div>
+
+          {/* ── Row 2: fit / overflow · actions ── */}
+          <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2">
+            {overflowPx >= 10 && (
+              <button
+                onClick={handleFitMe}
+                disabled={isFittingMe}
+                className="flex items-center gap-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50"
+                title="Auto-shorten longest bullets to fit one page"
+              >
+                {isFittingMe ? <Loader2 size={13} className="animate-spin" /> : <Scissors size={13} />}
+                Fit
+              </button>
+            )}
+            {resumeHeight > 200 && (
+              <span
+                className="text-[11px] font-mono px-2.5 py-1 rounded-md"
+                style={
+                  overflowPx > 30
+                    ? { color: "rgb(239,68,68)", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }
+                    : overflowPx > 0
+                    ? { color: "rgb(217,119,6)", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.25)" }
+                    : { color: "var(--accent)", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }
+                }
+              >
+                {overflowPx > 0
+                  ? `${overflowPx > 30 ? "✕" : "⚠"} ${overflowPx}px over`
+                  : "✓ fits"}
+              </span>
+            )}
+
+            <div className="flex-1" />
+
             <button
               onClick={handleAtsRescan}
               disabled={isScanningAts}
@@ -664,12 +731,12 @@ export default function EditStep() {
               {isScanningAts ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
               Re-scan
             </button>
-            <button 
+            <button
               onClick={handleCompleteRendering}
               className="btn-primary h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
-              <FileText size={14} /> 
-              Complete Rendering
+              <Play size={14} />
+              Render
             </button>
           </div>
         </div>
@@ -690,6 +757,7 @@ export default function EditStep() {
             ref={resumeDocRef}
             className="bg-white relative z-10 transition-transform duration-200"
             style={{
+              ...previewTypographyStyle,
               width: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
               minWidth: isMobilePreview ? `${scaledPreviewWidth}px` : "794px",
               transform: isMobilePreview ? `scale(${previewScale})` : undefined,
@@ -816,7 +884,9 @@ export default function EditStep() {
             }}
           >
             <Suspense fallback={null}>
-              <TemplateComponent resumeData={resumeData} isEditing={false} />
+              <div style={previewTypographyStyle}>
+                <TemplateComponent resumeData={resumeData} isEditing={false} />
+              </div>
             </Suspense>
           </div>
         );

@@ -1,6 +1,6 @@
 import { Bold, Italic, Underline, List, Type } from "lucide-react";
 
-export default function RichTextToolbar() {
+export default function RichTextToolbar({ flat = false }) {
   const applyFormat = (e, command) => {
     e.preventDefault();
     if (command === 'removeFormat') {
@@ -11,14 +11,19 @@ export default function RichTextToolbar() {
     document.execCommand(command, false, null);
   };
 
+  const buttonClass = flat
+    ? "h-6 w-6 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+    : "h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors";
+  const iconSize = flat ? 12 : 14;
+
   return (
-    <div className="builder-richtext-toolbar flex flex-wrap sm:flex-nowrap items-center gap-1.5 bg-surface-container border border-surface-container-high p-1.5 rounded-lg shadow-[0_8px_20px_-14px_rgba(15,15,20,0.3),0_1px_2px_rgba(15,15,20,0.06)]">
+    <div className={flat ? "flex items-center gap-0.5" : "builder-richtext-toolbar flex flex-wrap sm:flex-nowrap items-center gap-1.5 bg-surface-container border border-surface-container-high p-1.5 rounded-lg shadow-[0_8px_20px_-14px_rgba(15,15,20,0.3),0_1px_2px_rgba(15,15,20,0.06)]"}>
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'bold')}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+          className={buttonClass}
         >
-          <Bold size={14} />
+          <Bold size={iconSize} />
         </button>
         <div className="absolute top-full mt-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
           Bold (Cmd/Ctrl+B)
@@ -28,9 +33,9 @@ export default function RichTextToolbar() {
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'italic')}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+          className={buttonClass}
         >
-          <Italic size={14} />
+          <Italic size={iconSize} />
         </button>
         <div className="absolute top-full mt-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
           Italic (Cmd/Ctrl+I)
@@ -40,9 +45,9 @@ export default function RichTextToolbar() {
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'underline')}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+          className={buttonClass}
         >
-          <Underline size={14} />
+          <Underline size={iconSize} />
         </button>
         <div className="absolute top-full mt-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
           Underline (Cmd/Ctrl+U)
@@ -54,9 +59,9 @@ export default function RichTextToolbar() {
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'insertUnorderedList')}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+          className={buttonClass}
         >
-          <List size={14} />
+          <List size={iconSize} />
         </button>
         <div className="absolute top-full mt-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
           Bullet List
@@ -66,9 +71,9 @@ export default function RichTextToolbar() {
       <div className="relative group flex items-center justify-center">
         <button
           onMouseDown={(e) => applyFormat(e, 'removeFormat')}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lowest border border-transparent hover:border-surface-container-high transition-colors"
+          className={buttonClass}
         >
-          <Type size={14} />
+          <Type size={iconSize} />
         </button>
         <div className="absolute top-full mt-2 right-0 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
           Clear Formatting
