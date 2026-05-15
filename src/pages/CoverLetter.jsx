@@ -4,6 +4,7 @@ import { useFirestore } from "../hooks/useFirestore";
 import { generateCoverLetter } from "../services/llm";
 import { ArrowLeft, Wand2, Download, FileText, Loader2, Home } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
+import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
 
 export default function CoverLetter() {
   const { resumeId } = useParams();
@@ -83,11 +84,11 @@ export default function CoverLetter() {
   }
 
   // Basic styling mapping for the cover letter header
-  const name = resumeData.personalInfo?.fullName || "Your Name";
-  const email = resumeData.personalInfo?.email || "email@example.com";
-  const phone = resumeData.personalInfo?.phone || "";
-  const linkedin = resumeData.personalInfo?.linkedin || "";
-  const location = resumeData.personalInfo?.location || "";
+  const name = stripResumeHtml(resumeData.personalInfo?.fullName) || "Your Name";
+  const email = stripResumeHtml(resumeData.personalInfo?.email) || "email@example.com";
+  const phone = stripResumeHtml(resumeData.personalInfo?.phone) || "";
+  const linkedin = stripResumeHtml(resumeData.personalInfo?.linkedin) || "";
+  const location = stripResumeHtml(resumeData.personalInfo?.location) || "";
 
   const contactDetails = [email, phone, location, linkedin].filter(Boolean).join("  •  ");
 
