@@ -29,6 +29,7 @@ export default function EditStep() {
   const [previewScale, setPreviewScale] = useState(1);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [localFontSize, setLocalFontSize] = useState(DEFAULT_RESUME_FONT_SIZE);
+  const [fontSizeInput, setFontSizeInput] = useState(String(DEFAULT_RESUME_FONT_SIZE));
   const [localFontFamily, setLocalFontFamily] = useState(POPULAR_RESUME_FONTS[0].value);
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const fontPickerRef = useRef(null);
@@ -81,8 +82,7 @@ export default function EditStep() {
   }, []);
 
   // Track the last selection the user made inside any contenteditable (resume text fields).
-  // This is more reliable than saving/restoring in individual event handlers because
-  // selection state can be lost unpredictably when focus moves to toolbar controls.
+  // Also reads the computed font size/family at the selection so the toolbar reflects current state.
   useEffect(() => {
     const onSelectionChange = () => {
       const sel = window.getSelection();
@@ -92,6 +92,27 @@ export default function EditStep() {
       while (node) {
         if (node.isContentEditable) {
           resumeSelectionRef.current = range.cloneRange();
+          // Read computed styles from the deepest element at the selection point.
+          const el = range.startContainer.nodeType === 1
+            ? range.startContainer
+            : range.startContainer.parentElement;
+          if (el) {
+            const computed = window.getComputedStyle(el);
+            const pxSize = parseFloat(computed.fontSize);
+            if (!isNaN(pxSize)) {
+              const rounded = Math.round(pxSize);
+              setLocalFontSize(rounded);
+              setFontSizeInput(String(rounded));
+            }
+            const family = computed.fontFamily;
+            if (family) {
+              const match = POPULAR_RESUME_FONTS.find(f =>
+                f.value.split(',')[0].trim().replace(/['"]/g, '').toLowerCase() ===
+                family.split(',')[0].trim().replace(/['"]/g, '').toLowerCase()
+              );
+              if (match) setLocalFontFamily(match.value);
+            }
+          }
           return;
         }
         node = node.parentNode;
@@ -400,6 +421,13 @@ export default function EditStep() {
       }
     }
 
+    // Re-select the newly inserted span so consecutive changes work without re-selecting.
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+    resumeSelectionRef.current = newRange.cloneRange();
+
     return true;
   };
 
@@ -412,10 +440,11 @@ export default function EditStep() {
     }
   };
 
-  const applyFontSize = (e, sizePx) => {
-    e.preventDefault();
-    if (wrapSelectionWithSpan('fontSize', sizePx + 'px')) {
-      setLocalFontSize(sizePx);
+  const applyFontSize = (sizePx) => {
+    const clamped = Math.min(84, Math.max(12, sizePx));
+    if (wrapSelectionWithSpan('fontSize', clamped + 'px')) {
+      setLocalFontSize(clamped);
+      setFontSizeInput(String(clamped));
     }
   };
 
@@ -746,7 +775,7 @@ export default function EditStep() {
             <div className="inline-flex items-center h-8 rounded-lg border border-surface-container-high bg-surface-container overflow-hidden">
               <button
                 type="button"
-                onMouseDown={(e) => applyFontSize(e, Math.max(12, currentFontSize - 1))}
+                onMouseDown={(e) => { e.preventDefault(); applyFontSize(currentFontSize - 1); }}
                 disabled={currentFontSize <= 12}
                 className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Decrease font size"
@@ -754,12 +783,29 @@ export default function EditStep() {
               >
                 <Minus size={11} />
               </button>
-              <span className="w-7 text-center text-[12px] font-medium text-on-surface tabular-nums select-none">
-                {currentFontSize}
-              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={fontSizeInput}
+                onChange={(e) => setFontSizeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const n = parseInt(fontSizeInput, 10);
+                    if (!isNaN(n)) applyFontSize(n);
+                  }
+                }}
+                onBlur={() => {
+                  const n = parseInt(fontSizeInput, 10);
+                  if (!isNaN(n)) applyFontSize(n);
+                  else setFontSizeInput(String(currentFontSize));
+                }}
+                className="w-7 text-center text-[12px] font-medium text-on-surface tabular-nums bg-transparent border-none outline-none"
+                aria-label="Font size"
+              />
               <button
                 type="button"
-                onMouseDown={(e) => applyFontSize(e, Math.min(84, currentFontSize + 1))}
+                onMouseDown={(e) => { e.preventDefault(); applyFontSize(currentFontSize + 1); }}
                 disabled={currentFontSize >= 84}
                 className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-l border-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Increase font size"
