@@ -12,14 +12,8 @@ export const POPULAR_RESUME_FONTS = [
 export const DEFAULT_RESUME_FONT = POPULAR_RESUME_FONTS[0].value;
 export const DEFAULT_RESUME_FONT_SIZE = 16;
 
-export function getResumeTypographyStyle(theme) {
-  const selectedSize = Number(theme?.fontSize);
-  const fontSize = Number.isFinite(selectedSize)
-    ? Math.min(20, Math.max(12, selectedSize))
-    : DEFAULT_RESUME_FONT_SIZE;
-
-  return {
-    fontFamily: theme?.fontFamily || DEFAULT_RESUME_FONT,
-    fontSize: `${fontSize}px`,
-  };
+// Returns the base wrapper style — always Arial so unformatted text inherits it.
+// Per-selection font changes are applied via execCommand in the editor toolbar.
+export function getResumeTypographyStyle(_theme) {
+  return { fontFamily: DEFAULT_RESUME_FONT };
 }

@@ -1,7 +1,7 @@
 import createDOMPurify from "dompurify";
 
-const ALLOWED_TAGS = ["b", "strong", "i", "em", "u", "br", "ul", "ol", "li"];
-const ALLOWED_ATTR = [];
+const ALLOWED_TAGS = ["b", "strong", "i", "em", "u", "br", "ul", "ol", "li", "span", "font"];
+const ALLOWED_ATTR = ["style", "face", "size"];
 
 let browserPurifier = null;
 

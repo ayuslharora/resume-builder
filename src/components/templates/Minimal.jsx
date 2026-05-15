@@ -21,7 +21,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
   const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
 
   return (
-    <div className="resume-template-root bg-white p-8 md:p-12 max-w-[850px] mx-auto text-gray-900 font-sans" style={RESUME_PAGE_MIN_HEIGHT_STYLE}>
+    <div className="resume-template-root bg-white p-8 md:p-12 max-w-[850px] mx-auto text-gray-900 font-sans" style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}>
       <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold uppercase tracking-wide">

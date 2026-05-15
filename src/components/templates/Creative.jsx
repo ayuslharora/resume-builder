@@ -31,7 +31,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
   return (
     <div
       className={`resume-template-root creative-template-root ${bg} flex flex-col max-w-[850px] mx-auto font-sans shadow-2xl p-12 relative`}
-      style={RESUME_PAGE_MIN_HEIGHT_STYLE}
+      style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}
     >
       {/* Editorial Name Header */}
       <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>

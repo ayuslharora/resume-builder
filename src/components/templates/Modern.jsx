@@ -23,7 +23,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
   return (
     <div
       className="resume-template-root flex bg-[#1c252e] max-w-[850px] mx-auto text-slate-300 font-sans shadow-2xl"
-      style={RESUME_PAGE_MIN_HEIGHT_STYLE}
+      style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}
     >
       {/* Left Sidebar - Dark Slate */}
       <div className="w-[35%] bg-[#2d3740] text-slate-200 p-8 flex flex-col gap-8">

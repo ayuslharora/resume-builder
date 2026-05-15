@@ -28,6 +28,10 @@ export default function EditStep() {
   const [pendingAIChange, setPendingAIChange] = useState(null);
   const [previewScale, setPreviewScale] = useState(1);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
+  const [localFontSize, setLocalFontSize] = useState(DEFAULT_RESUME_FONT_SIZE);
+  const [localFontFamily, setLocalFontFamily] = useState(POPULAR_RESUME_FONTS[0].value);
+  const [fontPickerOpen, setFontPickerOpen] = useState(false);
+  const fontPickerRef = useRef(null);
   const [rewriteBulletData, setRewriteBulletData] = useState(null);
   const [sectionRewriteData, setSectionRewriteData] = useState(null);
   const [rewriteItemData, setRewriteItemData] = useState(null);
@@ -41,6 +45,7 @@ export default function EditStep() {
   const atsScanRequestIdRef = useRef(0);
   const previewContainerRef = useRef(null);
   const resumeDocRef = useRef(null);
+  const resumeSelectionRef = useRef(null); // last selection inside any contenteditable
   const navigate = useNavigate();
 
   const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
@@ -74,6 +79,38 @@ export default function EditStep() {
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Track the last selection the user made inside any contenteditable (resume text fields).
+  // This is more reliable than saving/restoring in individual event handlers because
+  // selection state can be lost unpredictably when focus moves to toolbar controls.
+  useEffect(() => {
+    const onSelectionChange = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      let node = range.startContainer;
+      while (node) {
+        if (node.isContentEditable) {
+          resumeSelectionRef.current = range.cloneRange();
+          return;
+        }
+        node = node.parentNode;
+      }
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => document.removeEventListener('selectionchange', onSelectionChange);
+  }, []);
+
+  useEffect(() => {
+    if (!fontPickerOpen) return;
+    const onClickOutside = (e) => {
+      if (fontPickerRef.current && !fontPickerRef.current.contains(e.target)) {
+        setFontPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [fontPickerOpen]);
 
   // Callback ref: attaches ResizeObserver the moment the shadow div mounts.
   const shadowCallbackRef = (el) => {
@@ -324,6 +361,64 @@ export default function EditStep() {
     });
   };
 
+  const wrapSelectionWithSpan = (styleProp, styleVal) => {
+    const sel = window.getSelection();
+    let range = null;
+
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      range = sel.getRangeAt(0).cloneRange();
+    } else if (resumeSelectionRef.current && !resumeSelectionRef.current.collapsed) {
+      range = resumeSelectionRef.current.cloneRange();
+    } else {
+      return false;
+    }
+
+    // Walk up to the actual [contenteditable] element (not just isContentEditable which is
+    // true on ALL elements inside a CE). Focus it so the browser allows DOM modifications.
+    let ce = range.startContainer;
+    while (ce && !(ce.nodeType === 1 && ce.hasAttribute?.('contenteditable'))) {
+      ce = ce.parentNode;
+    }
+    if (ce) {
+      ce.focus();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    const span = document.createElement('span');
+    span.style[styleProp] = styleVal;
+
+    try {
+      range.surroundContents(span);
+    } catch {
+      try {
+        const extracted = range.extractContents();
+        span.appendChild(extracted);
+        range.insertNode(span);
+      } catch {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Per-selection font changes are stored in the HTML content of each field (via InlineEdit's
+  // handleBlur → onChange), NOT in resumeData.theme. Local state updates avoid triggering a
+  // full re-render that can overwrite the contenteditable DOM before the blur saves it.
+  const applyFontFamily = (family) => {
+    if (wrapSelectionWithSpan('fontFamily', family)) {
+      setLocalFontFamily(family);
+    }
+  };
+
+  const applyFontSize = (e, sizePx) => {
+    e.preventDefault();
+    if (wrapSelectionWithSpan('fontSize', sizePx + 'px')) {
+      setLocalFontSize(sizePx);
+    }
+  };
+
   async function handleAtsRescan() {
     setIsAtsPanelOpen(true);
     setAtsError(null);
@@ -366,10 +461,8 @@ export default function EditStep() {
   }
 
   const atsCardStyle = { background: "var(--surface)", border: "1px solid var(--border)" };
-  const currentFontFamily = resumeData.theme?.fontFamily || POPULAR_RESUME_FONTS[0].value;
-  const currentFontSize = Number.isFinite(Number(resumeData.theme?.fontSize))
-    ? Number(resumeData.theme.fontSize)
-    : DEFAULT_RESUME_FONT_SIZE;
+  const currentFontFamily = localFontFamily;
+  const currentFontSize = localFontSize;
   const previewTypographyStyle = getResumeTypographyStyle(resumeData.theme);
 
   const overflowPx = resumeHeight > 0 ? Math.round(resumeHeight - 1122) : 0;
@@ -616,22 +709,44 @@ export default function EditStep() {
 
             <div className="h-5 w-px bg-surface-container-high flex-shrink-0" aria-hidden="true" />
 
-            <select
-              value={currentFontFamily}
-              onChange={(e) => handleTypographyChange("fontFamily", e.target.value)}
-              className="h-8 w-24 max-w-[96px] rounded-lg border border-surface-container-high bg-surface-container px-2 text-[12px] font-medium text-on-surface cursor-pointer focus:outline-none"
-              style={{ width: "96px" }}
-              aria-label="Resume font family"
-            >
-              {POPULAR_RESUME_FONTS.map((font) => (
-                <option key={font.value} value={font.value}>{font.label}</option>
-              ))}
-            </select>
+            <div ref={fontPickerRef} className="relative" aria-label="Resume font family">
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setFontPickerOpen((o) => !o);
+                }}
+                className="h-8 w-24 flex items-center justify-between gap-1 rounded-lg border border-surface-container-high bg-surface-container px-2 text-[12px] font-medium text-on-surface cursor-pointer hover:bg-surface-container-high transition-colors"
+                style={{ fontFamily: currentFontFamily }}
+              >
+                <span className="truncate">{POPULAR_RESUME_FONTS.find(f => f.value === currentFontFamily)?.label ?? 'Arial'}</span>
+                <ChevronRight size={10} className={`flex-shrink-0 transition-transform ${fontPickerOpen ? 'rotate-90' : 'rotate-90 opacity-50'}`} />
+              </button>
+              {fontPickerOpen && (
+                <div className="absolute top-full left-0 mt-1 z-50 min-w-[140px] rounded-lg border border-surface-container-high bg-surface shadow-lg overflow-hidden">
+                  {POPULAR_RESUME_FONTS.map((font) => (
+                    <button
+                      key={font.value}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        applyFontFamily(font.value);
+                        setFontPickerOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-[13px] hover:bg-surface-container transition-colors ${currentFontFamily === font.value ? 'bg-surface-container-high text-on-surface' : 'text-on-surface-variant'}`}
+                      style={{ fontFamily: font.value }}
+                    >
+                      {font.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="inline-flex items-center h-8 rounded-lg border border-surface-container-high bg-surface-container overflow-hidden">
               <button
                 type="button"
-                onClick={() => handleTypographyChange("fontSize", Math.max(12, currentFontSize - 1))}
+                onMouseDown={(e) => applyFontSize(e, Math.max(12, currentFontSize - 1))}
                 disabled={currentFontSize <= 12}
                 className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Decrease font size"
@@ -644,8 +759,8 @@ export default function EditStep() {
               </span>
               <button
                 type="button"
-                onClick={() => handleTypographyChange("fontSize", Math.min(20, currentFontSize + 1))}
-                disabled={currentFontSize >= 20}
+                onMouseDown={(e) => applyFontSize(e, Math.min(84, currentFontSize + 1))}
+                disabled={currentFontSize >= 84}
                 className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-l border-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Increase font size"
                 title="Increase font size"

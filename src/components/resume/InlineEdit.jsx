@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Wand2 } from 'lucide-react';
 import { sanitizeResumeHtml, stripResumeHtml } from '../../services/resumeHtmlSanitizer';
 
@@ -7,9 +7,9 @@ let _activeRewriteFn = null;
 export function triggerActiveRewrite() { _activeRewriteFn?.(); }
 
 export default function InlineEdit({
-  value, 
-  onChange, 
-  isEditing = false, 
+  value,
+  onChange,
+  isEditing = false,
   placeholder = "Empty",
   className = "",
   multiline = false,
@@ -18,13 +18,21 @@ export default function InlineEdit({
   const contentEditableRef = useRef(null);
   const sanitizedValue = sanitizeResumeHtml(value);
 
-  // Sync external value changes (e.g. from AI regeneration or parent loading)
+  // Stable ref callback: fires only on mount/unmount, not on re-renders.
+  // Sets the initial innerHTML without dangerouslySetInnerHTML so React's reconciler
+  // never touches this element's content — allowing inline formatting (bold, font size, etc.)
+  // applied via Range API to survive re-renders.
+  const refCallback = useCallback((el) => {
+    contentEditableRef.current = el;
+    if (el) el.innerHTML = sanitizeResumeHtml(value);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync external value changes (AI regeneration, parent load) when the field is not active.
   useEffect(() => {
-    if (contentEditableRef.current && document.activeElement !== contentEditableRef.current) {
-      if (contentEditableRef.current.innerHTML !== sanitizedValue) {
-        contentEditableRef.current.innerHTML = sanitizedValue;
-      }
-    }
+    const el = contentEditableRef.current;
+    if (!el || document.activeElement === el) return;
+    if (el.innerHTML !== sanitizedValue) el.innerHTML = sanitizedValue;
   }, [sanitizedValue]);
 
   const handleBlur = () => {
@@ -66,7 +74,7 @@ export default function InlineEdit({
   return (
     <span className={`group w-full ${className}`}>
       <span
-        ref={contentEditableRef}
+        ref={refCallback}
         contentEditable={true}
         suppressContentEditableWarning={true}
         onFocus={handleFocus}
@@ -74,7 +82,6 @@ export default function InlineEdit({
         onKeyDown={handleKeyDown}
         className={`outline-none min-w-[20px] whitespace-pre-wrap [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:my-1`}
         data-placeholder={placeholder}
-        dangerouslySetInnerHTML={{ __html: sanitizedValue }}
       />
       {onAiRewrite && (
         <button
