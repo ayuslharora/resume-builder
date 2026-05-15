@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import { generateCoverLetter } from "../services/llm";
 import { ArrowLeft, Wand2, Download, FileText, Loader2, Home } from "lucide-react";
-import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
 import Spinner from "../components/ui/Spinner";
 
 export default function CoverLetter() {
@@ -84,7 +83,7 @@ export default function CoverLetter() {
   }
 
   // Basic styling mapping for the cover letter header
-  const name = stripResumeHtml(resumeData.personalInfo?.fullName) || "Your Name";
+  const name = resumeData.personalInfo?.fullName || "Your Name";
   const email = resumeData.personalInfo?.email || "email@example.com";
   const phone = resumeData.personalInfo?.phone || "";
   const linkedin = resumeData.personalInfo?.linkedin || "";
