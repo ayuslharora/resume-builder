@@ -20,14 +20,31 @@
       "continue": true
     },
     { "handle": "filesystem" },
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/templates", "dest": "/templates.html" },
-    { "src": "/grader-info", "dest": "/grader-info.html" },
-    { "src": "/pricing", "dest": "/pricing.html" },
+    {
+      "src": "/",
+      "dest": "/index.html",
+      "headers": { "Cache-Control": "no-cache" }
+    },
+    {
+      "src": "/templates",
+      "dest": "/templates.html",
+      "headers": { "Cache-Control": "no-cache" }
+    },
+    {
+      "src": "/grader-info",
+      "dest": "/grader-info.html",
+      "headers": { "Cache-Control": "no-cache" }
+    },
+    {
+      "src": "/pricing",
+      "dest": "/pricing.html",
+      "headers": { "Cache-Control": "no-cache" }
+    },
     {
       "src": "/login",
       "dest": "/login.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, follow"
       }
     },
@@ -35,6 +52,7 @@
       "src": "/signup",
       "dest": "/signup.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, follow"
       }
     },
@@ -42,6 +60,7 @@
       "src": "/grader/report/(.*)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -49,6 +68,7 @@
       "src": "/(dashboard|resources|grader|profile|whats-new|help)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -56,6 +76,7 @@
       "src": "/builder/(.*)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -63,6 +84,7 @@
       "src": "/export/(.*)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -70,6 +92,7 @@
       "src": "/cover-letter/(.*)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -77,6 +100,7 @@
       "src": "/shared/(.*)",
       "dest": "/app.html",
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
@@ -85,6 +109,7 @@
       "dest": "/404.html",
       "status": 404,
       "headers": {
+        "Cache-Control": "no-cache",
         "X-Robots-Tag": "noindex, nofollow"
       }
     }
