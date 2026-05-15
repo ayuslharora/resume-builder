@@ -36,17 +36,17 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
       {/* Editorial Name Header */}
       <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
         <div className="mb-10">
-          <div className="w-full flex flex-col md:flex-row justify-between items-end mb-8 gap-4 pb-2">
-            <h1 className={`text-[4rem] md:text-[5.5rem] font-black ${accentText} uppercase tracking-tighter leading-[0.8] break-words`}>
+          <div className="w-full flex flex-col md:flex-row print:flex-row justify-between items-end mb-8 gap-4 pb-2">
+            <h1 className={`text-[4rem] md:text-[5.5rem] print:text-[5.5rem] font-black ${accentText} uppercase tracking-tighter leading-[0.8] break-words`}>
               <InlineEdit value={resumeData.personalInfo.fullName} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, fullName: v })} placeholder="Your Name" />
             </h1>
-            <div className={`text-sm md:text-base font-black ${darkText} uppercase tracking-[0.2em] md:text-right pb-1 max-w-[300px]`}>
+            <div className={`text-sm md:text-base print:text-base font-black ${darkText} uppercase tracking-[0.2em] md:text-right print:text-right pb-1 max-w-[300px]`}>
               <InlineEdit value={resumeData.personalInfo.title} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, title: v })} placeholder="PROFESSIONAL TITLE" />
             </div>
           </div>
 
           {/* Clean Contact Grid */}
-          <div className={`creative-contact-grid grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4`}>
+          <div className={`creative-contact-grid grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-y-6 gap-x-4`}>
             {(isEditing || resumeData.personalInfo.phone) && (
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.phone ?? "PHONE"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, phone: v })} /></div>
@@ -106,12 +106,12 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                 <div className={`h-1 flex-1 ${accentBg}`}></div>
               </h2>
 
-                <div className="creative-timeline space-y-10 pl-6 md:pl-8 border-l-2 border-[#121212]/20 relative">
+                <div className="creative-timeline space-y-10 pl-6 md:pl-8 print:pl-8 border-l-2 border-[#121212]/20 relative">
                   {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
-                  <div key={exp.id || `exp-${i}`} className="creative-role-grid grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 group relative">
-                    <div className={`creative-timeline-dot absolute -left-[31px] md:-left-[39px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
+                  <div key={exp.id || `exp-${i}`} className="creative-role-grid grid grid-cols-1 md:grid-cols-12 print:grid-cols-12 gap-4 md:gap-8 print:gap-8 group relative">
+                    <div className={`creative-timeline-dot absolute -left-[31px] md:-left-[39px] print:-left-[39px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
                     {/* Left Column: Role & Meta */}
-                    <div className="col-span-1 md:col-span-4 md:border-r-2 border-[#121212]/10 md:pr-6">
+                    <div className="col-span-1 md:col-span-4 print:col-span-4 md:border-r-2 print:border-r-2 border-[#121212]/10 md:pr-6 print:pr-6">
                       <h3 className={`font-black text-lg ${darkText} uppercase leading-tight mb-2`}>
                         <InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, role: v } : e))} />
                         {isEditing && activeSection === "experience" && onRegenerateItem && (
@@ -133,7 +133,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                       </div>
                     </div>
                     {/* Right Column: Bullets */}
-                    <div className="col-span-1 md:col-span-8">
+                    <div className="col-span-1 md:col-span-8 print:col-span-8">
                       <ul className={`list-none space-y-3 text-[13px] font-semibold ${darkText} leading-[1.7] tracking-wide`}>
                         {(exp.bullets || []).map((bullet, bulletIdx) => (
                           <li key={bulletIdx} className="creative-bullet-diamond relative pl-5 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-[#121212] before:rotate-45">
@@ -155,7 +155,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
         )}
 
         {/* 2-Column Grid for Skills & Projects/Education */}
-        <div className="creative-two-col-grid grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="creative-two-col-grid grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-12">
 
           {hasVisibleProjects && (
             <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>

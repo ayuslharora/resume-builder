@@ -2416,6 +2416,7 @@ body.builder-step-4-lock-scroll {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
 }
 
 /* Show placeholder text in empty contentEditable fields (InlineEdit in edit mode) */
