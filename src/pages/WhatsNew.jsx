@@ -8,12 +8,45 @@ import {
   CheckSquare,
   Wrench,
   Zap,
+  Type,
+  Download,
+  Bug,
 } from "lucide-react";
 
 const CHANGELOG = [
   {
     date: "May 2025",
     entries: [
+      {
+        type: "feature",
+        title: "Per-selection font family & size",
+        desc: "Select any text in your resume and change its font family or size directly from the toolbar. Pick from eight professional typefaces — each option rendered in its own font so you can see exactly what you're choosing. Changes persist through export.",
+        icon: Type,
+      },
+      {
+        type: "feature",
+        title: "ATS-optimised browser PDF export",
+        desc: "Save as PDF now uses the browser's native print engine, producing a real text layer that ATS scanners can parse reliably. No server round-trip, no pixel-image output — just clean, selectable text that passes keyword extraction.",
+        icon: Download,
+      },
+      {
+        type: "feature",
+        title: "DOCX export for all templates",
+        desc: "Download a fully formatted Word document for any template — Minimal, Modern, Professional, or Creative. Layout, colours, and sidebar columns are all faithfully reproduced using native DOCX constructs (no HTML embedded in the file).",
+        icon: FileText,
+      },
+      {
+        type: "improvement",
+        title: "Rich text toolbar — font controls",
+        desc: "The formatting toolbar now shows the font family and size of whatever text your cursor is in, updating live as you move around. Type a size directly into the field or use +/− for quick adjustments up to 84 pt.",
+        icon: Wrench,
+      },
+      {
+        type: "fix",
+        title: "Inline formatting survives re-renders",
+        desc: "Bold, italic, font changes, and size adjustments now persist correctly across AI rewrites and state updates. Previously, React's reconciler could silently reset inline formatting applied via the toolbar.",
+        icon: Bug,
+      },
       {
         type: "feature",
         title: "Grade resumes by shared link",
