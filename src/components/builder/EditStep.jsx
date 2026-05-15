@@ -12,6 +12,7 @@ import { buildResumeTextForAts } from "../../services/resumeTextForAts";
 import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
 import { triggerActiveRewrite } from "../resume/InlineEdit";
 import { POPULAR_RESUME_FONTS, DEFAULT_RESUME_FONT_SIZE, getResumeTypographyStyle } from "../../services/resumeTypography";
+import { stripResumeHtml } from "../../services/resumeHtmlSanitizer";
 
 const atsBreakdownLabels = [
   ["formatting", "Formatting"],
@@ -145,8 +146,9 @@ export default function EditStep() {
   };
 
   function buildCompleteResumeSavePayload() {
-    const title = resumeData.personalInfo?.fullName
-      ? `${resumeData.personalInfo.fullName} — ${interviewAnswers.targetRole || 'Resume'}`
+    const plainName = stripResumeHtml(resumeData.personalInfo?.fullName);
+    const title = plainName
+      ? `${plainName} — ${interviewAnswers.targetRole || 'Resume'}`
       : interviewAnswers.targetRole || 'New Resume';
 
     return {
@@ -404,6 +406,26 @@ export default function EditStep() {
       ce.focus();
       sel.removeAllRanges();
       sel.addRange(range);
+    }
+
+    // If the range exactly covers the contents of an existing span, update it in-place
+    // instead of wrapping again — prevents deeply nested spans on consecutive changes.
+    const ancestor = range.commonAncestorContainer;
+    const parentEl = ancestor.nodeType === 1 ? ancestor : ancestor.parentElement;
+    if (parentEl && parentEl.tagName === 'SPAN') {
+      const spanRange = document.createRange();
+      spanRange.selectNodeContents(parentEl);
+      const sameStart = range.compareBoundaryPoints(Range.START_TO_START, spanRange) === 0;
+      const sameEnd = range.compareBoundaryPoints(Range.END_TO_END, spanRange) === 0;
+      if (sameStart && sameEnd) {
+        parentEl.style[styleProp] = styleVal;
+        const newRange = document.createRange();
+        newRange.selectNodeContents(parentEl);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        resumeSelectionRef.current = newRange.cloneRange();
+        return true;
+      }
     }
 
     const span = document.createElement('span');
@@ -745,7 +767,7 @@ export default function EditStep() {
                   e.preventDefault();
                   setFontPickerOpen((o) => !o);
                 }}
-                className="h-8 w-24 flex items-center justify-between gap-1 rounded-lg border border-surface-container-high bg-surface-container px-2 text-[12px] font-medium text-on-surface cursor-pointer hover:bg-surface-container-high transition-colors"
+                className="h-8 w-36 flex items-center justify-between gap-1 rounded-lg border border-surface-container-high bg-surface-container px-2 text-[12px] font-medium text-on-surface cursor-pointer hover:bg-surface-container-high transition-colors"
                 style={{ fontFamily: currentFontFamily }}
               >
                 <span className="truncate">{POPULAR_RESUME_FONTS.find(f => f.value === currentFontFamily)?.label ?? 'Arial'}</span>
@@ -800,7 +822,8 @@ export default function EditStep() {
                   if (!isNaN(n)) applyFontSize(n);
                   else setFontSizeInput(String(currentFontSize));
                 }}
-                className="w-7 text-center text-[12px] font-medium text-on-surface tabular-nums bg-transparent border-none outline-none"
+                className="text-center text-[12px] font-medium text-on-surface tabular-nums bg-transparent border-none outline-none"
+                style={{ width: `${Math.max(5, fontSizeInput.length) + 1}ch` }}
                 aria-label="Font size"
               />
               <button

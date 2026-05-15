@@ -6,6 +6,7 @@ import { templates } from "../components/templates";
 import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
+import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
 
 export default function Export() {
   const { resumeId } = useParams();
@@ -121,7 +122,7 @@ export default function Export() {
       setExportingType('docx');
       const { exportDOCX } = await import("../services/export");
       await exportDOCX({
-        fileName: `Resume_${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Export'}`,
+        fileName: `Resume_${stripResumeHtml(resumeData.personalInfo?.fullName).replace(/\s+/g, '_') || 'Export'}`,
         templateId,
         resumeData,
       });
@@ -184,7 +185,7 @@ export default function Export() {
           <span className="v-hr hidden sm:block" style={{ height: 18 }} />
           <div className="min-w-0">
             <div className="truncate text-sm font-medium">
-              {resumeData.personalInfo?.fullName || "Resume"}
+              {stripResumeHtml(resumeData.personalInfo?.fullName) || "Resume"}
             </div>
             <div className="mono text-[11.5px] text-[var(--muted)]">
               Ready to export

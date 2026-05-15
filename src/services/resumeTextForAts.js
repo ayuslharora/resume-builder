@@ -1,7 +1,8 @@
+import { stripResumeHtml } from "./resumeHtmlSanitizer";
+
 function pushLine(lines, value) {
-  if (typeof value === "string" && value.trim()) {
-    lines.push(value.trim());
-  }
+  const text = stripResumeHtml(value).trim();
+  if (text) lines.push(text);
 }
 
 function pushSection(lines, title, values) {
