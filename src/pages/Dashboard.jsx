@@ -4,7 +4,6 @@ import { useFirestore } from "../hooks/useFirestore";
 import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";
 import EmptyState from "../components/dashboard/EmptyState";
-import Spinner from "../components/ui/Spinner";
 import { getGraderHistory } from "../services/graderHistory";
 import { CheckSquare, Eye, Grid2X2, LayoutList, Plus, Search } from "lucide-react";
 
@@ -66,7 +65,7 @@ export default function Dashboard() {
     navigate(`/builder/new`);
   }
 
-  if (loading) return <Spinner />;
+  if (loading) return <DashboardSkeleton />;
 
   const publishedCount = resumes.filter(resume => resume.isShared).length;
   const graderHistory = getGraderHistory();
@@ -220,6 +219,59 @@ export default function Dashboard() {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="app-page">
+      {/* Header */}
+      <div className="mb-7 flex items-end gap-4">
+        <div className="flex-1">
+          <div className="skeleton mb-2 h-3 w-20" />
+          <div className="skeleton h-8 w-64" />
+          <div className="skeleton mt-2 h-3 w-36" />
+        </div>
+        <div className="skeleton hidden h-9 w-32 sm:block" />
+        <div className="skeleton h-9 w-28" />
+      </div>
+
+      {/* Stat cards */}
+      <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="panel p-4">
+            <div className="skeleton h-3 w-24" />
+            <div className="skeleton mt-3 h-7 w-16" />
+          </div>
+        ))}
+      </div>
+
+      {/* Search + filters */}
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="skeleton h-9 w-full lg:max-w-xs" />
+        <div className="flex gap-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="skeleton h-8 w-16" />
+          ))}
+        </div>
+      </div>
+
+      {/* Resume card skeletons */}
+      <div className="resume-grid">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="panel overflow-hidden" style={{ padding: 0 }}>
+            <div className="skeleton" style={{ aspectRatio: "1.7", borderRadius: "12px 12px 0 0" }} />
+            <div style={{ padding: 14 }}>
+              <div className="skeleton h-4 w-3/4" />
+              <div className="mt-3 flex items-center gap-2">
+                <div className="skeleton h-5 w-16" />
+                <div className="skeleton ml-auto h-3 w-20" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

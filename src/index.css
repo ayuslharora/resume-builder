@@ -224,6 +224,24 @@
     }
   }
 
+  /* ── Skeleton loading ── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface) 25%,
+      color-mix(in oklch, var(--surface) 60%, var(--border)) 50%,
+      var(--surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+    border-radius: 6px;
+  }
+
+  @keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   .landing-desktop-shell {
     min-height: 100dvh;
     display: flex;
