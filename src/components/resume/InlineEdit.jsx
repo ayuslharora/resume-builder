@@ -56,7 +56,7 @@ export default function InlineEdit({
 
   if (!isEditing) {
     if (!stripResumeHtml(sanitizedValue).trim()) return null;
-    return <span className={className} dangerouslySetInnerHTML={{ __html: sanitizedValue }} />;
+    return <span className={`break-words ${className}`} dangerouslySetInnerHTML={{ __html: sanitizedValue }} />;
   }
 
   const handleRewrite = (e) => {
@@ -80,7 +80,7 @@ export default function InlineEdit({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`outline-none min-w-[20px] whitespace-pre-wrap [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:my-1`}
+        className={`outline-none min-w-[20px] whitespace-pre-wrap break-words [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:my-1`}
         data-placeholder={placeholder}
       />
       {onAiRewrite && (

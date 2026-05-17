@@ -7,6 +7,8 @@ import { Wand2, CheckCircle2, Loader2, Play, RefreshCw, X, AlertCircle, Sparkles
 import AiRewriteModal from "./AiRewriteModal";
 import SectionAiRewriteModal from "./SectionAiRewriteModal";
 import ItemAiRewriteModal from "./ItemAiRewriteModal";
+import RenderHealthCheckModal from "./RenderHealthCheckModal";
+import { runHealthChecks } from "../../services/resumeHealthCheck";
 import RichTextToolbar from "./RichTextToolbar";
 import { buildResumeTextForAts } from "../../services/resumeTextForAts";
 import { useKeyboardShortcut } from "../../hooks/useKeyboardShortcut";
@@ -43,6 +45,7 @@ export default function EditStep() {
   const [atsError, setAtsError] = useState(null);
   const [resumeHeight, setResumeHeight] = useState(0);
   const [isFittingMe, setIsFittingMe] = useState(false);
+  const [healthCheckIssues, setHealthCheckIssues] = useState(null); // null = modal closed
   const atsScanCacheRef = useRef(new Map());
   const atsScanRequestIdRef = useRef(0);
   const previewContainerRef = useRef(null);
@@ -191,8 +194,15 @@ export default function EditStep() {
     setIsAtsPanelOpen(prev => !prev);
   });
 
+  function handleRenderClick() {
+    if (!activeResumeId || !resumeData) return;
+    const issues = runHealthChecks(resumeData);
+    setHealthCheckIssues(issues);
+  }
+
   async function handleCompleteRendering() {
     if (!activeResumeId || !resumeData) return;
+    setHealthCheckIssues(null);
 
     const completeResumePayload = buildCompleteResumeSavePayload();
     const savedResumeId = await saveNow(completeResumePayload);
@@ -205,9 +215,23 @@ export default function EditStep() {
     });
   }
 
+  async function handleAiShortenSummary() {
+    const { regenerateSection } = await import("../../services/llm");
+    const shortened = await regenerateSection(
+      "summary",
+      resumeData.summary,
+      interviewAnswers,
+      bragSheetText,
+      "Rewrite this summary to be under 50 words. Keep only the most impactful points. Use concise, direct language. Return plain text only."
+    );
+    const newSummary = typeof shortened === "string" ? shortened : shortened?.summary || shortened;
+    updateSection("summary", newSummary);
+    saveToFirestore({ resumeData: { ...resumeData, summary: newSummary } });
+  }
+
   useKeyboardShortcut("p", () => {
     if (activeResumeId) {
-      handleCompleteRendering();
+      handleRenderClick();
     }
   });
 
@@ -916,7 +940,7 @@ export default function EditStep() {
               Re-scan
             </button>
             <button
-              onClick={handleCompleteRendering}
+              onClick={handleRenderClick}
               className="btn-primary h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
               <Play size={14} />
@@ -1048,6 +1072,15 @@ export default function EditStep() {
 
         </div>
       </div>
+
+      {healthCheckIssues !== null && (
+        <RenderHealthCheckModal
+          issues={healthCheckIssues}
+          onClose={() => setHealthCheckIssues(null)}
+          onContinue={handleCompleteRendering}
+          onAiShortenSummary={handleAiShortenSummary}
+        />
+      )}
 
       {/* Hidden shadow render — isEditing=false at natural 794px, no zoom.
           Matches what Puppeteer sees: empty sections hidden, real font layout. */}
