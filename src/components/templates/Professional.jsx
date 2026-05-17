@@ -3,9 +3,10 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2, Palette } from "lucide-react";
+import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
-export default function Professional({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
+export default function Professional({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet, onReorderItem }) {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const themeColors = ['#2B3A5A', '#222222', '#1B3B32', '#58202E', '#1F2937']; // Navy, Pure Dark Gray, Deep Pine, Rich Burgundy, Slate Gray
   const pickerRef = useRef(null);
@@ -231,6 +232,9 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                             <Wand2 size={12} className={isRegeneratingItem === `experience-${i}` ? "animate-pulse" : ""} />
                           </button>
                         )}
+                        {isEditing && activeSection === "experience" && onReorderItem && (
+                          <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
+                        )}
                       </h3>
                       <span className="text-xs font-bold text-gray-600">
                         <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
@@ -284,6 +288,9 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                             <Wand2 size={12} className={isRegeneratingItem === `education-${i}` ? "animate-pulse" : ""} />
                           </button>
                         )}
+                        {isEditing && activeSection === "education" && onReorderItem && (
+                          <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
+                        )}
                       </h3>
                       <span className="text-xs font-bold text-gray-600">
                         <InlineEdit value={edu.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
@@ -328,6 +335,9 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                           >
                             <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
                           </button>
+                        )}
+                        {isEditing && activeSection === "projects" && onReorderItem && (
+                          <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
                         )}
                         {(isEditing || proj.link) && (
                           <PrintLink className="text-blue-600 text-xs font-normal" isEditing={isEditing} href={proj.link}>

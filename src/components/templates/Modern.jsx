@@ -2,9 +2,10 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
+import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
-export default function Modern({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet }) {
+export default function Modern({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet, onReorderItem }) {
   if (!resumeData) return null;
 
   const isExpNotEmpty = (exp) => exp.role?.toString()?.trim() || exp.company?.toString()?.trim() || exp.duration?.toString()?.trim() || exp.location?.toString()?.trim() || exp.bullets?.some(b => b?.toString()?.trim());
@@ -139,6 +140,9 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                       {isEditing && activeSection === "education" && onRegenerateItem && (
                         <button disabled={isRegeneratingItem === `education-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('education', i); }} className="inline-flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this education with AI"><Wand2 size={12} className={isRegeneratingItem === `education-${i}` ? "animate-pulse" : ""} /></button>
                       )}
+                      {isEditing && activeSection === "education" && onReorderItem && (
+                        <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
+                      )}
                     </h3>
                     <div className="text-sm font-medium text-blue-300 mt-1">
                       <InlineEdit value={edu.institution} isEditing={isEditing} onChange={(v) => onUpdateSection('education', resumeData.education.map((e, idx) => idx === i ? { ...e, institution: v } : e))} />
@@ -176,6 +180,9 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                         <span><InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, role: v } : e))} /></span>
                         {isEditing && activeSection === "experience" && onRegenerateItem && (
                           <button disabled={isRegeneratingItem === `experience-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('experience', i); }} className="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this experience with AI"><Wand2 size={12} className={isRegeneratingItem === `experience-${i}` ? "animate-pulse" : ""} /></button>
+                        )}
+                        {isEditing && activeSection === "experience" && onReorderItem && (
+                          <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
                         )}
                       </h3>
                       <span className="text-xs font-semibold text-blue-400 bg-blue-900/30 px-2.5 py-1 rounded border border-blue-800/50">
@@ -221,6 +228,9 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                         <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
                         {isEditing && activeSection === "projects" && onRegenerateItem && (
                           <button disabled={isRegeneratingItem === `projects-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('projects', i); }} className="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this project with AI"><Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} /></button>
+                        )}
+                        {isEditing && activeSection === "projects" && onReorderItem && (
+                          <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
                         )}
                       </h3>
                       {(isEditing || proj.link) && (

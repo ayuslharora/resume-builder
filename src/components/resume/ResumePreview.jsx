@@ -16,7 +16,8 @@ export default function ResumePreview({
   onRewriteBulletRequest,
   onUpdateBullet,
   onAddBullet,
-  scale = 0.85 
+  onReorderItem,
+  scale = 0.85
 }) {
   if (!templateId || !templates[templateId]) return <div className="p-10 text-center text-gray-500">No template selected</div>;
 
@@ -39,6 +40,7 @@ export default function ResumePreview({
           onRewriteBulletRequest={onRewriteBulletRequest}
           onUpdateBullet={onUpdateBullet}
           onAddBullet={onAddBullet}
+          onReorderItem={onReorderItem}
         />
       </div>
     </Suspense>

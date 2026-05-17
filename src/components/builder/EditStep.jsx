@@ -393,6 +393,14 @@ export default function EditStep() {
     });
   };
 
+  const handleReorderItem = (sectionName, fromIndex, toIndex) => {
+    const arr = [...(resumeData[sectionName] || [])];
+    const [moved] = arr.splice(fromIndex, 1);
+    arr.splice(toIndex, 0, moved);
+    updateSection(sectionName, arr);
+    saveToFirestore({ resumeData: { ...resumeData, [sectionName]: arr } });
+  };
+
   const handleTypographyChange = (field, value) => {
     const nextTheme = {
       ...(resumeData.theme || {}),
@@ -1029,6 +1037,7 @@ export default function EditStep() {
               onRewriteBulletRequest={handleRewriteBulletRequest}
               onUpdateBullet={handleUpdateBullet}
               onAddBullet={handleAddBullet}
+              onReorderItem={handleReorderItem}
               scale={1} // Override default scale, since we zoom the parent container
             />
           </div>
