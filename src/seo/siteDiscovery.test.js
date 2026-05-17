@@ -109,6 +109,7 @@ test("public crawl and AI discovery assets are present and point at the producti
   assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/templates<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/grader-info<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/pricing<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/resume\.ayuslh\.in\/contact<\/loc>/);
   assert.doesNotMatch(sitemap, /\/login/);
   assert.doesNotMatch(sitemap, /\/signup/);
   assert.doesNotMatch(sitemap, /\/dashboard/);
