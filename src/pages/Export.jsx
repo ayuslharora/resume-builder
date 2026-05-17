@@ -7,6 +7,7 @@ import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, C
 import Spinner from "../components/ui/Spinner";
 import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
 import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
+import FeedbackWidget from "../components/ui/FeedbackWidget";
 
 export default function Export() {
   const { resumeId } = useParams();
@@ -285,6 +286,7 @@ export default function Export() {
           </div>
         );
       })()}
+      <FeedbackWidget />
     </div>
   );
 }
