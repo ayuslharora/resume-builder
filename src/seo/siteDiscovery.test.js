@@ -148,6 +148,10 @@ test("vercel routing avoids indexable homepage shells on non-home routes", async
     "expected /pricing to use a static route shell",
   );
   assert.ok(
+    routes.some((route) => route.src === "/contact" && route.dest === "/contact.html"),
+    "expected /contact to use a static route shell",
+  );
+  assert.ok(
     routes.some((route) => route.src === "/login" && route.dest === "/login.html"),
     "expected /login to use a noindex auth shell",
   );

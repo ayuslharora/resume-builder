@@ -185,6 +185,32 @@ export const PUBLIC_STATIC_ROUTES = [
       ]
     },
   },
+  {
+    path: '/contact',
+    fileName: 'contact.html',
+    title: 'Contact | ResuMe',
+    description:
+      "Get in touch with the ResuMe team for support, feedback, and partnership questions about resume building and ATS grading.",
+    heading: 'Contact ResuMe',
+    breadcrumbName: 'Contact',
+    body: [
+      'Contact the ResuMe team for product support, bug reports, and feedback related to resume building, grading, templates, and exports.',
+      'We review user messages to improve the product for students, graduates, and early-career job seekers using ATS-focused resumes.',
+    ],
+    jsonLd(route) {
+      return [
+        HOME_JSON_LD[0],
+        routeWebPage(route, {
+          about: {
+            '@type': 'Organization',
+            name: 'ResuMe',
+            url: SITE_URL,
+          },
+        }),
+        breadcrumbList(route),
+      ]
+    },
+  },
 ]
 
 export const AUTH_STATIC_ROUTES = Object.entries(AUTH_ROUTE_SEO).map(([path, seo]) => ({
@@ -338,4 +364,3 @@ export function buildStaticRouteHtml(html, route) {
 export function buildAppShellHtml(html, route = APP_SHELL_SEO) {
   return replaceStaticShell(replaceHeadSeo(html, route), buildEmptyAppShell())
 }
-

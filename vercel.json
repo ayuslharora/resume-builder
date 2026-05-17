@@ -41,6 +41,11 @@
       "headers": { "Cache-Control": "no-cache" }
     },
     {
+      "src": "/contact",
+      "dest": "/contact.html",
+      "headers": { "Cache-Control": "no-cache" }
+    },
+    {
       "src": "/login",
       "dest": "/login.html",
       "headers": {
