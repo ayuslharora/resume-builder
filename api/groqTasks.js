@@ -107,6 +107,7 @@ CRITICAL RULES:
 4. All bullets start with strong action verbs.
 5. Keep every bullet impact-driven and under 20 words.
 6. NEVER use em-dashes. Use a hyphen or colon.
+7. For education entries: "degree" is the short credential label (e.g. "B.Tech", "B.E.", "CS Undergrad", "M.S.", "MBA"). "field" is the subject ONLY if it adds information not already implied by the degree name. If the degree name already contains the subject or its abbreviation (e.g. "CS Undergrad" already implies Computer Science), leave "field" as an empty string.
 
 ${keywordRules(hasJobDescription)}
 

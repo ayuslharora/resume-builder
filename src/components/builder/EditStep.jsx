@@ -137,7 +137,7 @@ export default function EditStep() {
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [fontPickerOpen]);
 
-  // Callback ref: attaches ResizeObserver the moment the shadow div mounts.
+// Callback ref: attaches ResizeObserver the moment the shadow div mounts.
   const shadowCallbackRef = (el) => {
     if (!el) return;
     const observer = new ResizeObserver((entries) => {

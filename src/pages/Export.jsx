@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import ResumePreview from "../components/resume/ResumePreview";
-import { templates } from "../components/templates";
-import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle } from "lucide-react";
+import { templates, templateList } from "../components/templates";
+import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle, LayoutTemplate, ChevronDown } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
 import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
@@ -26,6 +26,8 @@ export default function Export() {
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [resumeHeight, setResumeHeight] = useState(0);
+  const [isTemplateSwitcherOpen, setIsTemplateSwitcherOpen] = useState(false);
+  const templateSwitcherRef = useRef(null);
   const previewRootRef = useRef(null);
   const { getResume, updateResume } = useFirestore();
   const navigate = useNavigate();
@@ -84,6 +86,29 @@ export default function Export() {
 
     return () => clearTimeout(hangTimeout);
   }, [getResume, resumeId, stateBuilderData]);
+
+  useEffect(() => {
+    if (!isTemplateSwitcherOpen) return;
+    const onClickOutside = (e) => {
+      if (templateSwitcherRef.current && !templateSwitcherRef.current.contains(e.target)) {
+        setIsTemplateSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isTemplateSwitcherOpen]);
+
+  const handleTemplateChange = async (newTemplateId) => {
+    setTemplateId(newTemplateId);
+    setIsTemplateSwitcherOpen(false);
+    if (resumeId && resumeId !== "new") {
+      try {
+        await updateResume(resumeId, { templateId: newTemplateId });
+      } catch (e) {
+        console.error("Failed to save template change:", e);
+      }
+    }
+  };
 
   if (loading) return <Spinner />;
   if (!resumeData) return (
@@ -196,6 +221,43 @@ export default function Export() {
         <span className="hidden flex-1 lg:block" />
         <div className="flex min-h-[40px] flex-wrap items-center gap-2 lg:justify-end">
             <>
+              <div ref={templateSwitcherRef} className="relative print-hide">
+                <button
+                  onClick={() => setIsTemplateSwitcherOpen(o => !o)}
+                  className="btn btn-outline btn-sm flex items-center gap-1.5"
+                >
+                  <LayoutTemplate size={13} />
+                  {templateList.find(t => t.id === templateId)?.name ?? "Template"}
+                  <ChevronDown size={11} className={`transition-transform ${isTemplateSwitcherOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isTemplateSwitcherOpen && (
+                  <div
+                    className="absolute top-full mt-2 right-0 z-50 rounded-xl border shadow-xl p-3 grid grid-cols-2 gap-2 w-64"
+                    style={{ background: "var(--bg)", borderColor: "var(--border)" }}
+                  >
+                    {templateList.map((tmpl) => (
+                      <button
+                        key={tmpl.id}
+                        type="button"
+                        onClick={() => handleTemplateChange(tmpl.id)}
+                        className={`rounded-lg overflow-hidden border-2 transition-all text-left ${
+                          templateId === tmpl.id
+                            ? "border-[var(--accent)]"
+                            : "border-transparent hover:border-[var(--border)]"
+                        }`}
+                      >
+                        <img src={tmpl.thumbnail} alt={tmpl.name} className="w-full h-20 object-cover object-top" />
+                        <div
+                          className="px-2 py-1.5 text-[11px] font-semibold text-on-surface truncate"
+                          style={{ background: "var(--surface)" }}
+                        >
+                          {tmpl.name}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button
                 onClick={handleTogglePublish}
                 disabled={shareBusy || resumeId === "new"}
@@ -213,13 +275,7 @@ export default function Export() {
                   {copiedShareLink ? "Copied" : "Copy Link"}
                 </button>
               )}
-              <button 
-                 onClick={handleDownloadDOCX} 
-                 disabled={exportingType || shareBusy}
-                 className="btn btn-outline btn-sm disabled:opacity-50"
-              >
-                <FileText size={13} /> {exportingType === 'docx' ? 'Preparing...' : 'DOCX'}
-              </button>
+              {/* DOCX export button temporarily hidden per user request */}
               <button 
                  onClick={handlePrintPDF}
                  disabled={shareBusy}
