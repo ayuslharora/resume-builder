@@ -267,6 +267,7 @@ export function buildHomepageStaticHtml() {
     { label: 'Templates', href: '/templates' },
     { label: 'Grader', href: '/grader-info' },
     { label: 'Pricing', href: '/pricing' },
+    { label: 'Contact', href: '/contact' },
   ].map(
     (item) => `
       <a href="${item.href}" class="landing-mobile-nav-link"${item.current ? ' aria-current="page"' : ''}>
@@ -285,6 +286,7 @@ export function buildHomepageStaticHtml() {
             <a href="/templates" class="ulink text-[13.5px] text-[var(--text-2)]">Templates</a>
             <a href="/grader-info" class="ulink text-[13.5px] text-[var(--text-2)]">Grader</a>
             <a href="/pricing" class="ulink text-[13.5px] text-[var(--text-2)]">Pricing</a>
+            <a href="/contact" class="ulink text-[13.5px] text-[var(--text-2)]">Contact</a>
           </nav>
           <span class="flex-1"></span>
           <div class="flex items-center gap-3">

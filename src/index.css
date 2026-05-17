@@ -1567,7 +1567,6 @@
     right: 16px;
     bottom: calc(16px + env(safe-area-inset-bottom));
     z-index: 72;
-    display: inline-flex;
     width: 58px;
     height: 58px;
     align-items: center;

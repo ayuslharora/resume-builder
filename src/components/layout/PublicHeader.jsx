@@ -89,7 +89,7 @@ export default function PublicHeader({ isDark, toggleTheme }) {
       {/* Hamburger trigger — fixed bottom-right, hidden when nav is open */}
       {!mobileNavOpen && (
         <button
-          className="landing-mobile-nav-trigger md:hidden"
+          className="landing-mobile-nav-trigger inline-flex md:hidden"
           onClick={() => setMobileNavOpen(true)}
           aria-label="Open navigation"
         >
