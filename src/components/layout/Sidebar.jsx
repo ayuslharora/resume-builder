@@ -325,7 +325,7 @@ export default function Sidebar() {
                     >
                       <span
                         className="h-1.5 w-1.5 shrink-0 rounded-[2px]"
-                        style={{ background: resume.isShared ? "var(--accent)" : "var(--border-strong)" }}
+                        style={{ background: resume.isShared ? "#22c55e" : "var(--border-strong)" }}
                       />
                       <span className="truncate text-[12.5px]">{resume.title || "Untitled Resume"}</span>
                     </Link>

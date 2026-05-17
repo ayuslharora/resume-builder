@@ -767,7 +767,7 @@ export default function EditStep() {
             </button>
 
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
               <span className="text-[13px] font-medium text-on-surface hidden sm:block">Live</span>
             </div>
 
@@ -806,7 +806,7 @@ export default function EditStep() {
                 <ChevronRight size={10} className={`flex-shrink-0 transition-transform ${fontPickerOpen ? 'rotate-90' : 'rotate-90 opacity-50'}`} />
               </button>
               {fontPickerOpen && (
-                <div className="absolute top-full left-0 mt-1 z-50 min-w-[140px] rounded-lg border border-surface-container-high bg-surface shadow-lg overflow-hidden">
+                <div className="absolute top-full left-0 mt-1 z-50 min-w-[140px] rounded-lg border shadow-lg overflow-hidden" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
                   {POPULAR_RESUME_FONTS.map((font) => (
                     <button
                       key={font.value}
@@ -816,8 +816,8 @@ export default function EditStep() {
                         applyFontFamily(font.value);
                         setFontPickerOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 text-[13px] hover:bg-surface-container transition-colors ${currentFontFamily === font.value ? 'bg-surface-container-high text-on-surface' : 'text-on-surface-variant'}`}
-                      style={{ fontFamily: font.value }}
+                      className="w-full text-left px-3 py-1.5 text-[13px] transition-colors"
+                      style={{ fontFamily: font.value, color: currentFontFamily === font.value ? "var(--text)" : "var(--muted)", background: currentFontFamily === font.value ? "var(--surface)" : "transparent" }}
                     >
                       {font.label}
                     </button>
@@ -826,12 +826,15 @@ export default function EditStep() {
               )}
             </div>
 
-            <div className="inline-flex items-center h-8 rounded-lg border border-surface-container-high bg-surface-container overflow-hidden">
+            <div className="inline-flex items-center h-8 rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
               <button
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); applyFontSize(currentFontSize - 1); }}
                 disabled={currentFontSize <= 12}
-                className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="h-full px-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ color: "var(--muted)" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--surface-container)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 aria-label="Decrease font size"
                 title="Decrease font size"
               >
@@ -862,7 +865,10 @@ export default function EditStep() {
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); applyFontSize(currentFontSize + 1); }}
                 disabled={currentFontSize >= 84}
-                className="h-full px-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-l border-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="h-full px-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ color: "var(--muted)", borderLeft: "1px solid var(--border)" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--surface-container)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 aria-label="Increase font size"
                 title="Increase font size"
               >
@@ -949,7 +955,7 @@ export default function EditStep() {
             </button>
             <button
               onClick={handleRenderClick}
-              className="btn-primary h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
+              className="btn-accent h-10 rounded-md px-4 text-xs font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
               <Play size={14} />
               Render

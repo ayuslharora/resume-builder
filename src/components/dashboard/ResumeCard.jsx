@@ -173,7 +173,7 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
         <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 12, background: "linear-gradient(to bottom, transparent, color-mix(in oklch, var(--surface) 70%, transparent))", pointerEvents: "none" }} />
 
         {resume.isShared && (
-          <span className="pill pill-accent" style={{ position: "absolute", top: 22, left: 22 }}>
+          <span className="pill pill-good" style={{ position: "absolute", top: 22, left: 22 }}>
             <Globe size={11} /> Published
           </span>
         )}
