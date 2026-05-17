@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: "Templates", to: "/templates" },
   { label: "Grader", to: "/grader-info" },
   { label: "Pricing", to: "/pricing" },
+  { label: "Contact", to: "/contact" },
   { label: "Get started", to: "/signup", accent: true },
 ];
 

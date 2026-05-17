@@ -24,6 +24,7 @@ const GraderInfo = lazy(() => import("./pages/GraderInfo"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const WhatsNew = lazy(() => import("./pages/WhatsNew"));
 const HelpDocs = lazy(() => import("./pages/HelpDocs"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
@@ -31,7 +32,7 @@ function AppRoot() {
   const location = useLocation();
   
   useEffect(() => {
-    const publicRoutes = ["/", "/templates", "/pricing", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
+    const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
     const savedTheme = localStorage.getItem("app-theme");
 
@@ -67,6 +68,7 @@ const router = createBrowserRouter([
       { path: "/grader/report/:reportToken", element: <Grader /> },
       { path: "/shared/:token", element: <PublicResume /> },
       { path: "/pricing", element: <Pricing /> },
+      { path: "/contact", element: <Contact /> },
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
       {
