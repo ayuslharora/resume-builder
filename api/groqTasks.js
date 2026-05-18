@@ -359,7 +359,7 @@ Review tone: ${limitText(context.reviewTone, 200) || "ATS strict"}
 Current resume text:
 ${limitText(context.rewrittenResumeText || payload.resumeText, 35000)}
 ${context.sourceDocumentText ? `\n\nCandidate's raw background/source document (use this to recover concrete facts and stronger details, but do not invent anything beyond it):\n${limitText(context.sourceDocumentText, 35000)}` : ""}`,
-    options: { temperature: 0.2, top_p: 1, max_tokens: 8000 },
+    options: { temperature: 0.2, top_p: 1, max_tokens: 4096 },
   };
 }
 

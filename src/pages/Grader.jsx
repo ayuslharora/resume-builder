@@ -330,12 +330,12 @@ export default function Grader() {
 
     try {
       const { improveResume } = await loadGroq();
+      const rewrittenText = applySelectedRewrites(result.resumeText, appliedRewrites);
       const improvedResumeData = await improveResume(result.resumeText, {
         targetRole: result.targetRole,
         jobDescription: result.jobDescription,
         reviewTone: result.reviewTone,
-        rewrittenResumeText: applySelectedRewrites(result.resumeText, appliedRewrites),
-        sourceDocumentText: result.resumeText,
+        rewrittenResumeText: rewrittenText !== result.resumeText ? rewrittenText : undefined,
       });
 
       const resumeId = await createResume(currentUser.uid, {
