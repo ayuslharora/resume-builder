@@ -122,20 +122,33 @@ async function makeGroqRequest(systemPrompt, userPrompt, options = {}) {
 
   if (!response.ok) {
     if (response.status === 429) {
-      const retryAfter = response.headers.get("retry-after") 
-        ? parseInt(response.headers.get("retry-after"), 10) 
+      const retryAfter = response.headers.get("retry-after")
+        ? parseInt(response.headers.get("retry-after"), 10)
         : 60;
       markKeyRateLimited(retryAfter);
       return await makeGroqRequest(systemPrompt, userPrompt, options);
     }
-    throw new Error(`Groq API Error: ${response.status}`);
+    let groqError = `Groq API Error: ${response.status}`;
+    try {
+      const errBody = await response.json();
+      groqError = errBody?.error?.message || groqError;
+    } catch {}
+    throw new LlmTaskError(groqError, 502);
   }
 
   const data = await response.json();
-  const textContent = data.choices[0].message.content;
+  const choice = data.choices[0];
+  if (choice.finish_reason === "length") {
+    throw new LlmTaskError("AI response was cut off — the resume may be too long. Try shortening it.", 422);
+  }
+  const textContent = choice.message.content;
   const cleanedText = textContent.replace(/```json/gi, '').replace(/```/g, '').trim();
-  
-  return JSON.parse(cleanedText);
+
+  try {
+    return JSON.parse(cleanedText);
+  } catch {
+    throw new LlmTaskError("AI returned an invalid response. Please try again.", 502);
+  }
 }
 
 export default async function handler(req, res) {
