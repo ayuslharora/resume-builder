@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import {
   collection, doc, setDoc, writeBatch,
-  getCountFromServer, getDoc, getDocs, query, updateDoc, where, serverTimestamp
+  getCountFromServer, getDoc, getDocs, query, updateDoc, where, serverTimestamp,
+  orderBy, limit,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
@@ -137,6 +138,24 @@ export function useFirestore() {
     return docRef.id;
   }, []);
 
+  const saveGraderHistoryEntry = useCallback(async (userId, entry) => {
+    if (!userId || !entry?.id) return;
+    const docRef = doc(db, "graderHistory", entry.id);
+    await setDoc(docRef, { ...entry, userId });
+  }, []);
+
+  const getUserGraderHistory = useCallback(async (userId) => {
+    if (!userId) return [];
+    const q = query(
+      collection(db, "graderHistory"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
+      limit(12)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }, []);
+
   const getGraderReportByShareToken = useCallback(async (shareToken) => {
     const docRef = doc(db, publicGraderReportsCollection, shareToken);
     const snap = await getDoc(docRef);
@@ -246,5 +265,7 @@ export function useFirestore() {
     deleteResume,
     duplicateResume,
     recordResumeView,
+    saveGraderHistoryEntry,
+    getUserGraderHistory,
   };
 }

@@ -79,13 +79,31 @@ export default function Grader() {
   const [sourceMode, setSourceMode] = useState("link");
   const [activeReportTab, setActiveReportTab] = useState("overview");
 
-  const { createResume, createGraderReport, getGraderReportByShareToken, getResumeByShareToken } = useFirestore();
+  const { createResume, createGraderReport, getGraderReportByShareToken, getResumeByShareToken, saveGraderHistoryEntry, getUserGraderHistory } = useFirestore();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { reportToken } = useParams();
   const isSharedReportView = Boolean(reportToken);
 
   const alternateRoles = useMemo(() => parseRoleList(compareRoles), [compareRoles]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    getUserGraderHistory(currentUser.uid).then(firestoreHistory => {
+      if (!firestoreHistory.length) return;
+      setHistory(prev => {
+        const merged = [...firestoreHistory];
+        const ids = new Set(merged.map(e => e.id));
+        for (const entry of prev) {
+          if (!ids.has(entry.id)) merged.push(entry);
+        }
+        return merged.slice(0, 12);
+      });
+    }).catch(err => {
+      console.warn("Failed to load grader history from Firestore:", err);
+    });
+  }, [currentUser, getUserGraderHistory]);
 
   useEffect(() => {
     if (reportToken) return;
@@ -210,7 +228,7 @@ export default function Grader() {
 
     setResult(nextResult);
 
-    const nextHistory = addGraderHistoryEntry({
+    const historyEntry = {
       id: `${Date.now()}`,
       createdAt: new Date().toISOString(),
       fileName,
@@ -222,8 +240,15 @@ export default function Grader() {
         role: item.role,
         score: item.grade.score,
       })),
-    });
+    };
+    const nextHistory = addGraderHistoryEntry(historyEntry);
     setHistory(nextHistory);
+
+    if (currentUser) {
+      saveGraderHistoryEntry(currentUser.uid, historyEntry).catch(err => {
+        console.warn("Failed to save grader history to Firestore:", err);
+      });
+    }
   };
 
   const handleFileUpload = async (e) => {

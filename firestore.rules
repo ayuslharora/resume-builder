@@ -51,6 +51,12 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
 
+    // Private grader history: owner has full access
+    match /graderHistory/{entryId} {
+      allow read, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
     // Resume views: authenticated users can create/update their own view record; owner can read counts
     match /resumeViews/{viewId} {
       allow create, update: if request.auth != null && request.auth.uid == request.resource.data.viewerId;

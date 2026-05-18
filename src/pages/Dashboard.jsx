@@ -9,8 +9,9 @@ import { CheckSquare, Eye, Grid2X2, LayoutList, Plus, Search } from "lucide-reac
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
-  const { deleteResume, duplicateResume, getResumeViewCounts, getUserResumes } = useFirestore();
+  const { deleteResume, duplicateResume, getResumeViewCounts, getUserResumes, getUserGraderHistory } = useFirestore();
   const [resumes, setResumes] = useState([]);
+  const [graderHistory, setGraderHistory] = useState(() => getGraderHistory());
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState(null);
   const [query, setQuery] = useState("");
@@ -46,6 +47,12 @@ export default function Dashboard() {
           ...resume,
           distinctViewCount: viewCounts[resume.id] || 0,
         })));
+
+        getUserGraderHistory(currentUser.uid).then(history => {
+          if (!cancelled && history.length) setGraderHistory(history);
+        }).catch(err => {
+          console.warn("Could not load grader history:", err);
+        });
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching resumes:", error);
@@ -59,7 +66,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [currentUser, getResumeViewCounts, getUserResumes]);
+  }, [currentUser, getResumeViewCounts, getUserResumes, getUserGraderHistory]);
 
   function handleCreate() {
     navigate(`/builder/new`);
@@ -68,7 +75,6 @@ export default function Dashboard() {
   if (loading) return <DashboardSkeleton />;
 
   const publishedCount = resumes.filter(resume => resume.isShared).length;
-  const graderHistory = getGraderHistory();
   const avgAtsScore = getAverageScore(graderHistory);
   const scoreTrend = getScoreTrend(graderHistory);
   const bulletsRewritten = resumes.reduce((total, resume) => (
