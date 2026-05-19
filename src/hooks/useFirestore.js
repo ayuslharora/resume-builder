@@ -141,7 +141,9 @@ export function useFirestore() {
   const saveGraderHistoryEntry = useCallback(async (userId, entry) => {
     if (!userId || !entry?.id) return;
     const docRef = doc(db, "graderHistory", entry.id);
-    await setDoc(docRef, { ...entry, userId });
+    // JSON round-trip strips undefined values that Firestore rejects
+    const sanitized = JSON.parse(JSON.stringify({ ...entry, userId }));
+    await setDoc(docRef, sanitized);
   }, []);
 
   const getUserGraderHistory = useCallback(async (userId) => {

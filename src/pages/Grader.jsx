@@ -246,7 +246,7 @@ export default function Grader() {
 
     if (currentUser) {
       saveGraderHistoryEntry(currentUser.uid, historyEntry).catch(err => {
-        console.warn("Failed to save grader history to Firestore:", err);
+        console.error("Failed to save grader history to Firestore:", err);
       });
     }
   };
