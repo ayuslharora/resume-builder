@@ -548,7 +548,8 @@ export default function EditStep() {
   const currentFontSize = localFontSize;
   const previewTypographyStyle = getResumeTypographyStyle(resumeData.theme);
 
-  const overflowPx = resumeHeight > 0 ? Math.round(resumeHeight - 1122) : 0;
+  const PAGE_FIT_TOLERANCE_PX = 30;
+  const overflowPx = resumeHeight > 0 ? Math.round(resumeHeight - (1122 + PAGE_FIT_TOLERANCE_PX)) : 0;
 
   const handleFitMe = async () => {
     setIsFittingMe(true);
