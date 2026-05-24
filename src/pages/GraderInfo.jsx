@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Eye, Layers, Key, PencilLine } from "lucide-react";
+import { ArrowRight, Eye, Layers, Key, PencilLine, Zap, Share2 } from "lucide-react";
 import { useRouteSeo } from "../seo/routeSeo";
 import PublicFooter from "../components/layout/PublicFooter";
 import PublicHeader from "../components/layout/PublicHeader";
@@ -25,6 +25,16 @@ const GRADER_FEATURES = [
     title: "Turn Fluff Into Impact",
     desc: "Flag weak, generic bullets. Understand exactly why they fail, and let our AI instantly generate stronger, data-driven alternatives you can apply in one click.",
     icon: PencilLine
+  },
+  {
+    title: "$0. Zero BS Paywalls",
+    desc: "Other tools slap a score on your resume and demand $20 to show you the details. We give you the full analysis and rewrites for free. No credit card traps.",
+    icon: Zap
+  },
+  {
+    title: "Shareable Reports",
+    desc: "Need a second opinion? Generate a private link to your full grader report and share it with mentors or peers. They see exactly what the AI sees, instantly.",
+    icon: Share2
   }
 ];
 
