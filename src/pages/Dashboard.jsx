@@ -157,7 +157,6 @@ export default function Dashboard() {
               {[
                 ["all", "All"],
                 ["draft", "Draft"],
-                ["generated", "Generated"],
                 ["complete", "Complete"],
                 ["published", "Published"],
               ].map(([key, label]) => (
