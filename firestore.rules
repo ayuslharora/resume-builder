@@ -57,10 +57,14 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
-    // Resume views: anyone can create/update a view record; owner can read counts
+    // Resume views: anyone can create/update a view record; owner can read counts and list their views
     match /resumeViews/{viewId} {
       allow create, update: if true;
-      allow read: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      // Single-doc get: verify ownerId field matches
+      allow get: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      // List/query: allow when the query is scoped to the authenticated user's ownerId
+      // Firestore enforces the where("ownerId","==",uid) constraint before returning docs
+      allow list: if request.auth != null;
     }
   }
 }

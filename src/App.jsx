@@ -25,6 +25,7 @@ const Pricing = lazy(() => import("./pages/Pricing"));
 const WhatsNew = lazy(() => import("./pages/WhatsNew"));
 const HelpDocs = lazy(() => import("./pages/HelpDocs"));
 const Contact = lazy(() => import("./pages/Contact"));
+const ResumeStats = lazy(() => import("./pages/ResumeStats"));
 
 const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
           { path: "/profile", element: <Profile /> },
           { path: "/whats-new", element: <WhatsNew /> },
           { path: "/help", element: <HelpDocs /> },
+          { path: "/stats/:resumeId", element: <ResumeStats /> },
         ]
       },
       {

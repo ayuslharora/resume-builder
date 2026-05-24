@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
+import { useAuth } from "../context/useAuth";
 import ResumePreview from "../components/resume/ResumePreview";
 import { templates, templateList } from "../components/templates";
-import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle, LayoutTemplate, ChevronDown } from "lucide-react";
+import { Download, FileText, ArrowLeft, Home, Globe, EyeOff, Link as LinkIcon, Check, AlertTriangle, LayoutTemplate, ChevronDown, BarChart3 } from "lucide-react";
 import Spinner from "../components/ui/Spinner";
 import { buildSharedResumeUrl, createShareToken } from "../services/shareResume";
 import { stripResumeHtml } from "../services/resumeHtmlSanitizer";
 import FeedbackWidget from "../components/ui/FeedbackWidget";
+import ResumeStatsPanel from "../components/stats/ResumeStatsPanel";
 
 export default function Export() {
   const { resumeId } = useParams();
   const location = useLocation();
+  const { currentUser } = useAuth();
   const stateBuilderData = location.state?.builderData;
   const [resumeData, setResumeData] = useState(() => (
     resumeId === "new" && stateBuilderData ? stateBuilderData.resumeData : null
@@ -27,6 +30,7 @@ export default function Export() {
   const [shareBusy, setShareBusy] = useState(false);
   const [resumeHeight, setResumeHeight] = useState(0);
   const [isTemplateSwitcherOpen, setIsTemplateSwitcherOpen] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const templateSwitcherRef = useRef(null);
   const previewRootRef = useRef(null);
   const { getResume, updateResume } = useFirestore();
@@ -275,6 +279,14 @@ export default function Export() {
                   {copiedShareLink ? "Copied" : "Copy Link"}
                 </button>
               )}
+              {isShared && resumeId && resumeId !== "new" && (
+                <button
+                  onClick={() => setShowStats(true)}
+                  className="btn btn-outline btn-sm"
+                >
+                  <BarChart3 size={13} className="text-[var(--accent)]" /> Stats
+                </button>
+              )}
               {/* DOCX export button temporarily hidden per user request */}
               <button 
                  onClick={handlePrintPDF}
@@ -343,6 +355,17 @@ export default function Export() {
         );
       })()}
       <FeedbackWidget />
+
+      {/* Stats side panel */}
+      {showStats && (
+        <ResumeStatsPanel
+          resumeId={resumeId}
+          ownerId={currentUser?.uid}
+          resumeTitle={stripResumeHtml(resumeData?.personalInfo?.fullName) || "Resume"}
+          onClose={() => setShowStats(false)}
+          showFullLink={true}
+        />
+      )}
     </div>
   );
 }

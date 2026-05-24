@@ -15,6 +15,23 @@
         { "fieldPath": "resumeId", "order": "ASCENDING" },
         { "fieldPath": "ownerId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "resumeViews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "resumeId", "order": "ASCENDING" },
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "resumeViews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

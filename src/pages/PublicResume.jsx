@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
+import { useAuth } from "../context/useAuth";
 import ResumePreview from "../components/resume/ResumePreview";
 import { AlertCircle, ChevronLeft, Sun, Moon } from "lucide-react";
 import Loading from "./Loading";
-import { getOrCreateResumeViewerId } from "../services/resumeViewTracking";
+import { getOrCreateResumeViewerId, getViewerContext, fetchGeoData } from "../services/resumeViewTracking";
 
 export default function PublicResume() {
   const { token } = useParams();
+  const { currentUser } = useAuth();
   const { getResumeByShareToken, recordResumeView } = useFirestore();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,13 +72,25 @@ export default function PublicResume() {
           setError("Resume not found.");
         } else {
           setResume(data);
-          recordResumeView({
-            resumeId: data.id,
-            ownerId: data.userId,
-            viewerId: getOrCreateResumeViewerId(),
-          }).catch((viewError) => {
-            console.warn("Failed to record resume view:", viewError);
-          });
+
+          // Don't record a view if the owner is viewing their own shared resume
+          const isOwner = currentUser?.uid && currentUser.uid === data.userId;
+          if (!isOwner) {
+            const viewerId = getOrCreateResumeViewerId();
+            const viewerCtx = getViewerContext();
+            // Fire-and-forget: fetch geo then record the enriched view
+            fetchGeoData().then((geo) => {
+              recordResumeView({
+                resumeId: data.id,
+                ownerId: data.userId,
+                viewerId,
+                ...geo,
+                ...viewerCtx,
+              }).catch((viewError) => {
+                console.warn("Failed to record resume view:", viewError);
+              });
+            });
+          }
         }
       } catch (err) {
         setError("Failed to load resume.");
@@ -86,7 +100,7 @@ export default function PublicResume() {
       }
     }
     loadResume();
-  }, [token, getResumeByShareToken, recordResumeView]);
+  }, [token, currentUser, getResumeByShareToken, recordResumeView]);
 
   if (loading) return <Loading />;
 

@@ -1,4 +1,4 @@
-import { FileText, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, Eye, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X } from "lucide-react";
+import { FileText, Trash2, MoreHorizontal, LayoutTemplate, Download, Globe, Eye, EyeOff, Link as LinkIcon, Check, Mail, Pencil, X, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumePreview from "../resume/ResumePreview";
@@ -140,7 +140,7 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
 
   return (
     <div
-      className="panel lift group relative cursor-pointer overflow-visible"
+      className={`panel lift group relative cursor-pointer overflow-visible ${showMenu ? "z-50" : "z-10"}`}
       style={{ padding: 0 }}
     >
       {/* Preview area */}
@@ -229,6 +229,14 @@ export default function ResumeCard({ resume, onDelete, onRename, onPublishChange
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
               >
                 <LinkIcon size={14} className="text-[var(--muted)]" /> Copy link
+              </button>
+            )}
+            {resume.isShared && (
+              <button
+                onClick={(e) => { e.stopPropagation(); navigate(`/stats/${resume.id}`); setShowMenu(false); }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)]"
+              >
+                <BarChart3 size={14} className="text-[var(--accent)]" /> View stats
               </button>
             )}
             <hr className="hr my-1" />
