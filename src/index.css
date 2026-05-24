@@ -2139,89 +2139,55 @@
     color: var(--text);
   }
 
-  .app-design .profile-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .app-design .profile-header h1 {
-    margin-top: 4px;
+  .app-design .profile-hero-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 3px solid transparent;
+    background:
+      linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+      linear-gradient(135deg, var(--accent), var(--border-strong)) border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--text);
     font-size: 28px;
-    line-height: 1.1;
+    font-weight: 600;
+    box-shadow: 0 0 14px 2px color-mix(in srgb, var(--accent) 15%, transparent),
+                0 4px 14px -6px color-mix(in srgb, var(--accent) 20%, transparent);
   }
 
-  .app-design .profile-header p:last-child {
-    max-width: 340px;
+  .app-design .profile-member-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     color: var(--muted);
-    font-size: 13.5px;
-    line-height: 1.5;
-    text-align: right;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
-  .app-design .profile-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .app-design .profile-section {
-    padding: 20px;
-  }
-
-  .app-design .profile-section-wide {
-    grid-column: 1 / -1;
+  .app-design .stat-number-gradient {
+    color: var(--accent);
+    font-weight: 700;
   }
 
   .app-design .profile-section-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
     color: var(--text);
     font-size: 13.5px;
     font-weight: 600;
   }
 
-  .app-design .profile-photo-row {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-
-  .app-design .profile-avatar {
-    width: 80px;
-    height: 80px;
-    flex: 0 0 auto;
-    overflow: hidden;
-    border-color: var(--border-strong);
-    background:
-      linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
-      linear-gradient(135deg, var(--accent), var(--border-strong)) border-box;
-    color: var(--text);
-    font-size: 24px;
-  }
-
-  .app-design .profile-google-photo {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-  }
-
-  .app-design .profile-helper {
-    color: var(--muted);
-    font-size: 12.5px;
-    line-height: 1.45;
-  }
-
   .app-design .profile-error {
-    margin-bottom: 16px;
     border: 1px solid rgba(185, 28, 28, 0.18);
     border-radius: 8px;
     background: var(--bad-soft);
@@ -2239,56 +2205,6 @@
     font-weight: 500;
   }
 
-  .app-design .profile-account-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .app-design .profile-account-row {
-    min-width: 0;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    padding: 14px;
-  }
-
-  .app-design .profile-account-row p:last-child {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    color: var(--text-2);
-    font-size: 13.5px;
-  }
-
-  .app-design .profile-account-row-full {
-    grid-column: 1 / -1;
-  }
-
-  .app-design .profile-creator-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 8px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    padding: 14px;
-  }
-
-  .app-design .profile-creator-card p {
-    color: var(--text);
-    font-size: 13.5px;
-    font-weight: 500;
-  }
-
-  .app-design .profile-creator-card span {
-    display: block;
-    margin-top: 2px;
-    color: var(--muted);
-    font-size: 12.5px;
-  }
-
   .app-mobile-bottom {
     border-top: 1px solid var(--border);
     background: var(--bg);
@@ -2298,28 +2214,6 @@
   @media (max-width: 900px) {
     .app-page {
       padding: 24px 16px 96px;
-    }
-
-    .app-design .profile-header {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .app-design .profile-header p:last-child {
-      max-width: none;
-      text-align: left;
-    }
-
-    .app-design .profile-grid,
-    .app-design .profile-account-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .app-design .profile-photo-row,
-    .app-design .profile-creator-card {
-      align-items: flex-start;
-      flex-direction: column;
     }
   }
 
@@ -2441,4 +2335,268 @@ body.builder-step-4-lock-scroll {
   content: attr(data-placeholder);
   color: rgba(156, 163, 175, 0.55);
   pointer-events: none;
+}
+
+/* ── Resume Stats Panel ──────────────────────────────────────────────────── */
+
+.stats-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: statsFadeIn 0.18s ease-out both;
+}
+
+.stats-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 49;
+  width: min(400px, 100vw);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  animation: statsPanelSlideIn 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes statsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes statsPanelSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.stats-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.stats-panel-icon {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.stats-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--surface);
+  padding: 0;
+}
+
+.stats-panel-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.stats-panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stats-panel-body::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+}
+
+.stats-panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  min-height: 200px;
+}
+
+/* ── Stats metric row ── */
+
+.stats-metric-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-mini-card {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+}
+
+.stats-mini-card:last-child {
+  border-right: none;
+}
+
+/* ── Stats sections ── */
+
+.stats-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Bar chart rows ── */
+
+.stats-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 110px;
+  max-width: 130px;
+  font-size: 12px;
+  color: var(--text-2);
+  overflow: hidden;
+}
+
+.stats-bar-track {
+  flex: 1;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.stats-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+  min-width: 3px;
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.stats-bar-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ── Flag ── */
+
+.stats-flag {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Tag / referrer rows ── */
+
+.stats-tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Device chips ── */
+
+.stats-device-row {
+  display: flex;
+  gap: 8px;
+}
+
+.stats-device-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+/* ── Recent view rows ── */
+
+.stats-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.stats-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-recent-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ── Scroll container for view history ── */
+
+.stats-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.stats-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.stats-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
 }

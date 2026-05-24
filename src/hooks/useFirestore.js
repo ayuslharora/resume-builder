@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import {
   collection, doc, setDoc, writeBatch,
   getCountFromServer, getDoc, getDocs, query, updateDoc, where, serverTimestamp,
-  orderBy, limit,
+  limit,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
@@ -10,6 +10,7 @@ import {
   getUserResumeQueryConstraints,
 } from "../services/resumePersistence";
 import { notifyResumeDeleted } from "../services/resumeListSync";
+import { normalizeTimestamp } from "../utils/viewStats";
 
 function sanitizeResume(resume) {
   if (resume?.resumeData?.summary && typeof resume.resumeData.summary === 'object') {
@@ -166,13 +167,23 @@ export function useFirestore() {
     return { id: data.reportId || snap.id, ...data };
   }, []);
 
-  const recordResumeView = useCallback(async ({ resumeId, ownerId, viewerId }) => {
+  const recordResumeView = useCallback(async ({ resumeId, ownerId, viewerId, country, countryCode, city, region, referrer, device, os }) => {
     if (!resumeId || !ownerId || !viewerId) return;
 
     const viewRef = doc(db, "resumeViews", `${resumeId}_${viewerId}`);
+    const enriched = {
+      country: country ?? "Unknown",
+      countryCode: countryCode ?? "",
+      city: city ?? "Unknown",
+      region: region ?? "Unknown",
+      referrer: referrer ?? "Direct",
+      device: device ?? "Desktop",
+      os: os ?? "Unknown",
+    };
     try {
       await updateDoc(viewRef, {
         lastViewedAt: serverTimestamp(),
+        ...enriched,
       });
     } catch {
       await setDoc(viewRef, {
@@ -181,6 +192,7 @@ export function useFirestore() {
         viewerId,
         createdAt: serverTimestamp(),
         lastViewedAt: serverTimestamp(),
+        ...enriched,
       });
     }
   }, []);
@@ -200,6 +212,45 @@ export function useFirestore() {
     }));
 
     return Object.fromEntries(entries);
+  }, []);
+
+  /**
+   * Fetch the full list of view docs for a single resume (for the per-resume stats panel/page).
+   * Returns up to 200 most-recent view records sorted newest-first.
+   */
+  const getResumeViewDetails = useCallback(async (resumeId, ownerId) => {
+    if (!resumeId || !ownerId) return [];
+    const q = query(
+      collection(db, "resumeViews"),
+      where("resumeId", "==", resumeId),
+      where("ownerId", "==", ownerId),
+      limit(500)
+    );
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return docs.sort((a, b) => normalizeTimestamp(b.createdAt) - normalizeTimestamp(a.createdAt));
+  }, []);
+
+  const getOwnerViewDetails = useCallback(async (ownerId) => {
+    if (!ownerId) return [];
+    const q = query(
+      collection(db, "resumeViews"),
+      where("ownerId", "==", ownerId),
+      limit(1000)
+    );
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return docs.sort((a, b) => normalizeTimestamp(b.createdAt) - normalizeTimestamp(a.createdAt));
+  }, []);
+
+  const getOwnerViewCount = useCallback(async (ownerId) => {
+    if (!ownerId) return 0;
+    const q = query(
+      collection(db, "resumeViews"),
+      where("ownerId", "==", ownerId)
+    );
+    const snap = await getCountFromServer(q);
+    return snap.data().count;
   }, []);
 
   // ─── Update ────────────────────────────────────────────────────────────────
@@ -261,6 +312,9 @@ export function useFirestore() {
     getResume,
     getGraderReportByShareToken,
     getResumeViewCounts,
+    getResumeViewDetails,
+    getOwnerViewDetails,
+    getOwnerViewCount,
     getResumeByShareToken,
     getUserResumes,
     updateResume,
