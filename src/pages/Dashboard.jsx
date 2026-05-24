@@ -80,7 +80,9 @@ export default function Dashboard() {
   const bulletsRewritten = resumes.reduce((total, resume) => (
     total + getResumeRewriteCount(resume)
   ), 0);
-  const lastGraded = formatLastGraded(graderHistory[0]?.createdAt);
+  const totalViews = resumes.reduce((total, resume) => (
+    total + (resume.distinctViewCount || 0)
+  ), 0);
   const filteredResumes = resumes.filter((resume) => {
     const title = resume.title || "";
     const role = resume.targetRole || "";
@@ -121,7 +123,7 @@ export default function Dashboard() {
           <StatCard label="Avg ATS score" value={avgAtsScore} suffix="/100" trend={scoreTrend} />
           <StatCard label="Resumes shared" value={publishedCount} />
           <StatCard label="Bullets rewritten" value={bulletsRewritten} />
-          <StatCard label="Last graded" value={lastGraded} muted />
+          <StatCard label="Total views received" value={totalViews} />
         </div>
       )}
       

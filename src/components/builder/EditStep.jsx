@@ -56,6 +56,18 @@ export default function EditStep() {
   const { resumeData, templateId, interviewAnswers, bragSheetText, isSaving } = builderData;
   const scaledPreviewWidth = 794 * previewScale;
 
+  const resumeDataRef = useRef(resumeData);
+  useEffect(() => {
+    resumeDataRef.current = resumeData;
+  }, [resumeData]);
+
+  const forceBlurActiveElement = async () => {
+    if (document.activeElement && document.activeElement.hasAttribute('contenteditable')) {
+      document.activeElement.blur();
+      await new Promise((resolve) => setTimeout(resolve, 80));
+    }
+  };
+
   // Dynamic scaling for the preview container
   useEffect(() => {
     if (!previewContainerRef.current) return;
@@ -148,14 +160,14 @@ export default function EditStep() {
     observer.observe(el);
   };
 
-  function buildCompleteResumeSavePayload() {
-    const plainName = stripResumeHtml(resumeData.personalInfo?.fullName);
+  function buildCompleteResumeSavePayload(data = resumeDataRef.current) {
+    const plainName = stripResumeHtml(data?.personalInfo?.fullName);
     const title = plainName
       ? `${plainName} — ${interviewAnswers.targetRole || 'Resume'}`
       : interviewAnswers.targetRole || 'New Resume';
 
     return {
-      resumeData,
+      resumeData: data,
       templateId,
       interviewAnswers,
       title,
@@ -184,9 +196,10 @@ export default function EditStep() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount — data is already in context
 
-  useKeyboardShortcut("s", () => {
-    if (resumeData) {
-      saveNow(buildCompleteResumeSavePayload());
+  useKeyboardShortcut("s", async () => {
+    if (resumeDataRef.current) {
+      await forceBlurActiveElement();
+      saveNow(buildCompleteResumeSavePayload(resumeDataRef.current));
     }
   });
 
@@ -194,17 +207,19 @@ export default function EditStep() {
     setIsAtsPanelOpen(prev => !prev);
   });
 
-  function handleRenderClick() {
-    if (!activeResumeId || !resumeData) return;
-    const issues = runHealthChecks(resumeData);
+  async function handleRenderClick() {
+    if (!activeResumeId || !resumeDataRef.current) return;
+    await forceBlurActiveElement();
+    const issues = runHealthChecks(resumeDataRef.current);
     setHealthCheckIssues(issues);
   }
 
   async function handleCompleteRendering() {
-    if (!activeResumeId || !resumeData) return;
+    if (!activeResumeId || !resumeDataRef.current) return;
     setHealthCheckIssues(null);
+    await forceBlurActiveElement();
 
-    const completeResumePayload = buildCompleteResumeSavePayload();
+    const completeResumePayload = buildCompleteResumeSavePayload(resumeDataRef.current);
     const savedResumeId = await saveNow(completeResumePayload);
     const exportResumeId = savedResumeId || activeResumeId;
 
@@ -512,8 +527,10 @@ export default function EditStep() {
       return;
     }
 
+    await forceBlurActiveElement();
+
     try {
-      const resumeText = buildResumeTextForAts(resumeData);
+      const resumeText = buildResumeTextForAts(resumeDataRef.current);
       const scanContext = {
         targetRole: interviewAnswers.targetRole,
         jobDescription: interviewAnswers.jobDescription || "",
@@ -943,6 +960,22 @@ export default function EditStep() {
                   : "✓ fits"}
               </span>
             )}
+
+            {/* Autosave Status Indicator */}
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono border transition-all duration-300"
+              style={
+                isSaving
+                  ? { color: "#3b82f6", background: "rgba(59,130,246,0.08)", borderColor: "rgba(59,130,246,0.2)" }
+                  : { color: "rgb(34,197,94)", background: "rgba(34,197,94,0.08)", borderColor: "rgba(34,197,94,0.2)" }
+              }
+            >
+              {isSaving ? (
+                <Loader2 size={11} className="animate-spin" />
+              ) : (
+                <span className="h-1.5 w-1.5 rounded-full bg-[rgb(34,197,94)]" />
+              )}
+              <span>{isSaving ? "syncing..." : "synced"}</span>
+            </div>
 
             <div className="flex-1" />
 

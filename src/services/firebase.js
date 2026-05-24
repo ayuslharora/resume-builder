@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { initializeFirestore, getFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { initializeFirestore, getFirestore, CACHE_SIZE_UNLIMITED, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 // import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -13,7 +13,10 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const isEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
+const alreadyInitialized = getApps().length > 0;
+
+const app = alreadyInitialized ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 let db;
@@ -29,5 +32,11 @@ try {
 export { db };
 
 export const storage = getStorage(app);
+
+if (isEmulator && !alreadyInitialized) {
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  connectStorageEmulator(storage, "localhost", 9199);
+}
 // export const analytics = getAnalytics(app);
 

@@ -190,13 +190,21 @@ export function ResumeProvider({ children }) {
     if (!currentUser) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    
+    dispatch({ type: "SET_SAVING", payload: true });
+
     debounceRef.current = setTimeout(async () => {
       const latestId = activeResumeIdRef.current;
-      if (!latestId || latestId === "creating" || latestId === "new") return;
+      if (!latestId || latestId === "creating" || latestId === "new") {
+        dispatch({ type: "SET_SAVING", payload: false });
+        return;
+      }
       try {
         await updateResume(latestId, { ...dataToMerge, userId: currentUser.uid });
       } catch (err) {
         console.warn("Live save failed:", err.message);
+      } finally {
+        dispatch({ type: "SET_SAVING", payload: false });
       }
     }, 1000);
   }, [currentUser, updateResume]);

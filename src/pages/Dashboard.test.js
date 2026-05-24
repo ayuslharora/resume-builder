@@ -9,7 +9,7 @@ test("Dashboard widgets match the design stats row", async () => {
   assert.match(source, /Avg ATS score/);
   assert.match(source, /Resumes shared/);
   assert.match(source, /Bullets rewritten/);
-  assert.match(source, /Last graded/);
+  assert.match(source, /Total views received/);
   assert.match(source, /suffix="\/100"/);
   assert.match(source, /trend=\{scoreTrend\}/);
 });

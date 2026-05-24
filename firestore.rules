@@ -57,9 +57,9 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
-    // Resume views: authenticated users can create/update their own view record; owner can read counts
+    // Resume views: anyone can create/update a view record; owner can read counts
     match /resumeViews/{viewId} {
-      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.viewerId;
+      allow create, update: if true;
       allow read: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
   }

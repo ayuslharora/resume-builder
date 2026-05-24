@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "api": "npx vercel dev",
+    "firebase": "concurrently -n emulator,app -c blue,green \"firebase emulators:start --only firestore,auth,storage\" \"npx vercel dev\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -33,6 +34,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
