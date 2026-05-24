@@ -359,7 +359,7 @@ export function buildHomepageStaticHtml() {
                   ${['TypeScript', 'React', 'Next.js', 'GraphQL', 'Tailwind', 'Vite'].map((skill) => `<span class="rounded bg-[#f4f4f5] px-1.5 py-0.5 text-[9px]">${escapeHtml(skill)}</span>`).join('')}
                 </div>
               </div>
-              <div id="grader" class="panel absolute right-[4%] top-[32%] w-[52%] rounded-[14px] p-[18px]" style="transform:rotate(2deg);--bg:#ffffff;--surface:#fafafa;--surface-2:#f4f4f5;--border:#ececef;--border-strong:#d4d4d8;--text:#0a0a0b;--text-2:#3f3f46;--muted:#71717a;--accent:#2563eb;--accent-soft:#eff6ff;--accent-fg:#ffffff;color:var(--text)">
+              <div id="grader" class="panel absolute right-[4%] top-[32%] w-[52%] rounded-[14px] p-[18px]" style="transform:rotate(2deg);--bg:#ffffff;--surface:#fafafa;--surface-2:#f4f4f5;--border:#ececef;--border-strong:#d4d4d8;--text:#0a0a0b;--text-2:#3f3f46;--muted:#71717a;--accent:#2563eb;--accent-soft:#eff6ff;--accent-fg:#ffffff;--good:#15803d;--good-soft:#ecfdf5;color:var(--text)">
                 <div class="mb-4 flex items-center justify-between">
                   <span class="lbl-mono">ATS Grade</span>
                   <span class="pill pill-good"><span class="dot" style="background:currentColor"></span>Strong</span>

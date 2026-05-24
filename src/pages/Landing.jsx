@@ -332,6 +332,20 @@ function HeroVisual() {
           padding: 18,
           boxShadow: "var(--shadow-lg)",
           transform: "rotate(2deg)",
+          "--bg": "#ffffff",
+          "--surface": "#fafafa",
+          "--surface-2": "#f4f4f5",
+          "--border": "#ececef",
+          "--border-strong": "#d4d4d8",
+          "--text": "#0a0a0b",
+          "--text-2": "#3f3f46",
+          "--muted": "#71717a",
+          "--accent": "#2563eb",
+          "--accent-soft": "#eff6ff",
+          "--accent-fg": "#ffffff",
+          "--good": "#15803d",
+          "--good-soft": "#ecfdf5",
+          color: "var(--text)"
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
