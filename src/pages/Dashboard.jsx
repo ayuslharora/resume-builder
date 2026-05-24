@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import ResumeCard from "../components/dashboard/ResumeCard";
 import EmptyState from "../components/dashboard/EmptyState";
 import { getGraderHistory } from "../services/graderHistory";
-import { CheckSquare, Eye, Grid2X2, LayoutList, Plus, Search } from "lucide-react";
+import { CheckSquare, Eye, Grid2X2, LayoutList, Plus, Search, LayoutTemplate, FileText } from "lucide-react";
+import ResumePreview from "../components/resume/ResumePreview";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -340,24 +341,48 @@ function formatLastGraded(value) {
 
 function ResumeRow({ resume, isLast, onOpen }) {
   const statusColor = { complete: "good", generated: "accent", draft: "warn" }[resume.status] || "warn";
+  const scale = 32 / 794;
 
   return (
     <button
       onClick={onOpen}
-      className="grid w-full grid-cols-[40px_1fr_auto_auto_auto] items-center gap-4 px-4 py-3 text-left"
+      className="grid w-full grid-cols-[32px_1fr_auto_auto_auto] items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[var(--surface-2)]"
       style={{ borderBottom: isLast ? "none" : "1px solid var(--border)" }}
     >
-      <div className="h-10 w-8 rounded border border-[var(--border)] bg-[var(--surface)]" />
+      <div className="h-10 w-8 shrink-0 overflow-hidden rounded border border-[var(--border)] bg-white relative">
+        {resume.templateId && resume.resumeData ? (
+          <div
+            className="pointer-events-none"
+            style={{ width: "794px", transform: `scale(${scale})`, transformOrigin: "top left" }}
+          >
+            <ResumePreview resumeData={resume.resumeData} templateId={resume.templateId} isEditing={false} scale={1} />
+          </div>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            {resume.templateId ? (
+              <LayoutTemplate size={14} className="text-on-surface-variant/20" strokeWidth={1.5} />
+            ) : (
+              <FileText size={14} className="text-on-surface-variant/20" strokeWidth={1.5} />
+            )}
+          </div>
+        )}
+      </div>
       <div className="min-w-0">
         <div className="truncate text-sm font-medium">{resume.title || "Untitled Resume"}</div>
         <div className="truncate text-xs text-[var(--muted)]">{resume.targetRole || "No role specified"}</div>
       </div>
       <span className={`pill pill-${statusColor}`}>{resume.status || "draft"}</span>
-      {resume.isShared && <span className="pill pill-accent hidden sm:inline-flex">Public</span>}
-      {resume.isShared && (
+      {resume.isShared ? (
+        <span className="pill pill-accent hidden sm:inline-flex">Public</span>
+      ) : (
+        <span className="hidden sm:inline-flex" />
+      )}
+      {resume.isShared ? (
         <span className="pill hidden sm:inline-flex">
           <Eye size={11} /> {formatViewCount(resume.distinctViewCount)}
         </span>
+      ) : (
+        <span className="hidden sm:inline-flex" />
       )}
     </button>
   );
