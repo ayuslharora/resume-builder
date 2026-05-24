@@ -22,6 +22,7 @@ const initialBuilderState = {
   },
   templateId: null,
   resumeData: null,
+  bulletsRewritten: 0,
   pastResumeData: [],
   futureResumeData: [],
   isGenerating: false,
@@ -78,6 +79,8 @@ function builderReducer(state, action) {
         resumeData: next
       };
     }
+    case "INCREMENT_BULLETS_REWRITTEN":
+      return { ...state, bulletsRewritten: (state.bulletsRewritten || 0) + (action.payload ?? 1) };
     case "SET_SAVING":
       return { ...state, isSaving: action.payload };
     case "LOAD_STATE": {
@@ -127,6 +130,7 @@ export function ResumeProvider({ children }) {
           interviewAnswers: data.interviewAnswers ?? initialBuilderState.interviewAnswers,
           templateId: data.templateId ?? null,
           resumeData: data.resumeData ?? null,
+          bulletsRewritten: data.bulletsRewritten ?? 0,
         }
       });
       setCurrentStep(getResumeBuilderStep(data));

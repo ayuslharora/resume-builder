@@ -59,8 +59,8 @@ export const HOME_LANDING_FEATURES = [
 
 export const HOME_LANDING_METRICS = [
   {
-    value: '38k',
-    label: 'Resumes built',
+    value: '100%',
+    label: 'Recruiter-ready structures',
   },
   {
     value: '92',

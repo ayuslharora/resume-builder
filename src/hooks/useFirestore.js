@@ -234,7 +234,7 @@ export function useFirestore() {
     const existing = await getResume(resumeId);
     const batch = writeBatch(db);
     batch.delete(doc(db, "resumes", resumeId));
-    if (existing?.shareToken) {
+    if (existing?.isShared && existing?.shareToken) {
       batch.delete(doc(db, publicResumesCollection, existing.shareToken));
     }
     await batch.commit();

@@ -24,7 +24,7 @@ const atsBreakdownLabels = [
 ];
 
 export default function EditStep() {
-  const { builderData, updateSection, saveNow, activeResumeId, saveToFirestore, undo, redo, canUndo, canRedo } = useResume();
+  const { builderData, dispatch, updateSection, saveNow, activeResumeId, saveToFirestore, undo, redo, canUndo, canRedo } = useResume();
   const [activeSection, setActiveSection] = useState("personalInfo");
   const [isRegenerating] = useState(false);
   const [isRegeneratingItem] = useState(null);
@@ -312,7 +312,7 @@ export default function EditStep() {
   const handleApplyBulletRewrite = (newBulletText) => {
     if (!rewriteBulletData) return;
     const { sectionName, itemId, bulletIdx } = rewriteBulletData;
-    
+
     const currentSection = resumeData[sectionName] || [];
     const updatedSection = currentSection.map(item => {
       if (item.id === itemId) {
@@ -322,13 +322,16 @@ export default function EditStep() {
       }
       return item;
     });
-    
+
+    const newCount = (builderData.bulletsRewritten || 0) + 1;
+    dispatch({ type: "INCREMENT_BULLETS_REWRITTEN" });
     updateSection(sectionName, updatedSection);
     saveToFirestore({
       resumeData: {
         ...resumeData,
         [sectionName]: updatedSection
-      }
+      },
+      bulletsRewritten: newCount,
     });
     setRewriteBulletData(null);
   };
@@ -618,7 +621,14 @@ export default function EditStep() {
         updateSection(sectionName, updatedSection);
       });
 
-      saveToFirestore({ resumeData: updatedResumeData });
+      const bulkCount = rewrites.length;
+      if (bulkCount > 0) {
+        const newCount = (builderData.bulletsRewritten || 0) + bulkCount;
+        dispatch({ type: "INCREMENT_BULLETS_REWRITTEN", payload: bulkCount });
+        saveToFirestore({ resumeData: updatedResumeData, bulletsRewritten: newCount });
+      } else {
+        saveToFirestore({ resumeData: updatedResumeData });
+      }
     } catch {
       // swallow errors from fit-me operation
     } finally {
