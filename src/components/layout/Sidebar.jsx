@@ -313,7 +313,7 @@ export default function Sidebar() {
             {resumes.length > 0 && (
               <>
                 <div className="lbl-mono px-2 pb-2 pt-5">Recent</div>
-                {resumes.slice(0, 6).map(resume => {
+                {resumes.map(resume => {
                   const isResumeActive = location.pathname === `/builder/${resume.id}`;
                   return (
                     <Link
