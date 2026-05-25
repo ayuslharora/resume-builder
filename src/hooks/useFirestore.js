@@ -58,6 +58,19 @@ function buildPublicGraderReportShareData(reportId, reportData) {
   };
 }
 
+async function deleteResumeAnalytics(resumeId) {
+  const [viewsSnap, clicksSnap] = await Promise.all([
+    getDocs(query(collection(db, "resumeViews"), where("resumeId", "==", resumeId))),
+    getDocs(query(collection(db, "resumeLinkClicks"), where("resumeId", "==", resumeId))),
+  ]);
+  const allDocs = [...viewsSnap.docs, ...clicksSnap.docs];
+  for (let i = 0; i < allDocs.length; i += 500) {
+    const b = writeBatch(db);
+    allDocs.slice(i, i + 500).forEach(d => b.delete(d.ref));
+    await b.commit();
+  }
+}
+
 export function useFirestore() {
   const publicResumesCollection = "publicResumes";
   const publicGraderReportsCollection = "publicGraderReports";
@@ -321,6 +334,10 @@ export function useFirestore() {
       batch.delete(doc(db, publicResumesCollection, existing.shareToken));
     }
     await batch.commit();
+
+    // Clean up analytics records in the background — failures are non-fatal
+    deleteResumeAnalytics(resumeId).catch(() => {});
+
     notifyResumeDeleted(resumeId);
   }, [getResume]);
 
