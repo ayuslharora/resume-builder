@@ -2600,3 +2600,25 @@ body.builder-step-4-lock-scroll {
   background: var(--border-strong);
   border-radius: 99px;
 }
+
+/* Force desktop layout for resume templates inside the mobile zoom wrapper.
+   Tailwind md: classes are viewport-based and don't fire on mobile viewports,
+   so we unconditionally re-apply them here. */
+.public-resume-zoom .md\:flex-row { flex-direction: row; }
+.public-resume-zoom .md\:text-right { text-align: right; }
+.public-resume-zoom .md\:text-base { font-size: 1rem; line-height: 1.5rem; }
+.public-resume-zoom .md\:text-\[5\.5rem\] { font-size: 5.5rem; }
+.public-resume-zoom .md\:text-\[14px\] { font-size: 14px; }
+.public-resume-zoom .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.public-resume-zoom .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.public-resume-zoom .md\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.public-resume-zoom .md\:col-span-4 { grid-column: span 4 / span 4; }
+.public-resume-zoom .md\:col-span-8 { grid-column: span 8 / span 8; }
+.public-resume-zoom .md\:gap-8 { gap: 2rem; }
+.public-resume-zoom .md\:p-12 { padding: 3rem; }
+.public-resume-zoom .md\:pl-2 { padding-left: 0.5rem; }
+.public-resume-zoom .md\:pl-8 { padding-left: 2rem; }
+.public-resume-zoom .md\:pr-6 { padding-right: 1.5rem; }
+.public-resume-zoom .md\:px-0 { padding-left: 0; padding-right: 0; }
+.public-resume-zoom .md\:border-r-2 { border-right-width: 2px; }
+.public-resume-zoom .md\:-left-\[39px\] { left: -39px; }

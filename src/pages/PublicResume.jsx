@@ -28,6 +28,7 @@ export default function PublicResume() {
   const [error, setError] = useState(null);
   const [viewDocId, setViewDocId] = useState(null);
   const isOwnerRef = useRef(false);
+  const [mobileZoom, setMobileZoom] = useState(1);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("app-theme") || "light";
@@ -178,6 +179,20 @@ export default function PublicResume() {
     return () => document.removeEventListener("click", handleClick);
   }, [resume, recordLinkClick]);
 
+  useEffect(() => {
+    function computeZoom() {
+      if (window.innerWidth >= 768) {
+        setMobileZoom(1);
+        return;
+      }
+      const available = window.innerWidth - 32; // px-4 (16px each side)
+      setMobileZoom(available / 850);
+    }
+    computeZoom();
+    window.addEventListener("resize", computeZoom);
+    return () => window.removeEventListener("resize", computeZoom);
+  }, []);
+
   if (loading) return <Loading />;
 
   if (error) {
@@ -247,8 +262,14 @@ export default function PublicResume() {
         </div>
       </header>
 
-      <div className="mt-8 mx-auto w-full max-w-[850px] px-4 sm:px-6">
-        <div className="bg-white shadow-2xl rounded-sm overflow-hidden">
+      <div
+        className={mobileZoom < 1 ? "" : "mt-8 mx-auto w-full max-w-[850px] px-4 sm:px-6"}
+        style={mobileZoom < 1 ? { marginTop: "2rem", width: `${Math.round(850 * mobileZoom)}px`, marginLeft: "auto", marginRight: "auto" } : undefined}
+      >
+        <div
+          className={`bg-white shadow-2xl rounded-sm overflow-hidden${mobileZoom < 1 ? " public-resume-zoom" : ""}`}
+          style={mobileZoom < 1 ? { zoom: mobileZoom, width: "850px" } : undefined}
+        >
           <ResumePreview
             resumeData={resume.resumeData}
             templateId={resume.templateId}
