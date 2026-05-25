@@ -30,32 +30,23 @@ export default async function handler(req, res) {
     const timeout = setTimeout(() => controller.abort(), 3000);
 
     const geoRes = await fetch(
-      `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,regionName`,
+      `https://ipinfo.io/${ip}/json`,
       { signal: controller.signal }
     );
     clearTimeout(timeout);
 
-    if (!geoRes.ok) throw new Error(`ip-api responded ${geoRes.status}`);
+    if (!geoRes.ok) throw new Error(`ipinfo responded ${geoRes.status}`);
 
     const data = await geoRes.json();
 
-    if (data.status !== "success") {
-      return res.status(200).json({
-        country: "Unknown",
-        countryCode: "",
-        city: "Unknown",
-        region: "Unknown",
-      });
-    }
-
+    // ipinfo returns country as a 2-letter code (e.g. "US"), city and region as strings
     return res.status(200).json({
-      country: data.country ?? "Unknown",
-      countryCode: data.countryCode ?? "",
+      country: codeToName(data.country) ?? "Unknown",
+      countryCode: data.country ?? "",
       city: data.city ?? "Unknown",
-      region: data.regionName ?? "Unknown",
+      region: data.region ?? "Unknown",
     });
   } catch {
-    // Any error (timeout, rate limit, network) — silently return Unknown
     return res.status(200).json({
       country: "Unknown",
       countryCode: "",
@@ -75,6 +66,12 @@ function getClientIp(req) {
     return forwarded.split(",")[0].trim();
   }
   return req.headers["x-real-ip"] || req.socket?.remoteAddress || null;
+}
+
+const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
+function codeToName(code) {
+  if (!code || code.length !== 2) return null;
+  try { return COUNTRY_NAMES.of(code.toUpperCase()); } catch { return null; }
 }
 
 /**
