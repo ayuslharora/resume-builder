@@ -61,7 +61,7 @@ service cloud.firestore {
     match /resumeLinkClicks/{clickId} {
       allow create, update: if true;
       allow get: if request.auth != null && request.auth.uid == resource.data.ownerId;
-      allow list: if request.auth != null;
+      allow list: if request.auth != null && resource.data.ownerId == request.auth.uid;
     }
 
     // Resume views: anyone can create/update a view record; owner can read counts and list their views

@@ -30,9 +30,9 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
           </h1>
           <div className="mt-2 text-sm space-x-2 text-gray-600">
             <span className="flex items-center gap-1 justify-center inline-flex">
-              <InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" />
+              <PrintLink className="hover:underline" isEditing={isEditing} href={resumeData.personalInfo.email ? `mailto:${resumeData.personalInfo.email}` : ""}><InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" /></PrintLink>
               <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
-              <InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" />
+              <PrintLink className="hover:underline" isEditing={isEditing} href={resumeData.personalInfo.phone ? `tel:${resumeData.personalInfo.phone}` : ""}><InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" /></PrintLink>
               <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
               <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" />
             </span>

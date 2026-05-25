@@ -116,8 +116,8 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
               <InlineEdit value={resumeData.personalInfo.fullName} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, fullName: v })} placeholder="Your Name" />
             </h1>
             <div className="flex flex-col gap-2 text-sm text-gray-200">
-              <span className="flex items-center gap-2">✉ <InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" /></span>
-              <span className="flex items-center gap-2">☎ <InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" /></span>
+              <PrintLink className="flex items-center gap-2 hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.email ? `mailto:${resumeData.personalInfo.email}` : ""}>✉ <InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" /></PrintLink>
+              <PrintLink className="flex items-center gap-2 hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.phone ? `tel:${resumeData.personalInfo.phone}` : ""}>☎ <InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" /></PrintLink>
               <span className="flex items-center gap-2">⚲ <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" /></span>
             </div>
             <div className="mt-4 text-sm flex flex-col gap-2 text-gray-300">

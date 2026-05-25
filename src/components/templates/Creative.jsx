@@ -51,13 +51,13 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
             {(isEditing || resumeData.personalInfo.phone) && (
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.phone ?? "PHONE"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, phone: v })} /></div>
-                <div className={`${textMuted} text-xs font-bold`}><InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" /></div>
+                <PrintLink className={`${textMuted} text-xs font-bold`} isEditing={isEditing} href={resumeData.personalInfo.phone ? `tel:${resumeData.personalInfo.phone}` : ""}><InlineEdit value={resumeData.personalInfo.phone} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, phone: v })} placeholder="Phone" /></PrintLink>
               </div>
             )}
             {(isEditing || resumeData.personalInfo.email) && (
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.email ?? "EMAIL"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, email: v })} /></div>
-                <div className={`lowercase ${textMuted} text-xs font-bold truncate`}><InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" /></div>
+                <PrintLink className={`lowercase ${textMuted} text-xs font-bold truncate`} isEditing={isEditing} href={resumeData.personalInfo.email ? `mailto:${resumeData.personalInfo.email}` : ""}><InlineEdit value={resumeData.personalInfo.email} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, email: v })} placeholder="Email" /></PrintLink>
               </div>
             )}
             {(isEditing || resumeData.personalInfo.linkedin) && (

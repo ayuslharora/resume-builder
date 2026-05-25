@@ -243,11 +243,13 @@ export default function ResumeStats() {
             </div>
 
             {/* Link clicks */}
-            {linkClicks.length > 0 && (
-              <div className="panel p-5">
-                <h2 className="lbl-mono mb-4 flex items-center gap-1.5">
-                  <MousePointerClick size={12} /> Link clicks
-                </h2>
+            <div className="panel p-5">
+              <h2 className="lbl-mono mb-4 flex items-center gap-1.5">
+                <MousePointerClick size={12} /> Link clicks
+              </h2>
+              {linkClicks.length === 0 ? (
+                <p className="text-[13px] text-[var(--muted)]">No link clicks yet — viewers haven't clicked any links.</p>
+              ) : (
                 <div className="space-y-2.5">
                   {linkClicks.map(lc => {
                     const ctr = totalViews > 0 ? Math.round((lc.count / totalViews) * 100) : 0;
@@ -265,8 +267,8 @@ export default function ResumeStats() {
                     );
                   })}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Full view history */}
             <div className="panel p-5">
