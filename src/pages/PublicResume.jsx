@@ -10,10 +10,11 @@ import { getOrCreateResumeViewerId, getViewerContext, fetchGeoData } from "../se
 export default function PublicResume() {
   const { token } = useParams();
   const { currentUser } = useAuth();
-  const { getResumeByShareToken, recordResumeView } = useFirestore();
+  const { getResumeByShareToken, recordResumeView, updateResumeViewDuration } = useFirestore();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [viewDocId, setViewDocId] = useState(null);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("app-theme") || "light";
@@ -78,7 +79,8 @@ export default function PublicResume() {
           if (!isOwner) {
             const viewerId = getOrCreateResumeViewerId();
             const viewerCtx = getViewerContext();
-            // Fire-and-forget: fetch geo then record the enriched view
+            const docId = `${data.id}_${viewerId}`;
+            setViewDocId(docId);
             fetchGeoData().then((geo) => {
               recordResumeView({
                 resumeId: data.id,
@@ -101,6 +103,47 @@ export default function PublicResume() {
     }
     loadResume();
   }, [token, currentUser, getResumeByShareToken, recordResumeView]);
+
+  useEffect(() => {
+    if (!viewDocId) return;
+
+    let accumulated = 0;
+    let segmentStart = document.visibilityState === "visible" ? Date.now() : null;
+
+    function activeSeconds() {
+      const inProgress = segmentStart ? Math.round((Date.now() - segmentStart) / 1000) : 0;
+      return accumulated + inProgress;
+    }
+
+    function flush() {
+      const secs = activeSeconds();
+      if (secs >= 3) updateResumeViewDuration(viewDocId, secs);
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "hidden") {
+        if (segmentStart) {
+          accumulated += Math.round((Date.now() - segmentStart) / 1000);
+          segmentStart = null;
+        }
+        flush();
+      } else {
+        segmentStart = Date.now();
+      }
+    }
+
+    // Heartbeat every 30s so we capture duration even if the tab is closed without firing unload
+    const heartbeat = setInterval(flush, 30000);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+
+    return () => {
+      clearInterval(heartbeat);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+      flush();
+    };
+  }, [viewDocId, updateResumeViewDuration]);
 
   if (loading) return <Loading />;
 

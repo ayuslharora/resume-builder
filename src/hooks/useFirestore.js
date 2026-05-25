@@ -197,6 +197,14 @@ export function useFirestore() {
     }
   }, []);
 
+  const updateResumeViewDuration = useCallback(async (viewDocId, durationSeconds) => {
+    if (!viewDocId || durationSeconds < 3) return;
+    const viewRef = doc(db, "resumeViews", viewDocId);
+    try {
+      await updateDoc(viewRef, { duration: durationSeconds });
+    } catch {}
+  }, []);
+
   const getResumeViewCounts = useCallback(async (resumeIds = [], ownerId = "") => {
     if (!ownerId) return {};
 
@@ -321,6 +329,7 @@ export function useFirestore() {
     deleteResume,
     duplicateResume,
     recordResumeView,
+    updateResumeViewDuration,
     saveGraderHistoryEntry,
     getUserGraderHistory,
   };

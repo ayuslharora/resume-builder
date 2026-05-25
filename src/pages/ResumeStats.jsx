@@ -67,6 +67,10 @@ export default function ResumeStats() {
   const filteredViews = views.filter(v => normalizeTimestamp(v.createdAt) >= cutoff);
 
   const totalViews = filteredViews.length;
+  const viewsWithDuration = filteredViews.filter(v => v.duration > 0);
+  const avgDuration = viewsWithDuration.length
+    ? Math.round(viewsWithDuration.reduce((s, v) => s + v.duration, 0) / viewsWithDuration.length)
+    : null;
   const countryCounts = countBy(filteredViews, "country");
   const referrerCounts = countBy(filteredViews, "referrer");
   const deviceCounts = countBy(filteredViews, "device");
@@ -132,13 +136,14 @@ export default function ResumeStats() {
       ) : (
         <>
           {/* Top stats row */}
-          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
             <StatCard label="Total views" value={totalViews} icon={<Eye size={14} />} />
             <StatCard
               label="Countries"
               value={Object.keys(countryCounts).filter(c => c !== "Unknown").length || 0}
               icon={<Globe size={14} />}
             />
+            <StatCard label="Avg time" value={formatDuration(avgDuration)} icon={<Clock size={14} />} />
             <StatCard label="Top device" value={getTopKey(deviceCounts)} icon={<Monitor size={14} />} />
             <StatCard label="Top source" value={getTopKey(referrerCounts)} icon={<ExternalLink size={14} />} />
           </div>
@@ -396,6 +401,13 @@ function StatsPageSkeleton() {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+function formatDuration(secs) {
+  if (!secs) return "—";
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
 
 function countBy(arr, key) {
   const out = {};
