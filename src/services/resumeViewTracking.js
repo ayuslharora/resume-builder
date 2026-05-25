@@ -40,30 +40,46 @@ export function getViewerContext() {
     }
 
     const ua = navigator.userAgent;
+    // navigator.userAgentData is available in Chrome/Edge 90+ and is structured,
+    // making it resistant to accidental UA overrides from DevTools emulation.
+    const uaData = navigator.userAgentData;
 
-    const isMobi = /Mobi/i.test(ua);
-    const isAndroid = /Android/i.test(ua);
-    // Android tablets have "Android" but not "Mobi"; check tablet before mobile
-    const isTablet = /Tablet|iPad/i.test(ua) || (isAndroid && !isMobi);
+    let device, os;
 
-    let device = "Desktop";
-    if (isTablet) {
-      device = "Tablet";
-    } else if (isMobi || isAndroid) {
-      device = "Mobile";
-    }
+    if (uaData?.platform) {
+      const platform = uaData.platform.toLowerCase();
+      const isMobileHint = uaData.mobile ?? false;
 
-    let os = "Unknown";
-    if (/iPhone|iPad/.test(ua)) {
-      os = "iOS";
-    } else if (/Mac/.test(ua) && !/iPhone|iPad/.test(ua)) {
-      os = "macOS";
-    } else if (/Android/.test(ua)) {
-      os = "Android";
-    } else if (/Windows/.test(ua)) {
-      os = "Windows";
-    } else if (/Linux/.test(ua)) {
-      os = "Linux";
+      if (platform === "android") {
+        device = isMobileHint ? "Mobile" : "Tablet";
+        os = "Android";
+      } else if (platform === "ios" || platform === "ipados") {
+        device = isMobileHint ? "Mobile" : "Tablet";
+        os = "iOS";
+      } else {
+        device = "Desktop";
+        if (platform === "macos") os = "macOS";
+        else if (platform === "windows") os = "Windows";
+        else if (platform === "chromeos") os = "ChromeOS";
+        else if (platform === "linux") os = "Linux";
+        else os = "Unknown";
+      }
+    } else {
+      // Fallback: UA string parsing (Firefox, Safari, older browsers)
+      const isMobi = /Mobi/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+      const isTablet = /Tablet|iPad/i.test(ua) || (isAndroid && !isMobi);
+
+      device = "Desktop";
+      if (isTablet) device = "Tablet";
+      else if (isMobi || isAndroid) device = "Mobile";
+
+      if (/iPhone|iPad/.test(ua)) os = "iOS";
+      else if (/Mac/.test(ua) && !/iPhone|iPad/.test(ua)) os = "macOS";
+      else if (isAndroid) os = "Android";
+      else if (/Windows/.test(ua)) os = "Windows";
+      else if (/Linux/.test(ua)) os = "Linux";
+      else os = "Unknown";
     }
 
     return { referrer, device, os };
