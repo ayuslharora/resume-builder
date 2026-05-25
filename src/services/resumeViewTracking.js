@@ -41,11 +41,16 @@ export function getViewerContext() {
 
     const ua = navigator.userAgent;
 
+    const isMobi = /Mobi/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+    // Android tablets have "Android" but not "Mobi"; check tablet before mobile
+    const isTablet = /Tablet|iPad/i.test(ua) || (isAndroid && !isMobi);
+
     let device = "Desktop";
-    if (/Mobi|Android/i.test(ua) && !/iPad/i.test(ua)) {
-      device = "Mobile";
-    } else if (/Tablet|iPad/i.test(ua)) {
+    if (isTablet) {
       device = "Tablet";
+    } else if (isMobi || isAndroid) {
+      device = "Mobile";
     }
 
     let os = "Unknown";
