@@ -341,6 +341,17 @@ export function useFirestore() {
     notifyResumeDeleted(resumeId);
   }, [getResume]);
 
+  const deleteGraderReport = useCallback(async (reportId) => {
+    const docRef = doc(db, "graderReports", reportId);
+    const snap = await getDoc(docRef);
+    const batch = writeBatch(db);
+    batch.delete(docRef);
+    if (snap.exists() && snap.data().shareToken) {
+      batch.delete(doc(db, publicGraderReportsCollection, snap.data().shareToken));
+    }
+    await batch.commit();
+  }, []);
+
   // ─── Duplicate ─────────────────────────────────────────────────────────────
   const duplicateResume = useCallback(async (resumeId) => {
     const data = await getResume(resumeId);
@@ -368,6 +379,7 @@ export function useFirestore() {
     getUserResumes,
     updateResume,
     deleteResume,
+    deleteGraderReport,
     duplicateResume,
     recordResumeView,
     updateResumeViewDuration,
