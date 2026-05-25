@@ -88,7 +88,8 @@ export default function PublicResume() {
           setResume(data);
 
           // Don't record a view if the owner is viewing their own shared resume
-          const isOwner = currentUser?.uid && currentUser.uid === data.userId;
+          const ownerId = data.userId || data.ownerId;
+          const isOwner = currentUser?.uid && currentUser.uid === ownerId;
           isOwnerRef.current = isOwner;
           if (!isOwner) {
             const viewerId = getOrCreateResumeViewerId();
@@ -98,7 +99,7 @@ export default function PublicResume() {
             fetchGeoData().then((geo) => {
               recordResumeView({
                 resumeId: data.id,
-                ownerId: data.userId,
+                ownerId,
                 viewerId,
                 ...geo,
                 ...viewerCtx,
@@ -162,7 +163,7 @@ export default function PublicResume() {
   useEffect(() => {
     if (!resume) return;
     const resumeId = resume.id;
-    const ownerId = resume.userId;
+    const ownerId = resume.userId || resume.ownerId;
 
     function handleClick(e) {
       if (isOwnerRef.current) return;
