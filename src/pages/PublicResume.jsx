@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "../context/useAuth";
@@ -7,14 +7,27 @@ import { AlertCircle, ChevronLeft, Sun, Moon } from "lucide-react";
 import Loading from "./Loading";
 import { getOrCreateResumeViewerId, getViewerContext, fetchGeoData } from "../services/resumeViewTracking";
 
+function classifyLink(href) {
+  if (!href) return null;
+  if (href.startsWith("mailto:")) return "Email";
+  if (href.startsWith("tel:")) return "Phone";
+  if (/github\.com/i.test(href)) return "GitHub";
+  if (/linkedin\.com/i.test(href)) return "LinkedIn";
+  if (/twitter\.com|x\.com/i.test(href)) return "Twitter";
+  if (/instagram\.com/i.test(href)) return "Instagram";
+  if (href.startsWith("http")) return "Portfolio";
+  return null;
+}
+
 export default function PublicResume() {
   const { token } = useParams();
   const { currentUser } = useAuth();
-  const { getResumeByShareToken, recordResumeView, updateResumeViewDuration } = useFirestore();
+  const { getResumeByShareToken, recordResumeView, updateResumeViewDuration, recordLinkClick } = useFirestore();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewDocId, setViewDocId] = useState(null);
+  const isOwnerRef = useRef(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("app-theme") || "light";
@@ -76,6 +89,7 @@ export default function PublicResume() {
 
           // Don't record a view if the owner is viewing their own shared resume
           const isOwner = currentUser?.uid && currentUser.uid === data.userId;
+          isOwnerRef.current = isOwner;
           if (!isOwner) {
             const viewerId = getOrCreateResumeViewerId();
             const viewerCtx = getViewerContext();
@@ -144,6 +158,24 @@ export default function PublicResume() {
       flush();
     };
   }, [viewDocId, updateResumeViewDuration]);
+
+  useEffect(() => {
+    if (!resume) return;
+    const resumeId = resume.id;
+    const ownerId = resume.userId;
+
+    function handleClick(e) {
+      if (isOwnerRef.current) return;
+      const anchor = e.target.closest("a[href]");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href") || "";
+      const label = classifyLink(href);
+      if (label) recordLinkClick({ resumeId, ownerId, label, url: href });
+    }
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [resume, recordLinkClick]);
 
   if (loading) return <Loading />;
 

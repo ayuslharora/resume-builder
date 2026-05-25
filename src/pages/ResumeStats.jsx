@@ -4,7 +4,7 @@ import { useFirestore } from "../hooks/useFirestore";
 import { useAuth } from "../context/useAuth";
 import {
   BarChart3, Eye, Globe, Monitor, Smartphone, Tablet,
-  ExternalLink, Clock, ArrowLeft, TrendingUp, Users
+  ExternalLink, Clock, ArrowLeft, TrendingUp, Users, MousePointerClick
 } from "lucide-react";
 import { normalizeTimestamp, buildDailySeries } from "../utils/viewStats";
 
@@ -19,10 +19,11 @@ export default function ResumeStats() {
   const { resumeId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { getResume, getResumeViewDetails } = useFirestore();
+  const { getResume, getResumeViewDetails, getResumeLinkClicks } = useFirestore();
 
   const [resume, setResume] = useState(null);
   const [views, setViews] = useState([]);
+  const [linkClicks, setLinkClicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("30d");
 
@@ -46,21 +47,22 @@ export default function ResumeStats() {
         return;
       }
 
-      // Separately fetch view details — failure here shows empty state, not a redirect
-      try {
-        const viewData = await getResumeViewDetails(resumeId, currentUser.uid);
-        if (!cancelled) setViews(viewData);
-      } catch (err) {
-        console.warn("Could not load view details:", err);
-        // Keep views as [] — the page will show "no views yet"
-      } finally {
-        if (!cancelled) setLoading(false);
+      // Separately fetch view details + link clicks — failures show empty state, not redirect
+      const [viewResult, clicksResult] = await Promise.allSettled([
+        getResumeViewDetails(resumeId, currentUser.uid),
+        getResumeLinkClicks(resumeId, currentUser.uid),
+      ]);
+      if (!cancelled) {
+        if (viewResult.status === "fulfilled") setViews(viewResult.value);
+        else console.warn("Could not load view details:", viewResult.reason);
+        if (clicksResult.status === "fulfilled") setLinkClicks(clicksResult.value);
+        setLoading(false);
       }
     }
 
     load();
     return () => { cancelled = true; };
-  }, [resumeId, currentUser, getResume, getResumeViewDetails, navigate]);
+  }, [resumeId, currentUser, getResume, getResumeViewDetails, getResumeLinkClicks, navigate]);
 
   const rangeDays = RANGE_OPTIONS.find(r => r.label === range)?.days ?? 30;
   const cutoff = Date.now() - rangeDays * 86400000;
@@ -71,6 +73,10 @@ export default function ResumeStats() {
   const avgDuration = viewsWithDuration.length
     ? Math.round(viewsWithDuration.reduce((s, v) => s + v.duration, 0) / viewsWithDuration.length)
     : null;
+  const bounceRate = viewsWithDuration.length
+    ? Math.round((viewsWithDuration.filter(v => v.duration < 5).length / viewsWithDuration.length) * 100)
+    : null;
+  const totalLinkClicks = linkClicks.reduce((s, c) => s + (c.count || 0), 0);
   const countryCounts = countBy(filteredViews, "country");
   const referrerCounts = countBy(filteredViews, "referrer");
   const deviceCounts = countBy(filteredViews, "device");
@@ -136,7 +142,7 @@ export default function ResumeStats() {
       ) : (
         <>
           {/* Top stats row */}
-          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard label="Total views" value={totalViews} icon={<Eye size={14} />} />
             <StatCard
               label="Countries"
@@ -144,8 +150,13 @@ export default function ResumeStats() {
               icon={<Globe size={14} />}
             />
             <StatCard label="Avg time" value={formatDuration(avgDuration)} icon={<Clock size={14} />} />
+            <StatCard
+              label="Bounce rate"
+              value={bounceRate !== null ? `${bounceRate}%` : "—"}
+              icon={<TrendingUp size={14} />}
+            />
+            <StatCard label="Link clicks" value={totalLinkClicks || "—"} icon={<MousePointerClick size={14} />} />
             <StatCard label="Top device" value={getTopKey(deviceCounts)} icon={<Monitor size={14} />} />
-            <StatCard label="Top source" value={getTopKey(referrerCounts)} icon={<ExternalLink size={14} />} />
           </div>
 
           {/* Daily chart */}
@@ -230,6 +241,32 @@ export default function ResumeStats() {
                 ))}
               </div>
             </div>
+
+            {/* Link clicks */}
+            {linkClicks.length > 0 && (
+              <div className="panel p-5">
+                <h2 className="lbl-mono mb-4 flex items-center gap-1.5">
+                  <MousePointerClick size={12} /> Link clicks
+                </h2>
+                <div className="space-y-2.5">
+                  {linkClicks.map(lc => {
+                    const ctr = totalViews > 0 ? Math.round((lc.count / totalViews) * 100) : 0;
+                    return (
+                      <div key={lc.id} className="stats-bar-row">
+                        <div className="stats-bar-label" style={{ width: 120, minWidth: 120 }}>
+                          <span className="truncate text-[12.5px]">{lc.label}</span>
+                        </div>
+                        <div className="stats-bar-track flex-1">
+                          <div className="stats-bar-fill" style={{ width: `${Math.min(ctr * 2, 100)}%` }} />
+                        </div>
+                        <span className="stats-bar-count">{lc.count}</span>
+                        <span className="text-[11px] text-[var(--faint)] w-10 text-right">{ctr}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Full view history */}
             <div className="panel p-5">

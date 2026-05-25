@@ -57,6 +57,13 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
+    // Link clicks: anyone can create/update (unauthenticated visitors); owner can read
+    match /resumeLinkClicks/{clickId} {
+      allow create, update: if true;
+      allow get: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow list: if request.auth != null;
+    }
+
     // Resume views: anyone can create/update a view record; owner can read counts and list their views
     match /resumeViews/{viewId} {
       allow create, update: if true;

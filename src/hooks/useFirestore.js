@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import {
   collection, doc, setDoc, writeBatch,
   getCountFromServer, getDoc, getDocs, query, updateDoc, where, serverTimestamp,
-  limit,
+  increment, limit,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import {
@@ -205,6 +205,30 @@ export function useFirestore() {
     } catch {}
   }, []);
 
+  const recordLinkClick = useCallback(async ({ resumeId, ownerId, label, url }) => {
+    if (!resumeId || !ownerId || !label) return;
+    const docId = `${resumeId}_${label.toLowerCase().replace(/\s+/g, "_")}`;
+    const ref = doc(db, "resumeLinkClicks", docId);
+    try {
+      await updateDoc(ref, { count: increment(1), lastClickedAt: serverTimestamp(), url });
+    } catch {
+      await setDoc(ref, { resumeId, ownerId, label, url, count: 1, lastClickedAt: serverTimestamp() });
+    }
+  }, []);
+
+  const getResumeLinkClicks = useCallback(async (resumeId, ownerId) => {
+    if (!resumeId || !ownerId) return [];
+    const q = query(
+      collection(db, "resumeLinkClicks"),
+      where("resumeId", "==", resumeId),
+      where("ownerId", "==", ownerId)
+    );
+    const snap = await getDocs(q);
+    return snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => b.count - a.count);
+  }, []);
+
   const getResumeViewCounts = useCallback(async (resumeIds = [], ownerId = "") => {
     if (!ownerId) return {};
 
@@ -330,6 +354,8 @@ export function useFirestore() {
     duplicateResume,
     recordResumeView,
     updateResumeViewDuration,
+    recordLinkClick,
+    getResumeLinkClicks,
     saveGraderHistoryEntry,
     getUserGraderHistory,
   };
