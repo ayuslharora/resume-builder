@@ -38,7 +38,7 @@ const FEATURE_ICON_MAP = {
   "Four templates": LayoutTemplate,
   "Inline editor": PencilLine,
   "Targeted rewrites": Zap,
-  "PDF and DOCX": Download,
+  "PDF export": Download,
 };
 
 const HERO_SCORE_ITEMS = [

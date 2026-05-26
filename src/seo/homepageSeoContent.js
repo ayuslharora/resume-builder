@@ -51,9 +51,9 @@ export const HOME_LANDING_FEATURES = [
       'Improve a single bullet for stronger impact, compare the result, and keep the version that fits the role.',
   },
   {
-    title: 'PDF and DOCX',
+    title: 'PDF export',
     body:
-      'Export recruiter-ready files from the same workspace after your resume has been built and graded.',
+      'Export a recruiter-ready PDF from the same workspace after your resume has been built and graded.',
   },
 ]
 
