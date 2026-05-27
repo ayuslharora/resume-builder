@@ -3,7 +3,7 @@ export const HOME_SEO_BADGE = 'ATS-Optimized Resumes'
 export const HOME_SEO_TITLE = 'Unlimited AI Resume Builder'
 
 export const HOME_SEO_DESCRIPTION =
-  'ResuMe is an open-access ATS-focused resume builder and grader for students, fresh graduates, and early-career professionals.'
+  'Build a tailored, ATS-ready resume in minutes — not hours. AI generation, ATS grading, and smart rewrites for students, fresh graduates, and early-career professionals.'
 
 export const HOME_AUTHOR_NAME = 'Ayush'
 export const HOME_AUTHOR_URL = 'https://Ayuslh.in/'
@@ -36,9 +36,9 @@ export const HOME_LANDING_FEATURES = [
       'Score your resume out of 100 against any job description, then see exactly what to fix first.',
   },
   {
-    title: 'Four templates',
+    title: 'Share & track',
     body:
-      'Minimal, Modern, Professional, and Creative layouts keep the structure clean while giving you a usable starting point.',
+      'Share your resume via a link and see who read it — views, locations, time spent, and which links they clicked.',
   },
   {
     title: 'Inline editor',
@@ -51,9 +51,9 @@ export const HOME_LANDING_FEATURES = [
       'Improve a single bullet for stronger impact, compare the result, and keep the version that fits the role.',
   },
   {
-    title: 'PDF export',
+    title: 'Cover letter',
     body:
-      'Export a recruiter-ready PDF from the same workspace after your resume has been built and graded.',
+      'Generate a tailored cover letter from your resume and a job description in seconds. No fluff, no filler.',
   },
 ]
 

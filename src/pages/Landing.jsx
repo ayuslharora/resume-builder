@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Download,
+  Eye,
   FileText,
-  LayoutTemplate,
   PencilLine,
   Shield,
   Sparkles,
@@ -35,10 +34,10 @@ import PublicFooter from "../components/layout/PublicFooter";
 const FEATURE_ICON_MAP = {
   "AI builder": Sparkles,
   "ATS grader": Target,
-  "Four templates": LayoutTemplate,
+  "Share & track": Eye,
   "Inline editor": PencilLine,
   "Targeted rewrites": Zap,
-  "PDF export": Download,
+  "Cover letter": FileText,
 };
 
 const HERO_SCORE_ITEMS = [
