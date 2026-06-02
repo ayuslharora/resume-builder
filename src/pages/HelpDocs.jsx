@@ -4,6 +4,7 @@ import {
   CheckSquare,
   Download,
   HelpCircle,
+  Key,
   Keyboard,
   Link2,
   PencilLine,
@@ -55,6 +56,42 @@ const SECTIONS = [
       {
         q: "What formatting is available?",
         a: "Bold, italic, underline, and bullet lists are available via the rich text toolbar inside each text field. All formatting is preserved when you export to PDF.",
+      },
+    ],
+  },
+  {
+    id: "byok",
+    icon: Key,
+    eyebrow: "Groq API Key",
+    title: "Bring your own API key",
+    items: [
+      {
+        q: "What is BYOK and why would I use it?",
+        a: "BYOK (Bring Your Own Key) lets you connect your personal Groq API key to your account. All AI features — resume generation, bullet rewrites, grading, cover letters — then run through your key instead of shared server capacity. This means no wait times and no rate-limit errors during peak hours. Groq keys are free to create at console.groq.com/keys.",
+      },
+      {
+        q: "How do I add my Groq API key?",
+        a: "Go to Profile → Groq API Key section. Paste your key (it starts with gsk_) into the input and click Save. The app validates the key against the Groq API before saving — if your key is inactive or typed incorrectly, you'll see an error immediately.",
+      },
+      {
+        q: "Is my API key stored securely?",
+        a: "Yes. Your key is never stored in plain text. Before it reaches the database, it is encrypted with AES-256-GCM — a standard used in banking and messaging apps. The encryption key lives only on the server and is never exposed to the browser. Even if someone accessed the database directly, they would see encrypted ciphertext, not your key.",
+      },
+      {
+        q: "What happens when I don't have a personal key?",
+        a: "AI features use shared server capacity by default. If all shared keys are currently rate-limited or under high load, a prompt will appear suggesting you add your own key or wait a moment. Most requests go through fine without a personal key.",
+      },
+      {
+        q: "What happens if my personal key hits its own rate limit?",
+        a: "Groq's free tier has generous limits, but if you hit them, you'll see a message saying your key is rate-limited and to try again shortly. The app will not silently fall back to shared keys — you'll know exactly what happened.",
+      },
+      {
+        q: "How do I remove my key?",
+        a: "Go to Profile → Groq API Key. When a key is active, you'll see a 'Remove key' button. Click it and the key is deleted from storage immediately. After removal, AI features revert to shared server capacity.",
+      },
+      {
+        q: "Can ResuMe staff see my API key?",
+        a: "No. The raw key is encrypted the moment it arrives at the server — it is never logged, never stored unencrypted, and is only decrypted in memory at the moment an AI request is made. It is immediately discarded after use.",
       },
     ],
   },
@@ -178,7 +215,7 @@ export default function HelpDocs() {
           </div>
           <div className="min-w-0">
             <div className="text-[13px] font-medium leading-tight text-[var(--text)]">FAQ</div>
-            <div className="text-[11px] leading-tight text-[var(--muted)]">Updated May 2025</div>
+            <div className="text-[11px] leading-tight text-[var(--muted)]">Updated Jun 2025</div>
           </div>
         </div>
       </div>

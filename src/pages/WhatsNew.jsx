@@ -11,9 +11,21 @@ import {
   Type,
   Download,
   Bug,
+  Key,
 } from "lucide-react";
 
 const CHANGELOG = [
+  {
+    date: "Jun 2025",
+    entries: [
+      {
+        type: "feature",
+        title: "Bring Your Own Groq API Key (BYOK)",
+        desc: "Add your personal Groq API key in Profile settings to bypass shared server limits entirely. Your key is AES-256-GCM encrypted before storage — the plaintext never touches the database. When server capacity is tight, a prompt appears offering to redirect you to your Profile to add a key. Once set, all AI features route through your key automatically.",
+        icon: Key,
+      },
+    ],
+  },
   {
     date: "May 2025",
     entries: [
