@@ -209,7 +209,7 @@ export default async function handler(req, res) {
       return res.status(503).json({ error: "AI servers are busy. Add your own Groq key or try again shortly.", code: "KEYS_EXHAUSTED" });
     }
     if (error.message === "No Groq API keys configured on server") {
-      return res.status(500).json({ error: "AI service is not configured." });
+      return res.status(503).json({ error: "AI servers are busy. Add your own Groq key or try again shortly.", code: "KEYS_EXHAUSTED" });
     }
     return res.status(500).json({ error: 'Internal Server Error' });
   }
