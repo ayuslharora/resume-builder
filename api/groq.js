@@ -69,12 +69,19 @@ async function getPersonalKey(uid, token) {
     const projectId = process.env.VITE_FIREBASE_PROJECT_ID || "resume-cd263";
     const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("getPersonalKey: Firestore REST returned", res.status);
+      return null;
+    }
     const doc = await res.json();
     const encryptedKey = doc.fields?.encryptedGroqKey?.stringValue;
-    if (!encryptedKey) return null;
+    if (!encryptedKey) {
+      console.error("getPersonalKey: encryptedGroqKey field missing from users doc");
+      return null;
+    }
     return decrypt(encryptedKey);
-  } catch {
+  } catch (err) {
+    console.error("getPersonalKey error:", err.message);
     return null;
   }
 }
@@ -192,6 +199,9 @@ export default async function handler(req, res) {
     let personalKey = null;
     if (usePersonalKey) {
       personalKey = await getPersonalKey(decoded.uid, token);
+      if (!personalKey) {
+        return res.status(400).json({ error: "Could not load your Groq API key. Please re-add it in your Profile settings." });
+      }
     }
 
     const result = await makeGroqRequest(
