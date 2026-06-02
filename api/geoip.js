@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const ip = getClientIp(req);
 
   // Localhost / private IPs — return Unknown immediately
-  if (!ip || isPrivateIp(ip)) {
+  if (!ip || !isValidIp(ip) || isPrivateIp(ip)) {
     return res.status(200).json({
       country: "Unknown",
       countryCode: "",
@@ -72,6 +72,12 @@ const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 function codeToName(code) {
   if (!code || code.length !== 2) return null;
   try { return COUNTRY_NAMES.of(code.toUpperCase()); } catch { return null; }
+}
+
+const IPV4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
+const IPV6_RE = /^[0-9a-fA-F:]{2,39}$/;
+function isValidIp(ip) {
+  return IPV4_RE.test(ip) || IPV6_RE.test(ip);
 }
 
 /**
