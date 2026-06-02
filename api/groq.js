@@ -1,6 +1,8 @@
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 import { buildLlmTaskRequest, LlmTaskError } from './groqTasks.js';
+import { decrypt } from './keyEncryption.js';
 
 if (!getApps().length) {
   initializeApp({ projectId: process.env.VITE_FIREBASE_PROJECT_ID || "resume-cd263" });
@@ -63,6 +65,19 @@ function initializeKeyStates() {
   }
 }
 
+async function getPersonalKey(uid) {
+  try {
+    const db = getFirestore();
+    const doc = await db.collection("userSecrets").doc(uid).get();
+    if (!doc.exists) return null;
+    const data = doc.data();
+    if (!data?.encryptedGroqKey) return null;
+    return decrypt(data.encryptedGroqKey);
+  } catch {
+    return null;
+  }
+}
+
 function getNextGroqKey() {
   const keys = getKeys();
   if (keys.length === 0) {
@@ -100,14 +115,14 @@ function markKeyRateLimited(retryAfterSeconds = 60) {
   }
 }
 
-async function makeGroqRequest(systemPrompt, userPrompt, options = {}) {
-  const apiKey = getNextGroqKey();
-  
+async function makeGroqRequest(systemPrompt, userPrompt, options = {}, apiKey = null) {
+  const resolvedKey = apiKey ?? getNextGroqKey();
+
   const response = await fetch(GROQ_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Authorization": `Bearer ${resolvedKey}`
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
@@ -122,6 +137,9 @@ async function makeGroqRequest(systemPrompt, userPrompt, options = {}) {
 
   if (!response.ok) {
     if (response.status === 429) {
+      if (apiKey !== null) {
+        throw new LlmTaskError("Your Groq API key is rate limited. Try again shortly.", 429);
+      }
       const retryAfter = response.headers.get("retry-after")
         ? parseInt(response.headers.get("retry-after"), 10)
         : 60;
@@ -166,14 +184,20 @@ export default async function handler(req, res) {
     const decoded = await getAuth().verifyIdToken(token);
     
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { task, payload } = body || {};
+    const { task, payload, usePersonalKey } = body || {};
     const taskRequest = buildLlmTaskRequest(task, payload);
     enforceRateLimit(decoded.uid, task);
+
+    let personalKey = null;
+    if (usePersonalKey) {
+      personalKey = await getPersonalKey(decoded.uid);
+    }
 
     const result = await makeGroqRequest(
       taskRequest.systemPrompt,
       taskRequest.userPrompt,
-      taskRequest.options
+      taskRequest.options,
+      personalKey
     );
     return res.status(200).json({ data: result });
   } catch (error) {
@@ -182,7 +206,7 @@ export default async function handler(req, res) {
       return res.status(error.statusCode).json({ error: error.message });
     }
     if (error.message === "rate-limited") {
-      return res.status(429).json({ error: "All keys rate-limited. Try again soon." });
+      return res.status(503).json({ error: "AI servers are busy. Add your own Groq key or try again shortly.", code: "KEYS_EXHAUSTED" });
     }
     if (error.message === "No Groq API keys configured on server") {
       return res.status(500).json({ error: "AI service is not configured." });
