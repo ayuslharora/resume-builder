@@ -380,7 +380,7 @@ export default function Profile() {
                     onClick={handleSaveKey}
                     disabled={!groqKey.trim() || keyStatus === "saving"}
                     className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                    style={{ background: "var(--accent)", color: "#fff", opacity: !groqKey.trim() ? 0.5 : 1 }}
+                    style={{ background: "var(--accent)", color: "var(--accent-fg)", opacity: !groqKey.trim() ? 0.5 : 1 }}
                   >
                     {keyStatus === "saving" ? "Saving…" : "Save"}
                   </button>
@@ -418,7 +418,7 @@ export default function Profile() {
               target="_blank" 
               rel="noreferrer" 
               className="relative inline-flex items-center justify-center px-4 py-2 text-[12.5px] font-bold rounded-lg transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: 'var(--accent)', color: 'var(--bg)' }}
+              style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-fg)' }}
             >
               Visit
             </a>
