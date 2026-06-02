@@ -57,17 +57,17 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
-    // Link clicks: anyone can create/update (unauthenticated visitors); owner can read/delete
+    // Link clicks: anyone can create (unauthenticated visitors); owner can read/delete
     match /resumeLinkClicks/{clickId} {
-      allow create, update: if true;
+      allow create: if true;
       allow get: if request.auth != null && request.auth.uid == resource.data.ownerId;
       allow list: if request.auth != null && resource.data.ownerId == request.auth.uid;
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
 
-    // Resume views: anyone can create/update a view record; owner can read/delete
+    // Resume views: anyone can create a view record; owner can read/delete
     match /resumeViews/{viewId} {
-      allow create, update: if true;
+      allow create: if true;
       allow get: if request.auth != null && request.auth.uid == resource.data.ownerId;
       allow list: if request.auth != null && resource.data.ownerId == request.auth.uid;
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
