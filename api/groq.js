@@ -201,7 +201,7 @@ export default async function handler(req, res) {
     );
     return res.status(200).json({ data: result });
   } catch (error) {
-    console.error("API Error:", error);
+    console.error("API Error:", error.message || error);
     if (error instanceof LlmTaskError) {
       return res.status(error.statusCode).json({ error: error.message });
     }

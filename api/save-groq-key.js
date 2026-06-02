@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     const db = getFirestore();
 
     await Promise.all([
-      db.collection("userSecrets").doc(decoded.uid).set({ groqApiKey: encrypted }),
+      db.collection("userSecrets").doc(decoded.uid).set({ encryptedGroqKey: encrypted }),
       db.collection("users").doc(decoded.uid).update({ hasPersonalKey: true }),
     ]);
 

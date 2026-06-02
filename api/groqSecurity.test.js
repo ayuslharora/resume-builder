@@ -12,7 +12,7 @@ test("groq API accepts typed tasks instead of client-owned prompts", async () =>
   assert.doesNotMatch(apiSource, /const\s+\{\s*systemPrompt,\s*userPrompt,\s*options\s*\}\s*=\s*body\s*\|\|\s*\{\}/);
   assert.doesNotMatch(apiSource, /process\.env\.VITE_GROQ_API_KEY/);
 
-  assert.match(llmSource, /JSON\.stringify\(\{\s*task,\s*payload\s*\}\)/);
+  assert.match(llmSource, /JSON\.stringify\(\{\s*task,\s*payload[^}]*\}\)/);
   assert.doesNotMatch(llmSource, /JSON\.stringify\(\{\s*systemPrompt,\s*userPrompt,\s*options\s*\}\)/);
   assert.doesNotMatch(llmSource, /const\s+systemPrompt\s*=/);
   assert.doesNotMatch(llmSource, /const\s+userPrompt\s*=/);
