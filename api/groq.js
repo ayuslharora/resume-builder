@@ -123,6 +123,12 @@ function markKeyRateLimited(retryAfterSeconds = 60) {
   }
 }
 
+function markKeyInvalid() {
+  if (keyStates[lastUsedIndex]) {
+    keyStates[lastUsedIndex] = { available: false, cooldownUntil: null, invalid: true };
+  }
+}
+
 async function makeGroqRequest(systemPrompt, userPrompt, options = {}, apiKey = null) {
   const resolvedKey = apiKey ?? getNextGroqKey();
 
@@ -152,6 +158,13 @@ async function makeGroqRequest(systemPrompt, userPrompt, options = {}, apiKey = 
         ? parseInt(response.headers.get("retry-after"), 10)
         : 60;
       markKeyRateLimited(retryAfter);
+      return await makeGroqRequest(systemPrompt, userPrompt, options);
+    }
+    if (response.status === 401) {
+      if (apiKey !== null) {
+        throw new LlmTaskError("Your Groq API key is invalid or inactive.", 400);
+      }
+      markKeyInvalid();
       return await makeGroqRequest(systemPrompt, userPrompt, options);
     }
     let groqError = `Groq API Error: ${response.status}`;
