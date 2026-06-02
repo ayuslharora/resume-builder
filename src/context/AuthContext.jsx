@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../services/firebase";
 import { AuthContext } from "./auth-context";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged, 
-  GoogleAuthProvider, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
   signInWithPopup,
   updateProfile
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { setHasPersonalKey } from "../services/llm";
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userDoc, setUserDoc] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setHasPersonalKey(userDoc?.hasPersonalKey ?? false);
+  }, [userDoc]);
 
   async function signup(email, password, name) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -159,7 +164,14 @@ export function AuthProvider({ children }) {
     return () => { clearTimeout(authTimeout); unsubscribe(); };
   }, []);
 
-  const value = { currentUser, userDoc, login, signup, logout, loginWithGoogle, updateUserProfile, loading };
+  async function refreshUserDoc() {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) setUserDoc(snap.data());
+  }
+
+  const value = { currentUser, userDoc, login, signup, logout, loginWithGoogle, updateUserProfile, refreshUserDoc, loading };
   // Render children immediately, ProtectedRoute will handle loading
   return (
     <AuthContext.Provider value={value}>
