@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { createBrowserRouter, Outlet, RouterProvider, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
@@ -7,6 +7,7 @@ import FullscreenProtectedRoute from "./components/auth/FullscreenProtectedRoute
 import AppErrorBoundary from "./components/errors/AppErrorBoundary";
 import RouteErrorScreen from "./components/errors/RouteErrorScreen";
 import Loading from "./pages/Loading";
+import KeysExhaustedModal from "./components/KeysExhaustedModal";
 
 const Landing  = lazy(() => import("./pages/Landing"));
 const Login    = lazy(() => import("./pages/Login"));
@@ -31,7 +32,14 @@ const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
 function AppRoot() {
   const location = useLocation();
-  
+  const [showKeysExhausted, setShowKeysExhausted] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowKeysExhausted(true);
+    window.addEventListener("keys-exhausted", handler);
+    return () => window.removeEventListener("keys-exhausted", handler);
+  }, []);
+
   useEffect(() => {
     const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
@@ -55,7 +63,14 @@ function AppRoot() {
     }
   }, [location.pathname]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      {showKeysExhausted && (
+        <KeysExhaustedModal onClose={() => setShowKeysExhausted(false)} />
+      )}
+    </>
+  );
 }
 
 const router = createBrowserRouter([
