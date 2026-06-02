@@ -72,5 +72,10 @@ service cloud.firestore {
       allow list: if request.auth != null && resource.data.ownerId == request.auth.uid;
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
+
+    // userSecrets: server-only via Admin SDK — no client access
+    match /userSecrets/{uid} {
+      allow read, write: if false;
+    }
   }
 }
