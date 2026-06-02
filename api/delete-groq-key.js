@@ -1,6 +1,5 @@
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
 
 if (!getApps().length) {
   initializeApp({ projectId: process.env.VITE_FIREBASE_PROJECT_ID || "resume-cd263" });
@@ -14,14 +13,7 @@ export default async function handler(req, res) {
     if (!authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthenticated" });
 
     const token = authHeader.split("Bearer ")[1];
-    const decoded = await getAuth().verifyIdToken(token);
-
-    const db = getFirestore();
-
-    await Promise.all([
-      db.collection("userSecrets").doc(decoded.uid).delete(),
-      db.collection("users").doc(decoded.uid).update({ hasPersonalKey: false }),
-    ]);
+    await getAuth().verifyIdToken(token);
 
     return res.status(200).json({ success: true });
   } catch (error) {

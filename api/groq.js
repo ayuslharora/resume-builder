@@ -1,6 +1,5 @@
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
 import { buildLlmTaskRequest, LlmTaskError } from './groqTasks.js';
 import { decrypt } from './keyEncryption.js';
 
@@ -65,14 +64,16 @@ function initializeKeyStates() {
   }
 }
 
-async function getPersonalKey(uid) {
+async function getPersonalKey(uid, token) {
   try {
-    const db = getFirestore();
-    const doc = await db.collection("userSecrets").doc(uid).get();
-    if (!doc.exists) return null;
-    const data = doc.data();
-    if (!data?.encryptedGroqKey) return null;
-    return decrypt(data.encryptedGroqKey);
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || "resume-cd263";
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return null;
+    const doc = await res.json();
+    const encryptedKey = doc.fields?.encryptedGroqKey?.stringValue;
+    if (!encryptedKey) return null;
+    return decrypt(encryptedKey);
   } catch {
     return null;
   }
@@ -190,7 +191,7 @@ export default async function handler(req, res) {
 
     let personalKey = null;
     if (usePersonalKey) {
-      personalKey = await getPersonalKey(decoded.uid);
+      personalKey = await getPersonalKey(decoded.uid, token);
     }
 
     const result = await makeGroqRequest(

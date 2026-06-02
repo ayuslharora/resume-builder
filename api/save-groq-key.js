@@ -1,6 +1,5 @@
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
 import { encrypt } from "./keyEncryption.js";
 
 if (!getApps().length) {
@@ -42,7 +41,7 @@ export default async function handler(req, res) {
     if (!authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthenticated" });
 
     const token = authHeader.split("Bearer ")[1];
-    const decoded = await getAuth().verifyIdToken(token);
+    await getAuth().verifyIdToken(token);
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const { groqApiKey } = body || {};
@@ -56,15 +55,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Groq API key is invalid or inactive." });
     }
 
-    const encrypted = encrypt(groqApiKey);
-    const db = getFirestore();
-
-    await Promise.all([
-      db.collection("userSecrets").doc(decoded.uid).set({ encryptedGroqKey: encrypted }),
-      db.collection("users").doc(decoded.uid).update({ hasPersonalKey: true }),
-    ]);
-
-    return res.status(200).json({ success: true });
+    const encryptedKey = encrypt(groqApiKey);
+    return res.status(200).json({ success: true, encryptedKey });
   } catch (error) {
     console.error("save-groq-key error:", error.message);
     return res.status(500).json({ error: "Failed to save API key." });

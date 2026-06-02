@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { doc, updateDoc, deleteField } from "firebase/firestore";
+import { db } from "../services/firebase";
 import { useAuth } from "../context/useAuth";
 import { useFirestore } from "../hooks/useFirestore";
 import { User, Save, Camera, CheckCircle, BarChart3, Eye, Share2, FileText, TrendingUp, CalendarDays, Key } from "lucide-react";
@@ -141,6 +143,10 @@ export default function Profile() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save key.");
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        encryptedGroqKey: data.encryptedKey,
+        hasPersonalKey: true,
+      });
       setGroqKey("");
       setKeyStatus("success");
       await refreshUserDoc();
@@ -160,6 +166,10 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to remove key.");
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        encryptedGroqKey: deleteField(),
+        hasPersonalKey: false,
+      });
       setKeyStatus(null);
       await refreshUserDoc();
     } catch (err) {
