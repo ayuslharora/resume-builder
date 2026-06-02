@@ -1,6 +1,11 @@
 import { auth } from "./firebase";
 import { sanitizeRewriteOption } from "./rewriteOptionSanitizer";
 
+let _hasPersonalKey = false;
+export function setHasPersonalKey(val) {
+  _hasPersonalKey = Boolean(val);
+}
+
 function coerceToString(val) {
   if (typeof val === "string") return val;
   if (!val || typeof val !== "object") return "";
@@ -41,20 +46,25 @@ async function callLlmTask(task, payload = {}) {
   try {
     const user = auth.currentUser;
     if (!user) throw new Error("User must be logged in to use AI features.");
-    
+
     const token = await user.getIdToken();
 
-    const response = await fetch('/api/groq', {
-      method: 'POST',
+    const response = await fetch("/api/groq", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ task, payload })
+      body: JSON.stringify({ task, payload, usePersonalKey: _hasPersonalKey }),
     });
 
     const result = await response.json();
+
     if (!response.ok) {
+      if (result.code === "KEYS_EXHAUSTED") {
+        window.dispatchEvent(new CustomEvent("keys-exhausted"));
+        throw new Error(result.error || "AI servers are busy.");
+      }
       throw new Error(result.error || "Failed to communicate with the AI service");
     }
 
