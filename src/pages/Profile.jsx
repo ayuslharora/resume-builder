@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/useAuth";
 import { useFirestore } from "../hooks/useFirestore";
-import { User, Save, Camera, CheckCircle, BarChart3, Eye, Share2, FileText, TrendingUp, CalendarDays } from "lucide-react";
+import { User, Save, Camera, CheckCircle, BarChart3, Eye, Share2, FileText, TrendingUp, CalendarDays, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { normalizeTimestamp, buildDailySeries } from "../utils/viewStats";
 
@@ -25,7 +25,7 @@ function sampleAvatarEdgeColor(img, size = 88) {
 }
 
 export default function Profile() {
-  const { userDoc, currentUser, updateUserProfile } = useAuth();
+  const { userDoc, currentUser, updateUserProfile, refreshUserDoc } = useAuth();
   const { getUserResumes, getOwnerViewDetails, getOwnerViewCount } = useFirestore();
   const navigate = useNavigate();
 
@@ -38,6 +38,9 @@ export default function Profile() {
   const [displayName, setDisplayName] = useState(userDoc?.displayName || "");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [groqKey, setGroqKey] = useState("");
+  const [keyStatus, setKeyStatus] = useState(null);
+  const [keyError, setKeyError] = useState("");
 
   useEffect(() => {
     if (!userDoc?.photoURL) { setAvatarGlowColor(null); return; }
@@ -120,6 +123,49 @@ export default function Profile() {
     updateUserProfile({ photoURL: googlePhotoURL });
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  }
+
+  async function handleSaveKey() {
+    if (!groqKey.trim()) return;
+    setKeyStatus("saving");
+    setKeyError("");
+    try {
+      const token = await currentUser.getIdToken();
+      const res = await fetch("/api/save-groq-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ groqApiKey: groqKey.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save key.");
+      setGroqKey("");
+      setKeyStatus("success");
+      await refreshUserDoc();
+    } catch (err) {
+      setKeyError(err.message);
+      setKeyStatus("error");
+    }
+  }
+
+  async function handleRemoveKey() {
+    setKeyStatus("removing");
+    setKeyError("");
+    try {
+      const token = await currentUser.getIdToken();
+      const res = await fetch("/api/delete-groq-key", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to remove key.");
+      setKeyStatus(null);
+      await refreshUserDoc();
+    } catch (err) {
+      setKeyError(err.message);
+      setKeyStatus("error");
+    }
   }
 
   return (
@@ -292,6 +338,73 @@ export default function Profile() {
                 </p>
               )}
             </div>
+          </section>
+
+          <section className="panel p-6">
+            <h2 className="profile-section-title mb-5 border-b border-[var(--border)] pb-3">
+              <Key size={15} className="text-[var(--accent)]" />
+              Groq API Key
+            </h2>
+
+            {userDoc?.hasPersonalKey ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm flex items-center gap-1.5" style={{ color: "var(--text)" }}>
+                  <CheckCircle size={14} style={{ color: "var(--accent)" }} />
+                  Personal key active
+                </span>
+                <button
+                  onClick={handleRemoveKey}
+                  disabled={keyStatus === "removing"}
+                  className="text-xs px-3 py-1.5 rounded-md transition-colors"
+                  style={{ background: "var(--surface-2)", color: "var(--muted)" }}
+                >
+                  {keyStatus === "removing" ? "Removing…" : "Remove key"}
+                </button>
+              </div>
+            ) : (
+              <div id="api-key">
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="password"
+                    value={groqKey}
+                    onChange={(e) => setGroqKey(e.target.value)}
+                    placeholder="gsk_..."
+                    className="flex-1 px-3 py-2 rounded-lg text-sm border"
+                    style={{
+                      background: "var(--surface)",
+                      borderColor: "var(--border)",
+                      color: "var(--text)",
+                    }}
+                  />
+                  <button
+                    onClick={handleSaveKey}
+                    disabled={!groqKey.trim() || keyStatus === "saving"}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    style={{ background: "var(--accent)", color: "#fff", opacity: !groqKey.trim() ? 0.5 : 1 }}
+                  >
+                    {keyStatus === "saving" ? "Saving…" : "Save"}
+                  </button>
+                </div>
+                {keyStatus === "success" && (
+                  <p className="text-xs" style={{ color: "var(--accent)" }}>Key saved successfully.</p>
+                )}
+                {keyError && (
+                  <p className="text-xs" style={{ color: "var(--error, #ef4444)" }}>{keyError}</p>
+                )}
+                <p className="text-xs mt-1.5" style={{ color: "var(--muted)" }}>
+                  Get a free key at{" "}
+                  <a
+                    href="https://console.groq.com/keys"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    console.groq.com/keys
+                  </a>
+                </p>
+              </div>
+            )}
           </section>
 
           <section className="panel flex items-center justify-between p-5 relative overflow-hidden">
