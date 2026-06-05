@@ -1,6 +1,6 @@
 export const HOME_SEO_BADGE = 'ATS-Optimized Resumes'
 
-export const HOME_SEO_TITLE = 'Unlimited AI Resume Builder'
+export const HOME_SEO_TITLE = 'Ultimate AI Resume Builder'
 
 export const HOME_SEO_DESCRIPTION =
   'Build a tailored, ATS-ready resume in minutes — not hours. AI generation, ATS grading, and smart rewrites for students, fresh graduates, and early-career professionals.'

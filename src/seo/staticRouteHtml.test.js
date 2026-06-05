@@ -42,7 +42,7 @@ test("public static routes expose unique raw SEO metadata", async () => {
   assert.match(routeHtml, />ATS-Friendly Resume Templates</);
   assert.match(routeHtml, /"@type"\s*:\s*"ItemList"/);
   assert.doesNotMatch(routeHtml, /<link rel="canonical" href="https:\/\/resume\.ayuslh\.in\/" \/>/);
-  assert.doesNotMatch(routeHtml, />Unlimited AI Resume Builder with ATS grading\.</);
+  assert.doesNotMatch(routeHtml, />Ultimate AI Resume Builder with ATS grading\.</);
 });
 
 test("noindex app shell keeps protected and auth routes out of raw indexing", async () => {

@@ -75,7 +75,7 @@ test("Landing uses the product design shell without the old orb/glass hero", asy
   assert.match(landingSource, /scorebar/);
   assert.match(landingSource, /aspectRatio:\s*"1\.05"/);
   assert.match(seoSource, /aspect-ratio:1\.05/);
-  assert.match(landingSource, /Unlimited AI Resume Builder|HOME_SEO_TITLE/);
+  assert.match(landingSource, /Ultimate AI Resume Builder|HOME_SEO_TITLE/);
   assert.match(landingSource, /Start building now/);
   assert.match(landingSource, /Grade my resume/);
   assert.match(landingSource, /with ATS grading/);
