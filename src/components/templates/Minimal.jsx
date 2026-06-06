@@ -90,7 +90,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                         </button>
                       )}
                       {isEditing && onReorderItem && (
-                        <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
+                        <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} className="text-gray-600 hover:text-gray-900 hover:bg-gray-500/10" />
                       )}
                     </h3>
                     <span className="text-sm text-gray-600">
@@ -150,7 +150,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                         </button>
                       )}
                       {isEditing && onReorderItem && (
-                        <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
+                        <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} className="text-gray-600 hover:text-gray-900 hover:bg-gray-500/10" />
                       )}
                     </h3>
                     <span className="text-sm text-gray-600">
@@ -260,7 +260,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                         </button>
                       )}
                       {isEditing && onReorderItem && (
-                        <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
+                        <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} className="text-gray-600 hover:text-gray-900 hover:bg-gray-500/10" />
                       )}
                       {(isEditing || proj.link) && (
                         <PrintLink className="text-blue-600 text-xs font-normal" isEditing={isEditing} href={proj.link}>
