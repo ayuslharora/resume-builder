@@ -89,7 +89,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                           <Wand2 size={12} className={isRegeneratingItem === `experience-${i}` ? "animate-pulse" : ""} />
                         </button>
                       )}
-                      {isEditing && activeSection === "experience" && onReorderItem && (
+                      {isEditing && onReorderItem && (
                         <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
                       )}
                     </h3>
@@ -149,7 +149,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                           <Wand2 size={12} className={isRegeneratingItem === `education-${i}` ? "animate-pulse" : ""} />
                         </button>
                       )}
-                      {isEditing && activeSection === "education" && onReorderItem && (
+                      {isEditing && onReorderItem && (
                         <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
                       )}
                     </h3>
@@ -259,7 +259,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                           <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
                         </button>
                       )}
-                      {isEditing && activeSection === "projects" && onReorderItem && (
+                      {isEditing && onReorderItem && (
                         <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
                       )}
                       {(isEditing || proj.link) && (

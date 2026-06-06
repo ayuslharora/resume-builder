@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
@@ -10,6 +10,36 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
   const [showColorPicker, setShowColorPicker] = useState(false);
   const themeColors = ['#2B3A5A', '#222222', '#1B3B32', '#58202E', '#1F2937']; // Navy, Pure Dark Gray, Deep Pine, Rich Burgundy, Slate Gray
   const pickerRef = useRef(null);
+  const containerRef = useRef(null);
+  const [liveWidth, setLiveWidth] = useState(null);
+
+  const sidebarWidth = resumeData?.sidebarWidth ?? 30;
+  const displayWidth = liveWidth ?? sidebarWidth;
+
+  const handleDragStart = useCallback((e) => {
+    e.preventDefault();
+    let finalWidth = null;
+
+    const onMouseMove = (moveEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const raw = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      finalWidth = Math.max(20, Math.min(50, Math.round(raw)));
+      setLiveWidth(finalWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (finalWidth !== null) {
+        onUpdateSection?.('sidebarWidth', finalWidth);
+      }
+      setLiveWidth(null);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [onUpdateSection]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -46,13 +76,14 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
 
   return (
     <div
+      ref={containerRef}
       className="resume-template-root bg-white max-w-[850px] mx-auto text-gray-800 font-sans flex items-stretch"
       style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}
     >
       {/* Left Sidebar */}
       <div
-        className="w-[30%] text-white p-8 relative transition-colors duration-300 self-stretch"
-        style={{ backgroundColor: resumeData.theme?.sidebarColor || '#2B3A5A', minHeight: '100%' }}
+        className="text-white p-8 relative transition-colors duration-300 self-stretch flex-shrink-0"
+        style={{ width: `${displayWidth}%`, backgroundColor: resumeData.theme?.sidebarColor || '#2B3A5A', minHeight: '100%' }}
       >
         {isEditing && (
           <div className="absolute top-4 left-4 z-50" ref={pickerRef}>
@@ -205,8 +236,24 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
         )}
       </div>
 
+      {/* Drag Handle - only visible in edit mode */}
+      {isEditing && (
+        <div
+          onMouseDown={handleDragStart}
+          title="Drag to resize columns"
+          className="relative flex-shrink-0 group"
+          style={{ width: '8px', cursor: 'col-resize', userSelect: 'none', background: 'transparent' }}
+        >
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-gray-300 group-hover:bg-blue-400 transition-colors" />
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ width: '4px', height: '32px', borderRadius: '2px', background: '#3b82f6' }}
+          />
+        </div>
+      )}
+
       {/* Right Content Area - White */}
-      <div className="w-[70%] p-8">
+      <div style={{ flex: 1, minWidth: 0 }} className="p-8">
         {hasVisibleExperience && (
           <EditableSection sectionName="experience" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "experience"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="mb-8">
@@ -232,7 +279,7 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                             <Wand2 size={12} className={isRegeneratingItem === `experience-${i}` ? "animate-pulse" : ""} />
                           </button>
                         )}
-                        {isEditing && activeSection === "experience" && onReorderItem && (
+                        {isEditing && onReorderItem && (
                           <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
                         )}
                       </h3>
@@ -288,7 +335,7 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                             <Wand2 size={12} className={isRegeneratingItem === `education-${i}` ? "animate-pulse" : ""} />
                           </button>
                         )}
-                        {isEditing && activeSection === "education" && onReorderItem && (
+                        {isEditing && onReorderItem && (
                           <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
                         )}
                       </h3>
@@ -336,7 +383,7 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
                             <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
                           </button>
                         )}
-                        {isEditing && activeSection === "projects" && onReorderItem && (
+                        {isEditing && onReorderItem && (
                           <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
                         )}
                         {(isEditing || proj.link) && (

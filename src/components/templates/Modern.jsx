@@ -1,3 +1,4 @@
+import { useState, useRef, useCallback } from 'react';
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
@@ -6,28 +7,60 @@ import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
 export default function Modern({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet, onReorderItem }) {
+  const containerRef = useRef(null);
+  const [liveWidth, setLiveWidth] = useState(null);
+
+  const sidebarWidth = resumeData?.sidebarWidth ?? 35;
+  const displayWidth = liveWidth ?? sidebarWidth;
+
+  const handleDragStart = useCallback((e) => {
+    e.preventDefault();
+    let finalWidth = null;
+
+    const onMouseMove = (moveEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const raw = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      finalWidth = Math.max(20, Math.min(50, Math.round(raw)));
+      setLiveWidth(finalWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (finalWidth !== null) {
+        onUpdateSection?.('sidebarWidth', finalWidth);
+      }
+      setLiveWidth(null);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [onUpdateSection]);
+
   if (!resumeData) return null;
 
   const isExpNotEmpty = (exp) => exp.role?.toString()?.trim() || exp.company?.toString()?.trim() || exp.duration?.toString()?.trim() || exp.location?.toString()?.trim() || exp.bullets?.some(b => b?.toString()?.trim());
   const hasVisibleExperience = isEditing || resumeData.experience?.some(isExpNotEmpty);
-  
+
   const isProjNotEmpty = (proj) => proj.name?.toString()?.trim() || proj.link?.toString()?.trim() || proj.techStack?.length > 0 || proj.bullets?.some(b => b?.toString()?.trim());
   const hasVisibleProjects = isEditing || resumeData.projects?.some(isProjNotEmpty);
-  
+
   const isEduNotEmpty = (edu) => edu.degree?.toString()?.trim() || edu.field?.toString()?.trim() || edu.institution?.toString()?.trim() || edu.duration?.toString()?.trim() || edu.cgpa?.toString()?.trim();
   const hasVisibleEducation = isEditing || resumeData.education?.some(isEduNotEmpty);
-  
+
   const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.toString()?.trim()) || resumeData.skills?.soft?.some(s => s?.toString()?.trim());
-  
+
   const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
 
   return (
     <div
+      ref={containerRef}
       className="resume-template-root flex bg-[#1c252e] max-w-[850px] mx-auto text-slate-300 font-sans shadow-2xl"
       style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}
     >
       {/* Left Sidebar - Dark Slate */}
-      <div className="w-[35%] bg-[#2d3740] text-slate-200 p-8 flex flex-col gap-8">
+      <div style={{ width: `${displayWidth}%` }} className="bg-[#2d3740] text-slate-200 p-8 flex flex-col gap-8 flex-shrink-0">
         <EditableSection sectionName="personalInfo" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "personalInfo"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
           <div className="mb-2 border-b-2 border-blue-500 pb-6">
             <h1 className="text-3xl font-bold text-white tracking-tight leading-tight mb-4">
@@ -125,7 +158,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
             </div>
           </EditableSection>
         )}
-        
+
         {hasVisibleEducation && (
           <EditableSection sectionName="education" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "education"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div>
@@ -140,7 +173,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                       {isEditing && activeSection === "education" && onRegenerateItem && (
                         <button disabled={isRegeneratingItem === `education-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('education', i); }} className="inline-flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this education with AI"><Wand2 size={12} className={isRegeneratingItem === `education-${i}` ? "animate-pulse" : ""} /></button>
                       )}
-                      {isEditing && activeSection === "education" && onReorderItem && (
+                      {isEditing && onReorderItem && (
                         <ItemReorderButtons index={i} total={resumeData.education.length} onMove={(from, to) => onReorderItem('education', from, to)} />
                       )}
                     </h3>
@@ -163,8 +196,24 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
         )}
       </div>
 
+      {/* Drag Handle - only visible in edit mode */}
+      {isEditing && (
+        <div
+          onMouseDown={handleDragStart}
+          title="Drag to resize columns"
+          className="relative flex-shrink-0 group"
+          style={{ width: '8px', cursor: 'col-resize', userSelect: 'none', background: 'transparent' }}
+        >
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-slate-600/50 group-hover:bg-blue-400 transition-colors" />
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ width: '4px', height: '32px', borderRadius: '2px', background: '#3b82f6' }}
+          />
+        </div>
+      )}
+
       {/* Right Content Area - Darker Slate */}
-      <div className="w-[65%] p-10 bg-[#1c252e]">
+      <div style={{ flex: 1, minWidth: 0 }} className="p-10 bg-[#1c252e]">
         {hasVisibleExperience && (
           <EditableSection sectionName="experience" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "experience"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
             <div className="mb-10">
@@ -181,7 +230,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                         {isEditing && activeSection === "experience" && onRegenerateItem && (
                           <button disabled={isRegeneratingItem === `experience-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('experience', i); }} className="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this experience with AI"><Wand2 size={12} className={isRegeneratingItem === `experience-${i}` ? "animate-pulse" : ""} /></button>
                         )}
-                        {isEditing && activeSection === "experience" && onReorderItem && (
+                        {isEditing && onReorderItem && (
                           <ItemReorderButtons index={i} total={resumeData.experience.length} onMove={(from, to) => onReorderItem('experience', from, to)} />
                         )}
                       </h3>
@@ -229,7 +278,7 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                         {isEditing && activeSection === "projects" && onRegenerateItem && (
                           <button disabled={isRegeneratingItem === `projects-${i}`} onClick={(e) => { e.stopPropagation(); onRegenerateItem('projects', i); }} className="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 p-1 rounded-full transition-colors disabled:opacity-50 ml-1" title="Rewrite this project with AI"><Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} /></button>
                         )}
-                        {isEditing && activeSection === "projects" && onReorderItem && (
+                        {isEditing && onReorderItem && (
                           <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
                         )}
                       </h3>

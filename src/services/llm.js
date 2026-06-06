@@ -58,14 +58,19 @@ async function callLlmTask(task, payload = {}) {
       body: JSON.stringify({ task, payload, usePersonalKey: _hasPersonalKey }),
     });
 
-    const result = await response.json();
+    let result = {};
+    try {
+      result = await response.json();
+    } catch {
+      // empty or non-JSON body (e.g. function crash returning bare 502)
+    }
 
     if (!response.ok) {
       if (result.code === "KEYS_EXHAUSTED") {
         window.dispatchEvent(new CustomEvent("keys-exhausted"));
         throw new Error(result.error || "AI servers are busy.");
       }
-      throw new Error(result.error || "Failed to communicate with the AI service");
+      throw new Error(result.error || `AI service error (${response.status})`);
     }
 
     return result.data;
