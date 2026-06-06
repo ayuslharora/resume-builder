@@ -13,7 +13,6 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
   const containerRef = useRef(null);
   const [liveWidth, setLiveWidth] = useState(null);
 
-  const cleanUrl = (url) => url.replace(/^https?:\/\/(www\.)?/, '');
   const sidebarWidth = resumeData?.sidebarWidth ?? 30;
   const displayWidth = liveWidth ?? sidebarWidth;
 
@@ -154,10 +153,10 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
             </div>
             <div className="mt-4 text-sm flex flex-col gap-2 text-gray-300">
               <PrintLink className="break-all hover:text-white" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                <InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" displayTransform={cleanUrl} />
+                {isEditing ? (<><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></>) : (<span>{(resumeData.labels?.linkedin ?? 'LinkedIn').replace(/:+\s*$/, '').trim()}</span>)}
               </PrintLink>
               <PrintLink className="break-all hover:text-white" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                <InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" displayTransform={cleanUrl} />
+                {isEditing ? (<><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></>) : (<span>{(resumeData.labels?.github ?? 'GitHub').replace(/:+\s*$/, '').trim()}</span>)}
               </PrintLink>
             </div>
           </div>
