@@ -12,7 +12,7 @@ export default function PrintLink({ href, isEditing, children, className = "" })
   const validUrl = /^(https?|mailto|tel):/i.test(cleanHref) ? cleanHref : `https://${cleanHref}`;
   
   return (
-    <a href={validUrl} target="_blank" rel="noreferrer" className={`${className} hover:underline`}>
+    <a href={validUrl} target="_blank" rel="noreferrer" className={`${className} underline`}>
       {children}
     </a>
   );

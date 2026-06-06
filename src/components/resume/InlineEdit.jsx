@@ -13,7 +13,8 @@ export default function InlineEdit({
   placeholder = "Empty",
   className = "",
   multiline = false,
-  onAiRewrite
+  onAiRewrite,
+  displayTransform = null,
 }) {
   const contentEditableRef = useRef(null);
   const sanitizedValue = sanitizeResumeHtml(value);
@@ -55,7 +56,11 @@ export default function InlineEdit({
   };
 
   if (!isEditing) {
-    if (!stripResumeHtml(sanitizedValue).trim()) return null;
+    const raw = stripResumeHtml(sanitizedValue);
+    if (!raw.trim()) return null;
+    if (displayTransform) {
+      return <span className={`break-words ${className}`}>{displayTransform(raw)}</span>;
+    }
     return <span className={`break-words ${className}`} dangerouslySetInnerHTML={{ __html: sanitizedValue }} />;
   }
 

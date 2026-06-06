@@ -11,6 +11,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
   const [liveBottomLeft, setLiveBottomLeft] = useState(null);
   const bottomRef = useRef(null);
 
+  const cleanUrl = (url) => url.replace(/^https?:\/\/(www\.)?/, '');
   const expLeftPct = liveExpLeft ?? (resumeData?.creativeExpLeftPct ?? 33);
   const bottomLeftPct = liveBottomLeft ?? (resumeData?.creativeBottomLeftPct ?? 50);
 
@@ -112,7 +113,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.linkedin ?? "LINKEDIN"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /></div>
                 <PrintLink className={`${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                  <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" />
+                  <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" displayTransform={cleanUrl} />
                 </PrintLink>
               </div>
             )}
@@ -120,7 +121,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.github ?? "WEBSITE"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /></div>
                 <PrintLink className={`${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={resumeData.personalInfo.github}>
-                  <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" />
+                  <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" displayTransform={cleanUrl} />
                 </PrintLink>
               </div>
             )}

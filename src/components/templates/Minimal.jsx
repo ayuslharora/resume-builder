@@ -5,6 +5,8 @@ import { Wand2 } from "lucide-react";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
+const cleanUrl = (url) => url.replace(/^https?:\/\/(www\.)?/, '');
+
 export default function Minimal({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet, onReorderItem }) {
   if (!resumeData) return null;
 
@@ -40,11 +42,11 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
           <div className="mt-1 text-sm space-x-2 text-gray-600">
             <span className="inline-flex gap-2 justify-center">
               <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" />
+                <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" displayTransform={cleanUrl} />
               </PrintLink>
               <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
               <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" />
+                <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" displayTransform={cleanUrl} />
               </PrintLink>
             </span>
           </div>
