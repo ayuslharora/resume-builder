@@ -4,6 +4,7 @@ import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2, Palette } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import SocialIconToggle from "../resume/SocialIconToggle";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
@@ -155,13 +156,13 @@ export default function Professional({ resumeData, isEditing, onSectionClick, ac
             <div className="mt-4 text-sm flex flex-col gap-2 text-gray-300">
               {(isEditing || resumeData.personalInfo.linkedin) && (
                 <PrintLink className="flex items-center gap-1.5 hover:text-white" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                  <FaLinkedin size={13} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.linkedinShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedinShowIcon: v })} isEditing={isEditing}><FaLinkedin size={13} className="shrink-0" /></SocialIconToggle>
                   {isEditing ? (<><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></>) : (<span>{(resumeData.labels?.linkedin ?? 'LinkedIn').replace(/:+\s*$/, '').trim()}</span>)}
                 </PrintLink>
               )}
               {(isEditing || resumeData.personalInfo.github) && (
                 <PrintLink className="flex items-center gap-1.5 hover:text-white" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                  <FaGithub size={13} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.githubShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, githubShowIcon: v })} isEditing={isEditing}><FaGithub size={13} className="shrink-0" /></SocialIconToggle>
                   {isEditing ? (<><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <InlineEdit value={resumeData.personalInfo.github} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></>) : (<span>{(resumeData.labels?.github ?? 'GitHub').replace(/:+\s*$/, '').trim()}</span>)}
                 </PrintLink>
               )}

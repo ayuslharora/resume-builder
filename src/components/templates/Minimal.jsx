@@ -3,6 +3,7 @@ import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import SocialIconToggle from "../resume/SocialIconToggle";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
@@ -44,13 +45,13 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
             <span className="inline-flex flex-wrap gap-x-3 gap-y-1 justify-center">
               {(isEditing || resumeData.personalInfo.linkedin) && (
                 <PrintLink className="inline-flex items-center gap-1 text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                  <FaLinkedin size={13} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.linkedinShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedinShowIcon: v })} isEditing={isEditing}><FaLinkedin size={13} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" displayTransform={cleanUrl} />
                 </PrintLink>
               )}
               {(isEditing || resumeData.personalInfo.github) && (
                 <PrintLink className="inline-flex items-center gap-1 text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                  <FaGithub size={13} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.githubShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, githubShowIcon: v })} isEditing={isEditing}><FaGithub size={13} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" displayTransform={cleanUrl} />
                 </PrintLink>
               )}

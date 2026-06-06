@@ -4,6 +4,7 @@ import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import SocialIconToggle from "../resume/SocialIconToggle";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
@@ -114,7 +115,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.linkedin ?? "LINKEDIN"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /></div>
                 <PrintLink className={`flex items-center gap-1 ${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                  <FaLinkedin size={11} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.linkedinShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedinShowIcon: v })} isEditing={isEditing}><FaLinkedin size={11} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" displayTransform={cleanUrl} />
                 </PrintLink>
               </div>
@@ -123,7 +124,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               <div className="flex flex-col px-2 md:px-0">
                 <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}><InlineEdit value={resumeData.labels?.github ?? "WEBSITE"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /></div>
                 <PrintLink className={`flex items-center gap-1 ${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={resumeData.personalInfo.github}>
-                  <FaGithub size={11} className="shrink-0" />
+                  <SocialIconToggle visible={resumeData.labels?.githubShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, githubShowIcon: v })} isEditing={isEditing}><FaGithub size={11} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" displayTransform={cleanUrl} />
                 </PrintLink>
               </div>

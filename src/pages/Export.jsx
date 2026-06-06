@@ -144,6 +144,12 @@ export default function Export() {
   );
 
   const handlePrintPDF = () => {
+    const name = stripResumeHtml(resumeData.personalInfo?.fullName || '').trim();
+    const role = (resumeData.targetRole || resumeData.interviewAnswers?.targetRole || '').trim();
+    const filename = [name, role].filter(Boolean).join(' - ') || 'Resume';
+    const prevTitle = document.title;
+    document.title = filename;
+    window.addEventListener('afterprint', () => { document.title = prevTitle; }, { once: true });
     window.print();
   };
 
