@@ -3,6 +3,7 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
+import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
@@ -72,12 +73,18 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
               <span className="flex items-center gap-2"><span className="text-blue-400">⚲</span> <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" /></span>
             </div>
             <div className="mt-5 flex flex-col gap-2 text-sm text-slate-400">
-              <PrintLink className="break-all hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                {isEditing ? (<><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.linkedin} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span></>) : (<span className="text-blue-400">{(resumeData.labels?.linkedin ?? 'LinkedIn').replace(/:+\s*$/, '').trim()}</span>)}
-              </PrintLink>
-              <PrintLink className="break-all hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                {isEditing ? (<><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.github} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span></>) : (<span className="text-blue-400">{(resumeData.labels?.github ?? 'GitHub').replace(/:+\s*$/, '').trim()}</span>)}
-              </PrintLink>
+              {(isEditing || resumeData.personalInfo.linkedin) && (
+                <PrintLink className="flex items-center gap-1.5 hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
+                  <FaLinkedin size={13} className="shrink-0 text-blue-400" />
+                  {isEditing ? (<><InlineEdit value={resumeData.labels?.linkedin ?? "LinkedIn:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, linkedin: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.linkedin} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="URL" /></span></>) : (<span className="text-blue-400">{(resumeData.labels?.linkedin ?? 'LinkedIn').replace(/:+\s*$/, '').trim()}</span>)}
+                </PrintLink>
+              )}
+              {(isEditing || resumeData.personalInfo.github) && (
+                <PrintLink className="flex items-center gap-1.5 hover:text-white transition-colors" isEditing={isEditing} href={resumeData.personalInfo.github}>
+                  <FaGithub size={13} className="shrink-0 text-blue-400" />
+                  {isEditing ? (<><InlineEdit value={resumeData.labels?.github ?? "GitHub:"} isEditing={true} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, github: v })} /> <span className="text-blue-400"><InlineEdit value={resumeData.personalInfo.github} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" /></span></>) : (<span className="text-blue-400">{(resumeData.labels?.github ?? 'GitHub').replace(/:+\s*$/, '').trim()}</span>)}
+                </PrintLink>
+              )}
             </div>
           </div>
         </EditableSection>

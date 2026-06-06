@@ -2,6 +2,7 @@ import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
+import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
@@ -39,15 +40,20 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
               <InlineEdit value={resumeData.personalInfo.location} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, location: v })} placeholder="Location" />
             </span>
           </div>
-          <div className="mt-1 text-sm space-x-2 text-gray-600">
-            <span className="inline-flex gap-2 justify-center">
-              <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
-                <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" displayTransform={cleanUrl} />
-              </PrintLink>
-              <span className="mx-1"><InlineEdit value={resumeData.labels?.separator ?? "•"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, separator: v })} /></span>
-              <PrintLink className="text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.github}>
-                <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" displayTransform={cleanUrl} />
-              </PrintLink>
+          <div className="mt-1 text-sm text-gray-600">
+            <span className="inline-flex flex-wrap gap-x-3 gap-y-1 justify-center">
+              {(isEditing || resumeData.personalInfo.linkedin) && (
+                <PrintLink className="inline-flex items-center gap-1 text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.linkedin}>
+                  <FaLinkedin size={13} className="shrink-0" />
+                  <InlineEdit value={resumeData.personalInfo.linkedin} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, linkedin: v })} placeholder="LinkedIn URL" displayTransform={cleanUrl} />
+                </PrintLink>
+              )}
+              {(isEditing || resumeData.personalInfo.github) && (
+                <PrintLink className="inline-flex items-center gap-1 text-blue-600" isEditing={isEditing} href={resumeData.personalInfo.github}>
+                  <FaGithub size={13} className="shrink-0" />
+                  <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" displayTransform={cleanUrl} />
+                </PrintLink>
+              )}
             </span>
           </div>
         </div>
