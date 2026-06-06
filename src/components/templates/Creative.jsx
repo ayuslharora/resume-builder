@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useCallback, useRef } from "react";
 import EditableSection from "../resume/EditableSection";
 import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
@@ -7,6 +7,54 @@ import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
 
 export default function Creative({ resumeData, isEditing, onSectionClick, activeSection, onUpdateSection, onRegenerate, isRegenerating, onRegenerateItem, isRegeneratingItem, onRewriteBulletRequest, onUpdateBullet, onAddBullet, onReorderItem }) {
+  const [liveExpLeft, setLiveExpLeft] = useState(null);
+  const [liveBottomLeft, setLiveBottomLeft] = useState(null);
+  const bottomRef = useRef(null);
+
+  const expLeftPct = liveExpLeft ?? (resumeData?.creativeExpLeftPct ?? 33);
+  const bottomLeftPct = liveBottomLeft ?? (resumeData?.creativeBottomLeftPct ?? 50);
+
+  const handleExpDragStart = useCallback((e) => {
+    e.preventDefault();
+    const row = e.currentTarget.parentElement;
+    let finalWidth = null;
+    const onMouseMove = (moveEvent) => {
+      const rect = row.getBoundingClientRect();
+      if (!rect.width) return;
+      const raw = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      finalWidth = Math.max(15, Math.min(55, Math.round(raw)));
+      setLiveExpLeft(finalWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (finalWidth !== null) onUpdateSection?.('creativeExpLeftPct', finalWidth);
+      setLiveExpLeft(null);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [onUpdateSection]);
+
+  const handleBottomDragStart = useCallback((e) => {
+    e.preventDefault();
+    let finalWidth = null;
+    const onMouseMove = (moveEvent) => {
+      const rect = bottomRef.current?.getBoundingClientRect();
+      if (!rect?.width) return;
+      const raw = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      finalWidth = Math.max(25, Math.min(75, Math.round(raw)));
+      setLiveBottomLeft(finalWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (finalWidth !== null) onUpdateSection?.('creativeBottomLeftPct', finalWidth);
+      setLiveBottomLeft(null);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [onUpdateSection]);
+
   if (!resumeData) return null;
 
   const isExpNotEmpty = (exp) => exp.role?.toString()?.trim() || exp.company?.toString()?.trim() || exp.duration?.toString()?.trim() || exp.location?.toString()?.trim() || exp.bullets?.some(b => b?.toString()?.trim());
@@ -107,12 +155,12 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                 <div className={`h-1 flex-1 ${accentBg}`}></div>
               </h2>
 
-                <div className="creative-timeline space-y-10 pl-6 md:pl-8 print:pl-8 border-l-2 border-[#121212]/20 relative">
-                  {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
-                  <div key={exp.id || `exp-${i}`} className="creative-role-grid grid grid-cols-1 md:grid-cols-12 print:grid-cols-12 gap-4 md:gap-8 print:gap-8 group relative">
+              <div className="creative-timeline space-y-10 pl-6 md:pl-8 print:pl-8 border-l-2 border-[#121212]/20 relative">
+                {resumeData.experience.map((exp, i) => (isEditing || isExpNotEmpty(exp)) && (
+                  <div key={exp.id || `exp-${i}`} className="creative-role-grid flex group relative">
                     <div className={`creative-timeline-dot absolute -left-[31px] md:-left-[39px] print:-left-[39px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
                     {/* Left Column: Role & Meta */}
-                    <div className="col-span-1 md:col-span-4 print:col-span-4 md:border-r-2 print:border-r-2 border-[#121212]/10 md:pr-6 print:pr-6">
+                    <div className="flex-shrink-0 border-r-2 border-[#121212]/10 pr-6" style={{ width: `${expLeftPct}%` }}>
                       <h3 className={`font-black text-lg ${darkText} uppercase leading-tight mb-2`}>
                         <InlineEdit value={exp.role} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, role: v } : e))} />
                         {isEditing && activeSection === "experience" && onRegenerateItem && (
@@ -136,8 +184,23 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                         <InlineEdit value={exp.duration} isEditing={isEditing} onChange={(v) => onUpdateSection('experience', resumeData.experience.map((e, idx) => idx === i ? { ...e, duration: v } : e))} />
                       </div>
                     </div>
+                    {/* Drag Handle - only in edit mode */}
+                    {isEditing && (
+                      <div
+                        onMouseDown={handleExpDragStart}
+                        title="Drag to resize columns"
+                        className="relative flex-shrink-0 group/handle"
+                        style={{ width: '8px', cursor: 'col-resize', userSelect: 'none' }}
+                      >
+                        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-[#121212]/10 group-hover/handle:bg-[#D32F2F] transition-colors" />
+                        <div
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/handle:opacity-100 transition-opacity"
+                          style={{ width: '4px', height: '24px', borderRadius: '2px', background: '#D32F2F' }}
+                        />
+                      </div>
+                    )}
                     {/* Right Column: Bullets */}
-                    <div className="col-span-1 md:col-span-8 print:col-span-8">
+                    <div className="pl-6" style={{ flex: 1, minWidth: 0 }}>
                       <ul className={`list-none space-y-3 text-[13px] font-semibold ${darkText} leading-[1.7] tracking-wide`}>
                         {(exp.bullets || []).map((bullet, bulletIdx) => (
                           <li key={bulletIdx} className="creative-bullet-diamond relative pl-5 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-[#121212] before:rotate-45">
@@ -158,61 +221,79 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
           </EditableSection>
         )}
 
-        {/* 2-Column Grid for Skills & Projects/Education */}
-        <div className="creative-two-col-grid grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-12">
+        {/* 2-Column Grid for Projects & Skills/Education */}
+        <div ref={bottomRef} className="creative-two-col-grid flex">
 
           {hasVisibleProjects && (
-            <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
-              <div>
-                <h2 className={`text-2xl font-black ${accentText} uppercase tracking-[0.15em] mb-6 flex items-center gap-4`}>
-                  <InlineEdit className="!w-auto" value={resumeData.labels?.projects ?? "PROJECTS"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, projects: v })} />
-                  <div className={`h-1 flex-1 ${accentBg}`}></div>
-                </h2>
-                <div className="creative-timeline space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
-                  {resumeData.projects.map((proj, i) => (isEditing || isProjNotEmpty(proj)) && (
-                    <div key={proj.id || `proj-${i}`} className="relative">
-                      <div className={`creative-timeline-dot absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
-                      <h3 className={`font-black text-base ${darkText} uppercase tracking-wider flex items-center flex-wrap gap-2 mb-1`}>
-                        <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
-                        {isEditing && activeSection === "projects" && onRegenerateItem && (
-                          <button
-                            disabled={isRegeneratingItem === `projects-${i}`}
-                            onClick={(e) => { e.stopPropagation(); onRegenerateItem('projects', i); }}
-                            className="inline-flex items-center justify-center bg-blue-100 hover:bg-blue-200 text-blue-600 p-1 rounded-full transition-colors disabled:opacity-50 ml-1"
-                            title="Rewrite this project with AI"
-                          >
-                            <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
+            <div className="flex-shrink-0" style={{ width: `${bottomLeftPct}%` }}>
+              <EditableSection sectionName="projects" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "projects"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
+                <div>
+                  <h2 className={`text-2xl font-black ${accentText} uppercase tracking-[0.15em] mb-6 flex items-center gap-4`}>
+                    <InlineEdit className="!w-auto" value={resumeData.labels?.projects ?? "PROJECTS"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, projects: v })} />
+                    <div className={`h-1 flex-1 ${accentBg}`}></div>
+                  </h2>
+                  <div className="creative-timeline space-y-8 pl-6 border-l-2 border-[#121212]/20 relative">
+                    {resumeData.projects.map((proj, i) => (isEditing || isProjNotEmpty(proj)) && (
+                      <div key={proj.id || `proj-${i}`} className="relative">
+                        <div className={`creative-timeline-dot absolute -left-[31px] top-1.5 w-3 h-3 ${accentBg} rounded-full border-2 border-[#EAEBE5]`}></div>
+                        <h3 className={`font-black text-base ${darkText} uppercase tracking-wider flex items-center flex-wrap gap-2 mb-1`}>
+                          <span><InlineEdit value={proj.name} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, name: v } : p))} /></span>
+                          {isEditing && activeSection === "projects" && onRegenerateItem && (
+                            <button
+                              disabled={isRegeneratingItem === `projects-${i}`}
+                              onClick={(e) => { e.stopPropagation(); onRegenerateItem('projects', i); }}
+                              className="inline-flex items-center justify-center bg-blue-100 hover:bg-blue-200 text-blue-600 p-1 rounded-full transition-colors disabled:opacity-50 ml-1"
+                              title="Rewrite this project with AI"
+                            >
+                              <Wand2 size={12} className={isRegeneratingItem === `projects-${i}` ? "animate-pulse" : ""} />
+                            </button>
+                          )}
+                          {isEditing && onReorderItem && (
+                            <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
+                          )}
+                        </h3>
+                        {(isEditing || proj.techStack?.length > 0) && (
+                          <div className={`text-[11px] font-black ${accentText} uppercase tracking-widest mb-3`}>
+                            <InlineEdit value={(Array.isArray(proj.techStack) ? proj.techStack : []).join(" // ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split('//').map(s => s.trim()) } : p))} placeholder="Tech Stack" />
+                          </div>
+                        )}
+                        <ul className={`list-none space-y-2 text-[13px] font-semibold ${textMuted} uppercase leading-[1.6] tracking-wide`}>
+                          {(proj.bullets || []).map((bullet, bulletIdx) => (
+                            <li key={bulletIdx} className="creative-bullet-square relative pl-4 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:border-2 before:border-[#121212]">
+                              <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], { [bulletIdx]: v }) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
+                            </li>
+                          ))}
+                        </ul>
+                        {isEditing && onAddBullet && (
+                          <button onClick={(e) => { e.stopPropagation(); onAddBullet('projects', proj.id); }} className={`text-[10px] ${accentText} hover:opacity-70 mt-2 flex items-center gap-1 opacity-50 transition-opacity uppercase font-black tracking-widest`}>
+                            + ADD BULLET
                           </button>
                         )}
-                        {isEditing && onReorderItem && (
-                          <ItemReorderButtons index={i} total={resumeData.projects.length} onMove={(from, to) => onReorderItem('projects', from, to)} />
-                        )}
-                      </h3>
-                      {(isEditing || proj.techStack?.length > 0) && (
-                        <div className={`text-[11px] font-black ${accentText} uppercase tracking-widest mb-3`}>
-                          <InlineEdit value={(Array.isArray(proj.techStack) ? proj.techStack : []).join(" // ")} isEditing={isEditing} onChange={(v) => onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, techStack: v.split('//').map(s => s.trim()) } : p))} placeholder="Tech Stack" />
-                        </div>
-                      )}
-                      <ul className={`list-none space-y-2 text-[13px] font-semibold ${textMuted} uppercase leading-[1.6] tracking-wide`}>
-                        {(proj.bullets || []).map((bullet, bulletIdx) => (
-                          <li key={bulletIdx} className="creative-bullet-square relative pl-4 before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:border-2 before:border-[#121212]">
-                            <InlineEdit value={bullet} multiline={true} isEditing={isEditing} onChange={(v) => onUpdateBullet ? onUpdateBullet('projects', proj.id, bulletIdx, v) : onUpdateSection('projects', resumeData.projects.map((p, idx) => idx === i ? { ...p, bullets: Object.assign([...(p.bullets || [])], { [bulletIdx]: v }) } : p))} onAiRewrite={onRewriteBulletRequest ? (v) => onRewriteBulletRequest('projects', proj.id, bulletIdx, v) : undefined} />
-                          </li>
-                        ))}
-                      </ul>
-                      {isEditing && onAddBullet && (
-                        <button onClick={(e) => { e.stopPropagation(); onAddBullet('projects', proj.id); }} className={`text-[10px] ${accentText} hover:opacity-70 mt-2 flex items-center gap-1 opacity-50 transition-opacity uppercase font-black tracking-widest`}>
-                          + ADD BULLET
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </EditableSection>
+              </EditableSection>
+            </div>
           )}
 
-          <div className="flex flex-col gap-12">
+          {/* Bottom section drag handle - only in edit mode */}
+          {isEditing && hasVisibleProjects && (
+            <div
+              onMouseDown={handleBottomDragStart}
+              title="Drag to resize columns"
+              className="relative flex-shrink-0 group/bhandle"
+              style={{ width: '8px', cursor: 'col-resize', userSelect: 'none' }}
+            >
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-[#121212]/10 group-hover/bhandle:bg-[#D32F2F] transition-colors" />
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/bhandle:opacity-100 transition-opacity"
+                style={{ width: '4px', height: '24px', borderRadius: '2px', background: '#D32F2F' }}
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-12" style={{ flex: 1, minWidth: 0, paddingLeft: hasVisibleProjects ? '40px' : 0 }}>
             {hasVisibleSkills && (
               <EditableSection sectionName="skills" isEditing={isEditing} onClick={onSectionClick} isActive={activeSection === "skills"} onRegenerate={onRegenerate} isRegenerating={isRegenerating}>
                 <div>
