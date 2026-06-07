@@ -3,6 +3,7 @@ import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import { getIconForUrl } from '../resume/linkIcon';
 import SocialIconToggle from "../resume/SocialIconToggle";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
@@ -24,6 +25,7 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
   const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.toString()?.trim()) || resumeData.skills?.soft?.some(s => s?.toString()?.trim());
 
   const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
+  const extraLinks = resumeData.personalInfo.extraLinks || [];
 
   return (
     <div className="resume-template-root bg-white p-8 md:p-12 max-w-[850px] mx-auto text-gray-900 font-sans" style={{ ...RESUME_PAGE_MIN_HEIGHT_STYLE, fontFamily: 'inherit' }}>
@@ -54,6 +56,25 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                   <SocialIconToggle visible={resumeData.labels?.githubShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, githubShowIcon: v })} isEditing={isEditing}><FaGithub size={13} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="GitHub URL" displayTransform={cleanUrl} />
                 </PrintLink>
+              )}
+              {extraLinks.map((link, i) => {
+                const ExtraIcon = getIconForUrl(link.url);
+                return (isEditing || link.url?.trim()) && (
+                  <PrintLink key={i} className="inline-flex items-center gap-1 text-blue-600" isEditing={isEditing} href={link.url}>
+                    <SocialIconToggle visible={true} onToggle={() => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.filter((_, idx) => idx !== i) })} isEditing={isEditing}><ExtraIcon size={13} className="shrink-0" /></SocialIconToggle>
+                    {isEditing ? (
+                      <>
+                        <InlineEdit value={link.label} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, label: v } : l) })} placeholder="Label" />
+                        <span className="text-blue-400 text-[10px] ml-1"><InlineEdit value={link.url} isEditing={true} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, url: v } : l) })} placeholder="URL" /></span>
+                      </>
+                    ) : (
+                      <span>{link.label?.trim() || cleanUrl(link.url)}</span>
+                    )}
+                  </PrintLink>
+                );
+              })}
+              {isEditing && (
+                <button type="button" onClick={(e) => { e.stopPropagation(); onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: [...extraLinks, { label: "Link", url: "" }] }); }} className="inline-flex items-center text-blue-600 opacity-50 hover:opacity-100 transition-opacity text-xs font-bold">+ Add Link</button>
               )}
             </span>
           </div>

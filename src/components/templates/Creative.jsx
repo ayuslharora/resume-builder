@@ -4,6 +4,7 @@ import InlineEdit from "../resume/InlineEdit";
 import PrintLink from "../resume/PrintLink";
 import { Wand2 } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import { getIconForUrl } from '../resume/linkIcon';
 import SocialIconToggle from "../resume/SocialIconToggle";
 import ItemReorderButtons from "../resume/ItemReorderButtons";
 import { RESUME_PAGE_MIN_HEIGHT_STYLE } from "../../services/resumeLayout";
@@ -72,6 +73,7 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
   const hasVisibleSkills = isEditing || resumeData.skills?.technical?.some(s => s?.toString()?.trim()) || resumeData.skills?.soft?.some(s => s?.toString()?.trim());
 
   const hasVisibleSummary = isEditing || resumeData.summary?.toString()?.trim();
+  const extraLinks = resumeData.personalInfo.extraLinks || [];
 
   // Color Palette Tokens
   const bg = "bg-[#EAEBE5]";
@@ -127,6 +129,25 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
                   <SocialIconToggle visible={resumeData.labels?.githubShowIcon} onToggle={(v) => onUpdateSection('labels', { ...resumeData.labels, githubShowIcon: v })} isEditing={isEditing}><FaGithub size={11} className="shrink-0" /></SocialIconToggle>
                   <InlineEdit value={resumeData.personalInfo.github} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, github: v })} placeholder="URL" displayTransform={cleanUrl} />
                 </PrintLink>
+              </div>
+            )}
+            {extraLinks.map((link, i) => {
+              const ExtraIcon = getIconForUrl(link.url);
+              return (isEditing || link.url?.trim()) && (
+                <div key={i} className="flex flex-col px-2 md:px-0">
+                  <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}>
+                    <InlineEdit value={link.label} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, label: v } : l) })} placeholder="LABEL" />
+                  </div>
+                  <PrintLink className={`flex items-center gap-1 ${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={link.url}>
+                    <SocialIconToggle visible={true} onToggle={() => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.filter((_, idx) => idx !== i) })} isEditing={isEditing}><ExtraIcon size={11} className="shrink-0" /></SocialIconToggle>
+                    <InlineEdit value={link.url} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, url: v } : l) })} placeholder="URL" displayTransform={cleanUrl} />
+                  </PrintLink>
+                </div>
+              );
+            })}
+            {isEditing && (
+              <div className="flex flex-col px-2 md:px-0 justify-end">
+                <button type="button" onClick={(e) => { e.stopPropagation(); onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: [...extraLinks, { label: "LINK", url: "" }] }); }} className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase opacity-40 hover:opacity-80 transition-opacity cursor-pointer text-left`}>+ Add Link</button>
               </div>
             )}
           </div>
