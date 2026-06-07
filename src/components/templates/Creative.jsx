@@ -135,10 +135,10 @@ export default function Creative({ resumeData, isEditing, onSectionClick, active
               const ExtraIcon = getIconForUrl(link.url);
               return (isEditing || link.url?.trim()) && (
                 <div key={i} className="flex flex-col px-2 md:px-0">
-                  <div className={`${darkText} text-[10px] font-black tracking-[0.2em] uppercase mb-1`}>
+                  <div className="text-[10px] font-black tracking-[0.2em] uppercase mb-1" style={{ color: '#121212' }}>
                     <InlineEdit value={link.label} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, label: v } : l) })} placeholder="LABEL" />
                   </div>
-                  <PrintLink className={`flex items-center gap-1 ${textMuted} text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} isEditing={isEditing} href={link.url}>
+                  <PrintLink className={`flex items-center gap-1 text-xs font-bold lowercase hover:${accentText} transition-colors truncate`} style={{ color: '#555555' }} isEditing={isEditing} href={link.url}>
                     <SocialIconToggle visible={true} onToggle={() => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.filter((_, idx) => idx !== i) })} isEditing={isEditing}><ExtraIcon size={11} className="shrink-0" /></SocialIconToggle>
                     <InlineEdit value={link.url} isEditing={isEditing} onChange={(v) => onUpdateSection('personalInfo', { ...resumeData.personalInfo, extraLinks: extraLinks.map((l, idx) => idx === i ? { ...l, url: v } : l) })} placeholder="URL" displayTransform={cleanUrl} />
                   </PrintLink>
