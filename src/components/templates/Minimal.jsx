@@ -217,8 +217,9 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                     <InlineEdit value={resumeData.labels?.technical ?? "Technical:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, technical: v })} />
                   </span>
                   {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
-                    <span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                    <span key={i} className="relative group/skill bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
                       <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], { [i]: v }) })} />
+                      {isEditing && <button type="button" contentEditable={false} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateSection('skills', { ...resumeData.skills, technical: resumeData.skills.technical.filter((_, idx) => idx !== i) }); }} className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white hidden group-hover/skill:flex items-center justify-center text-[9px] leading-none z-10 cursor-pointer" title="Remove">×</button>}
                     </span>
                   ))}
                   {isEditing && (
@@ -241,8 +242,9 @@ export default function Minimal({ resumeData, isEditing, onSectionClick, activeS
                     <InlineEdit value={resumeData.labels?.soft ?? "Soft:"} isEditing={isEditing} onChange={(v) => onUpdateSection('labels', { ...resumeData.labels, soft: v })} />
                   </span>
                   {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
-                    <span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                    <span key={i} className="relative group/skill bg-gray-100 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
                       <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], { [i]: v }) })} />
+                      {isEditing && <button type="button" contentEditable={false} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateSection('skills', { ...resumeData.skills, soft: resumeData.skills.soft.filter((_, idx) => idx !== i) }); }} className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white hidden group-hover/skill:flex items-center justify-center text-[9px] leading-none z-10 cursor-pointer" title="Remove">×</button>}
                     </span>
                   ))}
                   {isEditing && (

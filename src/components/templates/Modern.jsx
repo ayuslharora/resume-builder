@@ -138,8 +138,9 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                     </span>
                     <div className="flex flex-wrap gap-2 items-center">
                       {(resumeData.skills.technical || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
-                        <span key={i} className="bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
+                        <span key={i} className="relative group/skill bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
                           <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, technical: Object.assign([...resumeData.skills.technical], {[i]: v}) })} />
+                          {isEditing && <button type="button" contentEditable={false} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateSection('skills', { ...resumeData.skills, technical: resumeData.skills.technical.filter((_, idx) => idx !== i) }); }} className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white hidden group-hover/skill:flex items-center justify-center text-[9px] leading-none z-10 cursor-pointer" title="Remove">×</button>}
                         </span>
                       ))}
                       {isEditing && (
@@ -164,8 +165,9 @@ export default function Modern({ resumeData, isEditing, onSectionClick, activeSe
                     </span>
                     <div className="flex flex-wrap gap-2 items-center">
                       {(resumeData.skills.soft || []).map((s, i) => (isEditing || s?.toString()?.trim()) && (
-                        <span key={i} className="bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
+                        <span key={i} className="relative group/skill bg-[#1c252e] text-slate-300 px-3 py-1 rounded border border-slate-700/50 shadow-sm">
                           <InlineEdit value={s} isEditing={isEditing} onChange={(v) => onUpdateSection('skills', { ...resumeData.skills, soft: Object.assign([...resumeData.skills.soft], {[i]: v}) })} />
+                          {isEditing && <button type="button" contentEditable={false} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateSection('skills', { ...resumeData.skills, soft: resumeData.skills.soft.filter((_, idx) => idx !== i) }); }} className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white hidden group-hover/skill:flex items-center justify-center text-[9px] leading-none z-10 cursor-pointer" title="Remove">×</button>}
                         </span>
                       ))}
                       {isEditing && (
