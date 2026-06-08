@@ -72,7 +72,7 @@ const LANDING_LAYOUT_CSS = `
 `;
 
 export default function Landing() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
 
   useRouteSeo({
     title: HOME_TITLE,
@@ -141,7 +141,7 @@ export default function Landing() {
         color: "var(--text)"
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
 
       <main>
         <section id="product" className="container" style={{ paddingTop: 88, paddingBottom: 96 }}>

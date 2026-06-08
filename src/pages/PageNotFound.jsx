@@ -47,7 +47,7 @@ const CSS = `
 
 export default function PageNotFound() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
 
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -113,7 +113,7 @@ export default function PageNotFound() {
     >
       <style>{CSS}</style>
 
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
 
       <main
         style={{

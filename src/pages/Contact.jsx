@@ -7,7 +7,7 @@ import PublicHeader from "../components/layout/PublicHeader";
 import { useAuth } from "../context/useAuth";
 
 export default function Contact() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   useRouteSeo({
     title: "Contact | ResuMe",
     description: "Get in touch with the ResuMe team. We're here to help you land your dream job.",
@@ -103,7 +103,7 @@ export default function Contact() {
         flexDirection: "column",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
 
       <main style={{ flex: 1, padding: "64px 0" }}>
         <section className="container">

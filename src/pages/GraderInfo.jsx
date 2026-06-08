@@ -40,7 +40,7 @@ const GRADER_FEATURES = [
 ];
 
 export default function GraderInfo() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   useRouteSeo({
     title: "ATS Resume Grader Features | ResuMe",
     description: "Discover how ResuMe's ATS grader analyzes your resume from multiple perspectives, rewrites weak bullets, and compares alternate roles.",
@@ -107,7 +107,7 @@ export default function GraderInfo() {
         color: "var(--text)",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
 
       <main>
         <section className="container" style={{ paddingTop: 88, paddingBottom: 64 }}>
