@@ -300,7 +300,7 @@ export function buildHomepageStaticHtml() {
             </button>
             <div class="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block"></div>
             <a href="/login" class="btn btn-outline btn-sm">Log in</a>
-            <a href="/signup" class="btn btn-primary btn-sm">Get started</a>
+            <a href="/signup" class="btn btn-accent btn-sm">Get started</a>
           </div>
         </div>
       </header>
