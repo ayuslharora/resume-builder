@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, LayoutDashboard } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Product", to: "/" },
@@ -27,7 +27,7 @@ function BrandLogo({ color = "var(--text)" }) {
   );
 }
 
-export default function PublicHeader({ isDark, toggleTheme }) {
+export default function PublicHeader({ isDark, toggleTheme, currentUser = null }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -79,8 +79,17 @@ export default function PublicHeader({ isDark, toggleTheme }) {
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               <div className="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block" />
-              <Link to="/login" className="btn btn-outline btn-sm">Log in</Link>
-              <Link to="/signup" className="btn btn-primary btn-sm hidden md:inline-flex">Get started</Link>
+              {currentUser ? (
+                <Link to="/dashboard" className="btn btn-accent btn-sm inline-flex items-center gap-1.5">
+                  <LayoutDashboard size={14} />
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-outline btn-sm">Log in</Link>
+                  <Link to="/signup" className="btn btn-accent btn-sm hidden md:inline-flex">Get started</Link>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -135,8 +144,8 @@ export default function PublicHeader({ isDark, toggleTheme }) {
             aria-label="Site navigation"
             style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
           >
-            {NAV_ITEMS.map(({ label, to, accent }) => {
-              const current = !accent && pathname === to;
+            {NAV_ITEMS.filter(i => !i.accent).map(({ label, to }) => {
+              const current = pathname === to;
               return (
                 <Link
                   key={to}
@@ -148,8 +157,8 @@ export default function PublicHeader({ isDark, toggleTheme }) {
                     width: "100%",
                     textAlign: "center",
                     fontSize: "clamp(32px, 9.5vw, 44px)",
-                    fontWeight: current || accent ? 700 : 600,
-                    color: current ? "#ffffff" : accent ? "#3b82f6" : "#a1a1aa",
+                    fontWeight: current ? 700 : 600,
+                    color: current ? "#ffffff" : "#a1a1aa",
                     letterSpacing: "-0.03em",
                     lineHeight: 1.25,
                     padding: "7px 0",
@@ -160,6 +169,24 @@ export default function PublicHeader({ isDark, toggleTheme }) {
                 </Link>
               );
             })}
+            <Link
+              to={currentUser ? "/dashboard" : "/signup"}
+              onClick={() => setMobileNavOpen(false)}
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "center",
+                fontSize: "clamp(32px, 9.5vw, 44px)",
+                fontWeight: 700,
+                color: "#3b82f6",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.25,
+                padding: "7px 0",
+                textDecoration: "none",
+              }}
+            >
+              {currentUser ? "Dashboard" : "Get started"}
+            </Link>
           </nav>
         </div>
       )}

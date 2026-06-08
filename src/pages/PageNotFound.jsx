@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Globe } from "lucide-react";
 import PublicHeader from "../components/layout/PublicHeader";
+import { useAuth } from "../context/useAuth";
 
 function GithubIcon() {
   return (
@@ -46,6 +47,7 @@ const CSS = `
 
 export default function PageNotFound() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -111,7 +113,7 @@ export default function PageNotFound() {
     >
       <style>{CSS}</style>
 
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main
         style={{
@@ -209,6 +211,18 @@ export default function PageNotFound() {
           zIndex: 20,
         }}
       >
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--faint)",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            margin: 0,
+          }}
+        >
+          ResuMe · Open source under MIT
+        </p>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           <a href="https://www.linkedin.com/in/ayuslh/" target="_blank" rel="noreferrer" className="nf-social-link" aria-label="LinkedIn">
             <LinkedinIcon />
@@ -220,18 +234,6 @@ export default function PageNotFound() {
             <Globe size={20} />
           </a>
         </div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--faint)",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            margin: 0,
-          }}
-        >
-          © Ayush Arora 2026
-        </p>
       </div>
     </div>
   );

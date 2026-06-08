@@ -4,6 +4,7 @@ import { ArrowRight, Eye, Layers, Key, PencilLine, Zap, Share2 } from "lucide-re
 import { useRouteSeo } from "../seo/routeSeo";
 import PublicFooter from "../components/layout/PublicFooter";
 import PublicHeader from "../components/layout/PublicHeader";
+import { useAuth } from "../context/useAuth";
 
 const GRADER_FEATURES = [
   {
@@ -39,6 +40,7 @@ const GRADER_FEATURES = [
 ];
 
 export default function GraderInfo() {
+  const { currentUser } = useAuth();
   useRouteSeo({
     title: "ATS Resume Grader Features | ResuMe",
     description: "Discover how ResuMe's ATS grader analyzes your resume from multiple perspectives, rewrites weak bullets, and compares alternate roles.",
@@ -105,7 +107,7 @@ export default function GraderInfo() {
         color: "var(--text)",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main>
         <section className="container" style={{ paddingTop: 88, paddingBottom: 64 }}>

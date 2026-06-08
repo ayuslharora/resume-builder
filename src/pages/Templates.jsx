@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useRouteSeo } from "../seo/routeSeo";
 import PublicFooter from "../components/layout/PublicFooter";
 import PublicHeader from "../components/layout/PublicHeader";
+import { useAuth } from "../context/useAuth";
 
 const TEMPLATES = [
   {
@@ -33,6 +34,7 @@ const TEMPLATES = [
 ];
 
 export default function Templates() {
+  const { currentUser } = useAuth();
   useRouteSeo({
     title: "Resume Templates | ResuMe",
     description: "Browse our collection of ATS-optimized resume templates. Minimal, Modern, Professional, and Creative designs tailored to get you hired.",
@@ -100,7 +102,7 @@ export default function Templates() {
         color: "var(--text)",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main>
         <section className="container" style={{ paddingTop: 88, paddingBottom: 64 }}>

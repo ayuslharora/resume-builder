@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import PublicHeader from "../components/layout/PublicHeader";
+import { useAuth } from "../context/useAuth";
 import {
   HOME_JSON_LD,
   HOME_DESCRIPTION,
@@ -71,6 +72,8 @@ const LANDING_LAYOUT_CSS = `
 `;
 
 export default function Landing() {
+  const { currentUser } = useAuth();
+
   useRouteSeo({
     title: HOME_TITLE,
     description: HOME_DESCRIPTION,
@@ -138,7 +141,7 @@ export default function Landing() {
         color: "var(--text)"
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main>
         <section id="product" className="container" style={{ paddingTop: 88, paddingBottom: 96 }}>

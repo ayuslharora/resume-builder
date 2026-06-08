@@ -4,8 +4,10 @@ import { ArrowRight, Mail, MessageSquare, Send } from "lucide-react";
 import { useRouteSeo } from "../seo/routeSeo";
 import PublicFooter from "../components/layout/PublicFooter";
 import PublicHeader from "../components/layout/PublicHeader";
+import { useAuth } from "../context/useAuth";
 
 export default function Contact() {
+  const { currentUser } = useAuth();
   useRouteSeo({
     title: "Contact | ResuMe",
     description: "Get in touch with the ResuMe team. We're here to help you land your dream job.",
@@ -101,7 +103,7 @@ export default function Contact() {
         flexDirection: "column",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main style={{ flex: 1, padding: "64px 0" }}>
         <section className="container">
