@@ -3,6 +3,8 @@ import { createBrowserRouter, Outlet, RouterProvider, useLocation } from "react-
 import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import SemiPublicRoute from "./components/auth/SemiPublicRoute";
+import PageNotFound from "./pages/PageNotFound";
 import FullscreenProtectedRoute from "./components/auth/FullscreenProtectedRoute";
 import AppErrorBoundary from "./components/errors/AppErrorBoundary";
 import RouteErrorScreen from "./components/errors/RouteErrorScreen";
@@ -28,7 +30,6 @@ const HelpDocs = lazy(() => import("./pages/HelpDocs"));
 const Contact = lazy(() => import("./pages/Contact"));
 const ResumeStats = lazy(() => import("./pages/ResumeStats"));
 
-const NotFound = () => <div className="p-10">404 - Not Found</div>;
 
 function AppRoot() {
   const location = useLocation();
@@ -41,7 +42,7 @@ function AppRoot() {
   }, []);
 
   useEffect(() => {
-    const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/help"];
+    const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/resources", "/help"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
     const savedTheme = localStorage.getItem("app-theme");
 
@@ -91,13 +92,18 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "/dashboard", element: <Dashboard /> },
-          { path: "/resources", element: <Resources /> },
           { path: "/builder/:resumeId", element: <Builder /> },
           { path: "/grader", element: <Grader /> },
           { path: "/profile", element: <Profile /> },
-          { path: "/whats-new", element: <WhatsNew /> },
           { path: "/help", element: <HelpDocs /> },
           { path: "/stats/:resumeId", element: <ResumeStats /> },
+        ]
+      },
+      {
+        element: <SemiPublicRoute />,
+        children: [
+          { path: "/whats-new", element: <WhatsNew /> },
+          { path: "/resources", element: <Resources /> },
         ]
       },
       {
@@ -108,7 +114,7 @@ const router = createBrowserRouter([
           { path: "/cover-letter/:resumeId", element: <CoverLetter /> },
         ]
       },
-      { path: "*", element: <NotFound /> }
+      { path: "*", element: <PageNotFound /> }
     ]
   }
 ]);

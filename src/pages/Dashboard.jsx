@@ -208,6 +208,11 @@ export default function Dashboard() {
                   onDuplicate={async () => {
                     try {
                       await duplicateResume(resume.id);
+                      const fresh = await getUserResumes(currentUser.uid);
+                      setResumes(prev => {
+                        const viewMap = Object.fromEntries(prev.map(r => [r.id, r.distinctViewCount || 0]));
+                        return fresh.map(r => ({ ...r, distinctViewCount: viewMap[r.id] || 0 }));
+                      });
                     } catch(e) { console.error(e); }
                   }}
                 />
@@ -293,7 +298,11 @@ function StatCard({ label, value, suffix, trend, muted }) {
           {value}
         </span>
         {suffix && <span className="text-[13px] text-[var(--muted)]">{suffix}</span>}
-        {trend && <span className="pill pill-good ml-auto">+{trend}</span>}
+        {trend != null && (
+          <span className={`pill ml-auto ${trend > 0 ? "pill-good" : "pill-bad"}`}>
+            {trend > 0 ? `+${trend}` : trend}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -312,9 +321,9 @@ function getScoreTrend(history) {
   const latest = Number(history[0]?.score);
   const previous = Number(history[1]?.score);
 
-  if (!Number.isFinite(latest) || !Number.isFinite(previous)) return "";
+  if (!Number.isFinite(latest) || !Number.isFinite(previous)) return null;
   const delta = latest - previous;
-  return delta > 0 ? delta : "";
+  return delta !== 0 ? delta : null;
 }
 
 function getResumeRewriteCount(resume) {
