@@ -34,7 +34,7 @@ const TEMPLATES = [
 ];
 
 export default function Templates() {
-  const { currentUser, loading: authLoading } = useAuth();
+  const { currentUser } = useAuth();
   useRouteSeo({
     title: "Resume Templates | ResuMe",
     description: "Browse our collection of ATS-optimized resume templates. Minimal, Modern, Professional, and Creative designs tailored to get you hired.",
@@ -102,7 +102,7 @@ export default function Templates() {
         color: "var(--text)",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main>
         <section className="container" style={{ paddingTop: 88, paddingBottom: 64 }}>

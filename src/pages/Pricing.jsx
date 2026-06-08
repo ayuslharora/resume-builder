@@ -7,7 +7,7 @@ import PublicHeader from "../components/layout/PublicHeader";
 import { useAuth } from "../context/useAuth";
 
 export default function Pricing() {
-  const { currentUser, loading: authLoading } = useAuth();
+  const { currentUser } = useAuth();
   useRouteSeo({
     title: "Pricing | ResuMe",
     description: "Most resume builders exist to suck your pockets dry. ResuMe is completely free. No paywalls, no subscriptions.",
@@ -76,7 +76,7 @@ export default function Pricing() {
         flexDirection: "column",
       }}
     >
-      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} authLoading={authLoading} />
+      <PublicHeader isDark={isDark} toggleTheme={toggleTheme} currentUser={currentUser} />
 
       <main style={{ flex: 1, padding: "64px 0" }}>
         <section className="container">

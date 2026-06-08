@@ -27,7 +27,7 @@ function BrandLogo({ color = "var(--text)" }) {
   );
 }
 
-export default function PublicHeader({ isDark, toggleTheme, currentUser = null, authLoading = false }) {
+export default function PublicHeader({ isDark, toggleTheme, currentUser = null }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -79,9 +79,7 @@ export default function PublicHeader({ isDark, toggleTheme, currentUser = null, 
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               <div className="h-4 w-px bg-[var(--border)] mx-1 hidden sm:block" />
-              {authLoading ? (
-                <div className="h-8 w-24 rounded-lg bg-[var(--border)] animate-pulse" />
-              ) : currentUser ? (
+              {currentUser ? (
                 <Link to="/dashboard" className="btn btn-accent btn-sm inline-flex items-center gap-1.5">
                   <LayoutDashboard size={14} />
                   Dashboard
