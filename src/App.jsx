@@ -42,6 +42,11 @@ function AppRoot() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-route", location.pathname);
+    return () => document.documentElement.removeAttribute("data-route");
+  }, [location.pathname]);
+
+  useEffect(() => {
     const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/resources", "/help"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
     const savedTheme = localStorage.getItem("app-theme");
