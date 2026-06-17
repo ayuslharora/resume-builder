@@ -29,6 +29,7 @@ const WhatsNew = lazy(() => import("./pages/WhatsNew"));
 const HelpDocs = lazy(() => import("./pages/HelpDocs"));
 const Contact = lazy(() => import("./pages/Contact"));
 const ResumeStats = lazy(() => import("./pages/ResumeStats"));
+const PrivacyPolicy = lazy(() => import("./pages/Privacy"));
 
 
 function AppRoot() {
@@ -47,7 +48,7 @@ function AppRoot() {
   }, []);
 
   useEffect(() => {
-    const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/resources", "/help"];
+    const publicRoutes = ["/", "/templates", "/pricing", "/contact", "/grader-info", "/login", "/signup", "/whats-new", "/resources", "/help", "/privacy"];
     const isPublic = publicRoutes.includes(location.pathname) || location.pathname.startsWith("/shared/");
     const savedTheme = localStorage.getItem("app-theme");
 
@@ -91,6 +92,7 @@ const router = createBrowserRouter([
       { path: "/shared/:token", element: <PublicResume /> },
       { path: "/pricing", element: <Pricing /> },
       { path: "/contact", element: <Contact /> },
+      { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
       {

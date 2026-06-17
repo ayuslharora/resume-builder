@@ -41,6 +41,10 @@ export default function PublicFooter() {
           >
             Ayuslh.in
           </a>
+          {" · "}
+          <Link to="/privacy" className="ulink text-[var(--text-2)]">
+            Privacy
+          </Link>
         </span>
       </div>
     </footer>
