@@ -6,67 +6,67 @@ import { useAuth } from "../context/useAuth";
 
 const SECTIONS = [
   {
-    title: "What we collect",
+    title: "Information We Collect",
     body: [
-      "**Account information** — When you sign up, we store your email address and a display name via Firebase Authentication.",
-      "**Resume content** — Everything you type into your resume (name, phone, work history, skills, etc.) is stored in Firestore under your account so you can access it across devices.",
-      "**AI task input** — When you use AI features (bullet rewrites, ATS grading, cover letters), the relevant sections of your resume are sent to Groq's API to generate a response. We do not store these requests beyond what Firestore already holds.",
-      "**Shared resume links** — If you generate a public share link, the resume snapshot is readable by anyone with the link. You can revoke the link at any time from the Builder.",
-      "**Contact form submissions** — Messages sent via the Contact page are processed by Formspree and delivered to us by email. We do not store them in our own database.",
-      "**Page-view analytics** — We use Vercel Analytics to count page views and basic browser metadata (browser type, country). No cookies are set for this. No personal data is tied to these events.",
+      "**Account information.** When you register, we store your email address and display name via Firebase Authentication.",
+      "**Resume content.** All content you enter into your resume (name, phone number, work history, skills, and similar details) is stored in Firestore and associated with your account so it is accessible across devices.",
+      "**AI feature input.** When you use AI-powered features such as bullet rewrites, ATS grading, or cover letter generation, the relevant portions of your resume are transmitted to Groq's API to produce a response. We do not retain these requests beyond what is already stored in Firestore.",
+      "**Shared resume links.** If you generate a public share link, the associated resume snapshot is accessible to anyone who has that link. You may revoke access at any time from the Builder.",
+      "**Contact form submissions.** Messages submitted through the Contact page are processed by Formspree and forwarded to us by email. We do not store them in our own database.",
+      "**Page-view analytics.** We use Vercel Analytics to collect anonymous page-view counts and basic browser metadata, including browser type and country. No cookies are used for this purpose, and no personally identifiable information is associated with these events.",
     ],
   },
   {
-    title: "What we don't collect",
+    title: "Information We Do Not Collect",
     body: [
-      "We do not sell your data.",
-      "We do not use your resume content for advertising.",
-      "We do not run third-party ad trackers or retargeting pixels.",
-      "We do not read your resume content for any purpose other than returning it to you and powering the AI features you explicitly invoke.",
+      "We do not sell your personal data to third parties.",
+      "We do not use your resume content for advertising or marketing purposes.",
+      "We do not deploy third-party advertising trackers or retargeting pixels.",
+      "We do not access your resume content for any purpose other than displaying it to you and powering the AI features you explicitly activate.",
     ],
   },
   {
-    title: "How we use your data",
+    title: "How We Use Your Information",
     body: [
-      "To show you your resumes across sessions and devices.",
-      "To run AI features you trigger (grading, rewrites, cover letters). Your content is sent to Groq only when you click the relevant button.",
-      "To count anonymous page-view metrics so we know which features are used.",
-      "To respond to messages you send us through the Contact page.",
+      "To provide access to your resumes across sessions and devices.",
+      "To process AI features that you initiate. Your content is transmitted to Groq only at the moment you trigger a specific AI action.",
+      "To collect anonymous, aggregated usage metrics that help us understand which features are most valuable.",
+      "To respond to inquiries submitted through the Contact page.",
     ],
   },
   {
-    title: "Third-party services",
+    title: "Third-Party Services",
     body: [
-      "**Firebase (Google)** — Authentication and database. Subject to Google's privacy policy.",
-      "**Groq** — AI inference. Resume content is sent to Groq only when you use an AI feature. Subject to Groq's privacy policy.",
-      "**Vercel** — Hosting and analytics. Anonymous page-view data only. Subject to Vercel's privacy policy.",
-      "**Formspree** — Contact form processing. Subject to Formspree's privacy policy.",
+      "**Firebase (Google).** Used for authentication and database storage. Subject to Google's Privacy Policy.",
+      "**Groq.** Used for AI inference. Resume content is sent to Groq only when you use an AI feature. Subject to Groq's Privacy Policy.",
+      "**Vercel.** Used for hosting and anonymous analytics. Subject to Vercel's Privacy Policy.",
+      "**Formspree.** Used to process contact form submissions. Subject to Formspree's Privacy Policy.",
     ],
   },
   {
-    title: "Data retention and deletion",
+    title: "Data Retention and Deletion",
     body: [
-      "Your account and all associated resume data is retained as long as your account exists.",
-      "To delete your account and all stored data, contact us at ayuslh.arora@gmail.com with the subject line \"Delete my account\". We will remove your data within 7 days.",
-      "Shared resume snapshots are deleted automatically when you revoke the link or delete the resume.",
+      "Your account and all associated resume data are retained for as long as your account remains active.",
+      "To request deletion of your account and all associated data, please contact us at ayuslh.arora@gmail.com with the subject line \"Delete my account\". We will process your request within 7 days.",
+      "Shared resume snapshots are removed automatically when you revoke the corresponding link or delete the resume.",
     ],
   },
   {
     title: "Security",
     body: [
-      "All data is transmitted over HTTPS. Firestore security rules ensure users can only read and write their own data. We do not store passwords — authentication is handled by Firebase.",
+      "All data is transmitted over HTTPS. Firestore security rules are configured to ensure that users can only access their own data. We do not store passwords; authentication is managed entirely by Firebase.",
     ],
   },
   {
-    title: "Changes to this policy",
+    title: "Changes to This Policy",
     body: [
-      "If we make material changes, we will update the date below and, where appropriate, notify you via the app. Continued use after changes constitutes acceptance.",
+      "If we make material changes to this policy, we will update the effective date shown below and, where appropriate, provide notice within the application. Continued use of the service following any changes constitutes your acceptance of the revised policy.",
     ],
   },
   {
     title: "Contact",
     body: [
-      "Questions about this policy? Email us at ayuslh.arora@gmail.com.",
+      "If you have questions or concerns regarding this policy, please contact us at ayuslh.arora@gmail.com.",
     ],
   },
 ];
@@ -172,8 +172,7 @@ export default function PrivacyPolicy() {
           </p>
 
           <p style={{ color: "var(--text-2)", fontSize: 16, lineHeight: 1.7, marginBottom: 48 }}>
-            ResuMe is a free resume builder. This page explains what data we collect, why, and
-            what you can do about it — in plain English.
+            This Privacy Policy describes what information ResuMe collects, how it is used, and the choices available to you.
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
